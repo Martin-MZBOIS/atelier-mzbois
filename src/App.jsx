@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import Dashboard from './pages/Dashboard'
 import Chantiers from './pages/Chantiers'
 import ChantierDetail from './pages/ChantierDetail'
 import OuvragesTab from './pages/OuvragesTab'
@@ -25,6 +26,7 @@ function App() {
           </ProtectedRoute>
         }
       >
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chantiers" element={<Chantiers />} />
         <Route path="/chantiers/:id" element={<ChantierDetail />}>
           <Route index element={<Navigate to="ouvrages" replace />} />
@@ -39,8 +41,8 @@ function App() {
         <Route path="/courses" element={<CoursesGlobal />} />
       </Route>
 
-      <Route path="/" element={<Navigate to="/chantiers" replace />} />
-      <Route path="*" element={<Navigate to="/chantiers" replace />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   )
 }

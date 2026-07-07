@@ -38,7 +38,7 @@ export default function Login() {
         }
 
       login(user)
-      navigate('/chantiers', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (e) {
       setError(
         "Impossible de charger l'utilisateur. Vérifie que le schéma et le seed " +

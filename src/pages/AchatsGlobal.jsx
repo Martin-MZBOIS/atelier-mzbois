@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import {
   TYP_ACHAT,
@@ -48,9 +49,10 @@ export default function AchatsGlobal() {
   const [achats, setAchats] = useState([])
   const [chantiers, setChantiers] = useState([])
   const [fournisseurs, setFournisseurs] = useState([])
+  const location = useLocation()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [quick, setQuick] = useState('tous')
+  const [quick, setQuick] = useState(location.state?.quick ?? 'tous')
   const [typ, setTyp] = useState('tous')
   const [modal, setModal] = useState(null)
 

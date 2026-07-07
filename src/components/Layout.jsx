@@ -4,10 +4,11 @@ import { ROLES } from '../lib/roles'
 
 // Onglets de l'application. On ajoutera les autres au fil de la migration.
 const TABS = [
+  { to: '/dashboard', label: 'Tableau de bord' },
   { to: '/chantiers', label: 'Chantiers' },
   { to: '/achats', label: 'Achats' },
-  { to: '/planning', label: 'Planning' },
   { to: '/courses', label: 'Courses' },
+  { to: '/planning', label: 'Planning' },
 ]
 
 export default function Layout() {

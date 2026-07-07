@@ -1386,6 +1386,295 @@ textarea.ni:focus {
   color: var(--noir);
 }
 
+/* ----------------------------------------------------------- Dashboard */
+.dash-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+
+.dash-alerts {
+  background: var(--rd2);
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+.dash-alert {
+  font-size: 13px;
+  color: var(--rd);
+  margin-bottom: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 6px;
+  border-radius: 3px;
+  transition: background 0.12s;
+}
+.dash-alert:hover {
+  background: rgba(139, 58, 58, 0.08);
+}
+.dash-alert-arrow {
+  margin-left: auto;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.meteo-card {
+  background: linear-gradient(135deg, var(--acier), #4a3828);
+  border-radius: 4px;
+  border-left: 4px solid var(--brun);
+  padding: 16px 20px;
+  color: #fff;
+  margin-bottom: 14px;
+}
+.meteo-loading {
+  font-size: 13px;
+  opacity: 0.7;
+}
+.meteo-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.meteo-loc {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+.meteo-temp {
+  font-size: 28px;
+  font-weight: 800;
+}
+.meteo-desc {
+  font-size: 13px;
+  opacity: 0.8;
+}
+.meteo-days {
+  display: flex;
+  gap: 12px;
+}
+.meteo-day {
+  text-align: center;
+}
+.meteo-day-lbl {
+  font-size: 11px;
+  opacity: 0.6;
+}
+.meteo-day-ico {
+  font-size: 16px;
+}
+.meteo-day-max {
+  font-size: 12px;
+  font-weight: 600;
+}
+.meteo-day-min {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 860px) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tâches */
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 3px;
+  background: var(--g6);
+  margin-bottom: 5px;
+  border: 1px solid var(--g4);
+}
+.task-item--warn {
+  background: #f7f2e6;
+  border-color: #fde68a;
+}
+.task-item--late {
+  background: var(--rd2);
+  border-color: #fca5a5;
+}
+.task-item input[type='checkbox'] {
+  margin-top: 2px;
+  accent-color: var(--brun);
+}
+.task-body {
+  flex: 1;
+}
+.task-text {
+  font-size: 13px;
+}
+.task-meta {
+  display: flex;
+  gap: 7px;
+  margin-top: 3px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.task-num {
+  font-size: 11px;
+  color: var(--brun);
+}
+.task-tag {
+  font-size: 10px;
+  background: #eef2f7;
+  color: #4a6b8a;
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+.task-assignee {
+  font-size: 10px;
+  background: var(--g5);
+  color: var(--g1);
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+.task-age {
+  font-size: 10px;
+  color: var(--g2);
+}
+.task-age--warn {
+  color: #8a7040;
+}
+.task-age--late {
+  color: var(--rd);
+}
+.task-del {
+  background: none;
+  border: none;
+  color: var(--g2);
+  font-size: 11px;
+  cursor: pointer;
+}
+.task-del:hover {
+  color: var(--rd);
+}
+
+/* Fil d'actualité (dashboard) */
+.fil-type-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.qf--on {
+  background: var(--acier);
+  color: #fff;
+  border-color: var(--acier);
+}
+.fil-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--g5);
+  cursor: pointer;
+}
+.fil-item:hover {
+  background: var(--g6);
+}
+.fil-item-ico {
+  width: 32px;
+  height: 32px;
+  border-radius: 99px;
+  background: var(--g5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.fil-item-body {
+  flex: 1;
+  min-width: 0;
+}
+.fil-item-lbl {
+  font-size: 13px;
+  font-weight: 600;
+}
+.fil-item-det {
+  font-size: 12px;
+  color: var(--g1);
+}
+.fil-item-date {
+  font-size: 11px;
+  color: var(--g2);
+  flex-shrink: 0;
+}
+.dash-more {
+  width: 100%;
+  margin-top: 6px;
+}
+
+/* Mini planning */
+.mini-plan-scroll {
+  overflow-x: auto;
+}
+.mini-plan {
+  border-collapse: collapse;
+  width: 100%;
+}
+.mini-plan th {
+  padding: 6px;
+  font-size: 11px;
+  color: var(--g1);
+  font-weight: 600;
+  text-align: center;
+  min-width: 60px;
+}
+.mini-plan-name {
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.mini-plan-cell {
+  padding: 3px;
+  border: 1px solid var(--g4);
+  vertical-align: top;
+}
+.mini-plan-block {
+  border-radius: 3px;
+  padding: 2px 5px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+/* Ouvrages en cours (dashboard) */
+.dash-ov {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--g5);
+  cursor: pointer;
+}
+.dash-ov:hover {
+  background: var(--g6);
+}
+.dash-ov-body {
+  flex: 1;
+}
+.dash-ov-nom {
+  font-weight: 600;
+  font-size: 13px;
+}
+.dash-ov-num {
+  font-size: 11px;
+  color: var(--g2);
+}
+
 /* ------------------------------------------------------------- Planning */
 .chip-view {
   font-size: 11px;
