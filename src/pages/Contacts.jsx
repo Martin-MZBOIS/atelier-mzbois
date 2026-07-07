@@ -40,24 +40,25 @@ export default function Contacts() {
     else setSocietes(data ?? [])
   }, [])
 
+  const loadEmployes = useCallback(async () => {
+    const { data } = await supabase.from('employes').select('*').order('nom')
+    setEmployes(data ?? [])
+  }, [])
+
   useEffect(() => {
     let active = true
     async function load() {
       setLoading(true)
       setError('')
-      const [, emp] = await Promise.all([
-        loadSocietes(),
-        supabase.from('employes').select('*').order('nom'),
-      ])
+      await Promise.all([loadSocietes(), loadEmployes()])
       if (!active) return
-      setEmployes(emp.data ?? [])
       setLoading(false)
     }
     load()
     return () => {
       active = false
     }
-  }, [loadSocietes])
+  }, [loadSocietes, loadEmployes])
 
   const isSalaries = tab === 'salaries'
 
@@ -161,7 +162,7 @@ export default function Contacts() {
                 Sélectionne un élément pour voir sa fiche.
               </div>
             ) : isSalaries ? (
-              <EmployeDetail e={selected.raw} />
+              <EmployeDetail e={selected.raw} onUpdated={loadEmployes} />
             ) : (
               <SocieteDetail
                 s={selected.raw}
@@ -252,15 +253,57 @@ function SocieteDetail({ s, onAddContact }) {
   )
 }
 
-function EmployeDetail({ e }) {
+function EmployeDetail({ e, onUpdated }) {
+  const couleur = e.couleur || '#846a57'
+  const initials = ((e.prenom?.[0] ?? '') + (e.nom?.[0] ?? '')).toUpperCase()
+  const [colorError, setColorError] = useState('')
+
+  async function changeColor(value) {
+    const { error: dbError } = await supabase
+      .from('employes')
+      .update({ couleur: value })
+      .eq('id', e.id)
+    if (dbError) {
+      setColorError(dbError.message)
+      return
+    }
+    setColorError('')
+    onUpdated?.()
+  }
+
   return (
     <div className="detail-panel">
       <div className="detail-panel-head">
+        <span className="emp-avatar" style={{ background: couleur }}>
+          {initials}
+        </span>
         <h3>
           {e.prenom} {e.nom}
         </h3>
         {e.role && <span className="typbdg typ-div">{e.role}</span>}
       </div>
+
+      <div className="emp-color">
+        <label>Couleur</label>
+        <input
+          type="color"
+          value={couleur}
+          onChange={(evt) => changeColor(evt.target.value)}
+        />
+        <span className="emp-color-hex">{couleur}</span>
+      </div>
+      {colorError && (
+        <div className="alert">
+          {colorError.includes('couleur') ? (
+            <>
+              Exécute la migration{' '}
+              <code>supabase/migrations/0009_employe_couleur.sql</code>.
+            </>
+          ) : (
+            colorError
+          )}
+        </div>
+      )}
       <dl className="detail-fields">
         {e.poste && (
           <div>

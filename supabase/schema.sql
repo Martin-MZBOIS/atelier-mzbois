@@ -109,6 +109,7 @@ create table if not exists employes (
   tel         text,
   email       text,
   cout_h      numeric(12, 2),
+  couleur     text, -- couleur d'affichage (hex) — avatars + planning
   note        text
 );
 comment on column employes.cout_h is 'Coût horaire chargé (€/h)';

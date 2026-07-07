@@ -52,7 +52,7 @@ export default function PlanningGlobal() {
       setError('')
       const [, em, ch] = await Promise.all([
         loadAffectations(),
-        supabase.from('employes').select('id, prenom, nom, role').order('nom'),
+        supabase.from('employes').select('id, prenom, nom, role, couleur').order('nom'),
         supabase.from('chantiers').select('id, num, nom, client').order('num'),
       ])
       if (!active) return
@@ -236,7 +236,10 @@ export default function PlanningGlobal() {
                   <tr key={emp.id}>
                     <td className="plan-emp">
                       <div className="plan-emp-inner">
-                        <div className="plan-avatar">
+                        <div
+                          className="plan-avatar"
+                          style={emp.couleur ? { background: emp.couleur } : undefined}
+                        >
                           {(emp.prenom?.[0] ?? '') + (emp.nom?.[0] ?? '')}
                         </div>
                         <div>
@@ -263,7 +266,13 @@ export default function PlanningGlobal() {
                       const phase = aff.phase ? resolve(PHASE_PLANNING, aff.phase).label : ''
                       return (
                         <td key={cell.key} colSpan={span} className="plan-cell" title={aff.commentaire ?? ''}>
-                          <div className="plan-block" style={{ background: chantierColor[aff.chantier_id] }}>
+                          <div
+                            className="plan-block"
+                            style={{
+                              background: chantierColor[aff.chantier_id],
+                              borderLeft: `4px solid ${emp.couleur ?? 'transparent'}`,
+                            }}
+                          >
                             <div className="plan-block-num">{ch?.num ?? '?'}</div>
                             <div className="plan-block-sub">
                               {(ch?.client ?? '').slice(0, 16)}
