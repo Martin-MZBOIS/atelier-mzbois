@@ -1,8 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { formatEuro } from '../lib/format'
 import { TYP_ACHAT, TYP_ACHAT_ORDER, resolve } from '../lib/statuts'
 import ArticleModal from './ArticleModal'
+
+// Prix unitaire € avec décimales (0 à 2), sans arrondi à l'entier.
+function formatPrix(value) {
+  if (value == null) return '—'
+  return (
+    Number(value).toLocaleString('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }) + ' €'
+  )
+}
 
 function TypBadge({ slug }) {
   const t = resolve(TYP_ACHAT, slug)
@@ -153,7 +163,7 @@ export default function Bibliotheque() {
                       <td className="strong">{a.nom}</td>
                       <td>{a.description ?? '—'}</td>
                       <td className="mono">
-                        {a.prix != null ? formatEuro(a.prix) : '—'}
+                        {formatPrix(a.prix)}
                         {a.unite ? ' / ' + a.unite : ''}
                       </td>
                       <td>{fs.length ? fs.join(', ') : '—'}</td>
