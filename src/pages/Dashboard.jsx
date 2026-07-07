@@ -91,7 +91,7 @@ export default function Dashboard() {
   async function loadAll() {
     const [ouv, ach, tach, fil, fb, plan, emp, ch] = await Promise.all([
       supabase.from('ouvrages').select('id, nom, statut, dep, chantier:chantiers!chantier_id(id, num)'),
-      supabase.from('achats').select('id, nom, st, chantier:chantiers!chantier_id(id, num)'),
+      supabase.from('achats').select('id, nom, st, mht, chantier:chantiers!chantier_id(id, num)'),
       supabase.from('taches').select('id, texte, done, created_at, source, echeance, chantier:chantiers!chantier_id(id, num), employe:employes!assigne_a(id, prenom)').order('created_at', { ascending: true }),
       supabase.from('fil_messages').select('id, texte, date, chantier:chantiers!chantier_id(id, num), auteur:utilisateurs!auteur_id(prenom, nom)'),
       supabase.from('feedbacks').select('id, description, statut, date, chantier:chantiers!chantier_id(id, num)'),
@@ -177,6 +177,16 @@ export default function Dashboard() {
   const urgAch = useMemo(
     () => (data?.achats ?? []).filter((a) => a.st === 'a_commander'),
     [data]
+  )
+  // Achats sans montant (dir) — à compléter avant de lire l'analytique.
+  const achatsSansMontant = useMemo(
+    () =>
+      user?.role === 'dir'
+        ? (data?.achats ?? []).filter(
+            (a) => a.mht == null || Number(a.mht) === 0
+          )
+        : [],
+    [data, user]
   )
   const pendingTasks = useMemo(
     () => (data?.taches ?? []).filter((t) => !t.done),
@@ -282,6 +292,8 @@ export default function Dashboard() {
     alerts.push({ ico: '⚠️', txt: `${urgAch.length} achat${urgAch.length > 1 ? 's' : ''} à commander`, onClick: () => navigate('/achats', { state: { quick: 'traiter' } }) })
   if (lateTasks.length)
     alerts.push({ ico: '🔴', txt: `${lateTasks.length} tâche${lateTasks.length > 1 ? 's' : ''} en retard`, onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }) })
+  if (achatsSansMontant.length)
+    alerts.push({ ico: '💶', txt: `${achatsSansMontant.length} achat${achatsSansMontant.length > 1 ? 's' : ''} sans montant à compléter (avant l'analytique)`, onClick: () => navigate('/achats') })
 
   return (
     <section className="page">
