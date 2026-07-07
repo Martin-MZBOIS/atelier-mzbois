@@ -4,17 +4,23 @@ import { PHASE_PLANNING } from '../lib/statuts'
 
 const PHASE_ORDER = ['etude', 'fabrication', 'pose']
 
-// Création d'une affectation de planning (salarié -> chantier sur une période).
+// Création d'une affectation de planning.
+// - salarie fourni  => salarié fixe (vue Salariés), on choisit chantier + phase.
+// - prefill { chantier_id, phase } => chantier/phase fixes (vue Chantiers),
+//   on choisit le salarié.
 export default function PlanAffectationModal({
-  salarie,
   chantiers,
+  salaries = [],
+  salarie,
+  prefill,
   initialDate,
   onClose,
   onSaved,
 }) {
   const [form, setForm] = useState({
-    chantier_id: '',
-    phase: 'fabrication',
+    chantier_id: prefill?.chantier_id ?? '',
+    phase: prefill?.phase ?? 'fabrication',
+    sal_id: salarie?.id ?? '',
     date_debut: initialDate ?? '',
     date_fin: initialDate ?? '',
     commentaire: '',
@@ -22,40 +28,38 @@ export default function PlanAffectationModal({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
+  const chantierFixed = Boolean(prefill?.chantier_id)
+  const salarieFixed = Boolean(salarie)
+
   function set(key, value) {
     setForm((f) => ({ ...f, [key]: value }))
   }
 
   async function handleSave() {
-    if (!form.chantier_id) {
-      setError('Le chantier est obligatoire.')
-      return
-    }
-    if (!form.date_debut || !form.date_fin) {
-      setError('Les dates de début et de fin sont obligatoires.')
-      return
-    }
-    if (form.date_fin < form.date_debut) {
-      setError('La date de fin doit être après la date de début.')
-      return
-    }
+    if (!form.chantier_id) return setError('Le chantier est obligatoire.')
+    if (!form.sal_id) return setError('Le salarié est obligatoire.')
+    if (!form.date_debut || !form.date_fin)
+      return setError('Les dates de début et de fin sont obligatoires.')
+    if (form.date_fin < form.date_debut)
+      return setError('La date de fin doit être après la date de début.')
     setSaving(true)
     setError('')
     const { error: dbError } = await supabase.from('plan_affectations').insert({
       chantier_id: form.chantier_id,
       phase: form.phase || null,
-      sal_id: salarie.id,
+      sal_id: form.sal_id,
       date_debut: form.date_debut,
       date_fin: form.date_fin,
       commentaire: form.commentaire.trim() || null,
     })
     setSaving(false)
-    if (dbError) {
-      setError(dbError.message)
-      return
-    }
+    if (dbError) return setError(dbError.message)
     onSaved()
   }
+
+  const title = salarieFixed
+    ? `Affecter — ${salarie.prenom} ${salarie.nom}`
+    : 'Nouvelle affectation'
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -63,13 +67,15 @@ export default function PlanAffectationModal({
         <button className="modal-close" onClick={onClose}>
           ×
         </button>
-        <div className="modal-title">
-          Affecter — {salarie.prenom} {salarie.nom}
-        </div>
+        <div className="modal-title">{title}</div>
 
         <div className="fl">
           <label>Chantier *</label>
-          <select value={form.chantier_id} onChange={(e) => set('chantier_id', e.target.value)} autoFocus>
+          <select
+            value={form.chantier_id}
+            onChange={(e) => set('chantier_id', e.target.value)}
+            disabled={chantierFixed}
+          >
             <option value="">—</option>
             {chantiers.map((c) => (
               <option key={c.id} value={c.id}>
@@ -85,6 +91,22 @@ export default function PlanAffectationModal({
             {PHASE_ORDER.map((slug) => (
               <option key={slug} value={slug}>
                 {PHASE_PLANNING[slug].label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="fl">
+          <label>Salarié *</label>
+          <select
+            value={form.sal_id}
+            onChange={(e) => set('sal_id', e.target.value)}
+            disabled={salarieFixed}
+          >
+            <option value="">—</option>
+            {(salarieFixed ? [salarie] : salaries).map((em) => (
+              <option key={em.id} value={em.id}>
+                {em.prenom} {em.nom}
               </option>
             ))}
           </select>

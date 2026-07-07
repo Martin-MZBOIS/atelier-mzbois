@@ -1946,6 +1946,96 @@ textarea.ni:focus {
   opacity: 0.5;
 }
 
+/* Mode mois : colonnes plus étroites */
+.plan-table--month .plan-th-day {
+  min-width: 26px;
+  padding: 6px 2px;
+}
+.plan-table--month .plan-daynum {
+  font-size: 10px;
+}
+.plan-table--month .plan-cell {
+  padding: 2px;
+}
+
+/* Vue Chantiers (Gantt) */
+.plan-ch-head {
+  background: var(--acier);
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.plan-ch-head > * {
+  vertical-align: middle;
+}
+.plan-ch-chevron {
+  color: #fff;
+  font-size: 11px;
+  margin-right: 8px;
+}
+.plan-ch-num {
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  margin: 0 8px;
+}
+.plan-ch-client {
+  color: var(--g3);
+  font-size: 12px;
+}
+
+.plan-phase-cell {
+  background: var(--w);
+  border: 1px solid var(--g4);
+  padding: 6px 12px;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 150px;
+}
+.plan-phase-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.plan-phase-lbl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.plan-phase-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+}
+.plan-affecter-btn {
+  background: none;
+  border: 1px dashed var(--g3);
+  border-radius: 3px;
+  color: var(--g2);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.plan-affecter-btn:hover {
+  border-color: var(--brun);
+  color: var(--brun);
+}
+.plan-phase-sal {
+  font-size: 10px;
+  color: var(--g2);
+  margin-top: 3px;
+}
+.plan-phase-bar {
+  height: 100%;
+  min-height: 20px;
+  border-radius: 3px;
+}
+
 /* ------------------------------------------------------------- Contacts */
 .contacts-layout {
   display: grid;
