@@ -611,6 +611,62 @@ code {
   padding: 16px;
 }
 
+.card-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.add-form {
+  background: var(--g5);
+  border-radius: 4px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+/* Achat rapide par typologie */
+.ov-buy {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.buy-btn {
+  border: 1px solid transparent;
+  border-radius: 2px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.buy-btn:hover {
+  filter: brightness(0.95);
+}
+
+/* Sélection de modèle */
+.model-pick {
+  padding: 12px 14px;
+  border-radius: 3px;
+  border: 1px solid var(--g4);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.model-pick:hover {
+  border-color: var(--brun);
+  background: var(--brun2);
+}
+.model-pick-nom {
+  font-weight: 700;
+  font-size: 13px;
+}
+.model-pick-desc {
+  font-size: 12px;
+  color: var(--g1);
+  margin-top: 2px;
+}
+
 /* Ligne ouvrage */
 .ov {
   display: flex;

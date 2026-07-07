@@ -21,6 +21,8 @@ export default function AchatModal({
   chantiers,
   fournisseurs,
   achat,
+  presetTyp,
+  linkOuvrageId,
   onClose,
   onSaved,
 }) {
@@ -30,7 +32,7 @@ export default function AchatModal({
     chantier_id: achat?.chantier_id ?? chantierId ?? '',
     nom: achat?.nom ?? '',
     ref: achat?.ref ?? '',
-    typ: achat?.typ ?? 'panneau',
+    typ: achat?.typ ?? presetTyp ?? 'panneau',
     fournisseur_id: achat?.fournisseur_id ?? '',
     dtl: achat?.dtl ?? '',
     qty: achat?.qty ?? '',
@@ -72,14 +74,39 @@ export default function AchatModal({
       prix_u: num(form.prix_u),
       mht: num(form.mht),
     }
-    const query = isEdit
-      ? supabase.from('achats').update(payload).eq('id', achat.id)
-      : supabase.from('achats').insert(payload)
-    const { error: dbError } = await query
-    setSaving(false)
-    if (dbError) {
-      setError(dbError.message)
-      return
+    if (isEdit) {
+      const { error: dbError } = await supabase
+        .from('achats')
+        .update(payload)
+        .eq('id', achat.id)
+      setSaving(false)
+      if (dbError) {
+        setError(dbError.message)
+        return
+      }
+    } else {
+      const { data, error: dbError } = await supabase
+        .from('achats')
+        .insert(payload)
+        .select('id')
+        .single()
+      if (dbError) {
+        setSaving(false)
+        setError(dbError.message)
+        return
+      }
+      // Liaison à un ouvrage (achat rapide depuis un ouvrage)
+      if (linkOuvrageId && data?.id) {
+        const { error: linkErr } = await supabase
+          .from('achats_ouvrages')
+          .insert({ achat_id: data.id, ouvrage_id: linkOuvrageId })
+        if (linkErr) {
+          setSaving(false)
+          setError('Achat créé mais liaison en échec : ' + linkErr.message)
+          return
+        }
+      }
+      setSaving(false)
     }
     onSaved()
   }
