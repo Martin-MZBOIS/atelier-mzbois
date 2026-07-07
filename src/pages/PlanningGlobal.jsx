@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { PHASE_PLANNING, resolve } from '../lib/statuts'
+import PlanAffectationModal from './PlanAffectationModal'
 
 const JOUR_LETTER = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 // Palette pastel pour distinguer les chantiers (reprise de la maquette).
@@ -40,25 +41,30 @@ export default function PlanningGlobal() {
   const [error, setError] = useState('')
   const [weekOffset, setWeekOffset] = useState(0)
   const [search, setSearch] = useState('')
+  const [newAff, setNewAff] = useState(null) // { salId, date }
+
+  const loadAffectations = useCallback(async () => {
+    const { data, error: dbError } = await supabase
+      .from('plan_affectations')
+      .select(
+        'id, chantier_id, phase, sal_id, date_debut, date_fin, commentaire, ' +
+          'chantier:chantiers!chantier_id(num, client)'
+      )
+    if (dbError) setError(dbError.message)
+    else setAffectations(data ?? [])
+  }, [])
 
   useEffect(() => {
     let active = true
     async function load() {
       setLoading(true)
       setError('')
-      const [aff, em, ch] = await Promise.all([
-        supabase
-          .from('plan_affectations')
-          .select(
-            'id, chantier_id, phase, sal_id, date_debut, date_fin, commentaire, ' +
-              'chantier:chantiers!chantier_id(num, client)'
-          ),
+      const [, em, ch] = await Promise.all([
+        loadAffectations(),
         supabase.from('employes').select('id, prenom, nom, role').order('nom'),
-        supabase.from('chantiers').select('id, num').order('num'),
+        supabase.from('chantiers').select('id, num, nom').order('num'),
       ])
       if (!active) return
-      if (aff.error) setError(aff.error.message)
-      else setAffectations(aff.data ?? [])
       setEmployes(em.data ?? [])
       setChantiers(ch.data ?? [])
       setLoading(false)
@@ -67,7 +73,7 @@ export default function PlanningGlobal() {
     return () => {
       active = false
     }
-  }, [])
+  }, [loadAffectations])
 
   // Couleur par chantier (index stable via l'ordre des chantiers).
   const chantierColor = useMemo(() => {
@@ -231,12 +237,19 @@ export default function PlanningGlobal() {
                           <td
                             key={cell.key}
                             className={
-                              'plan-cell' +
+                              'plan-cell plan-cell--empty' +
                               (isT
                                 ? ' plan-cell--today'
                                 : we
                                 ? ' plan-cell--we'
                                 : '')
+                            }
+                            title="Affecter un chantier"
+                            onClick={() =>
+                              setNewAff({
+                                salId: emp.id,
+                                date: isoDay(cell.day),
+                              })
                             }
                           />
                         )
@@ -284,6 +297,19 @@ export default function PlanningGlobal() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {newAff && (
+        <PlanAffectationModal
+          salarie={employes.find((e) => e.id === newAff.salId)}
+          chantiers={chantiers}
+          initialDate={newAff.date}
+          onClose={() => setNewAff(null)}
+          onSaved={async () => {
+            setNewAff(null)
+            await loadAffectations()
+          }}
+        />
       )}
     </section>
   )

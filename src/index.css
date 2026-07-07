@@ -1886,6 +1886,14 @@ textarea.ni:focus {
 .plan-cell--today {
   background: #fff7ed;
 }
+.plan-cell--empty {
+  cursor: pointer;
+}
+.plan-cell--empty:hover {
+  background: var(--brun2);
+  outline: 1px dashed var(--brun);
+  outline-offset: -1px;
+}
 
 .plan-block {
   color: #333;
