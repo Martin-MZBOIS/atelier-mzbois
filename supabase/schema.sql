@@ -315,6 +315,32 @@ create table if not exists reunion_actions (
 comment on column reunion_actions.assigne_a is 'Employé assigné (référence employes)';
 
 -- =============================================================================
+-- 10. Bibliothèques (articles + ouvrages modèles)
+-- =============================================================================
+
+create table if not exists articles (
+  id          uuid primary key default gen_random_uuid(),
+  nom         text not null,
+  description text,
+  typ         typ_achat,
+  prix        numeric(12, 2),
+  unite       text
+);
+
+create table if not exists article_fournisseurs (
+  article_id     uuid not null references articles (id) on delete cascade,
+  fournisseur_id uuid not null references fournisseurs (id) on delete cascade,
+  primary key (article_id, fournisseur_id)
+);
+
+create table if not exists ouvrage_modeles (
+  id          uuid primary key default gen_random_uuid(),
+  nom         text not null,
+  description text,
+  typs        typ_achat[] not null default '{}'
+);
+
+-- =============================================================================
 -- Index (clés étrangères + colonnes fréquemment filtrées)
 -- =============================================================================
 
@@ -374,6 +400,11 @@ create index if not exists idx_fil_date     on fil_messages (date);
 create index if not exists idx_reunions_chantier       on reunions (chantier_id);
 create index if not exists idx_reunion_actions_reunion on reunion_actions (reunion_id);
 create index if not exists idx_reunion_actions_assigne on reunion_actions (assigne_a);
+
+-- bibliothèques
+create index if not exists idx_articles_typ on articles (typ);
+create index if not exists idx_article_fournisseurs_fournisseur
+  on article_fournisseurs (fournisseur_id);
 
 commit;
 

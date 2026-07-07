@@ -168,4 +168,27 @@ insert into fil_messages (id, chantier_id, auteur_id, texte, ouvrage_tag, parent
   ('bbbbbbbb-bbbb-bbbb-bbbb-000000000006', '44444444-4444-4444-4444-000000000002', '11111111-1111-1111-1111-000000000002', 'Je prépare les plans pour le RDV client.',      null, 'bbbbbbbb-bbbb-bbbb-bbbb-000000000003', '2026-09-03 11:30:00+02')
 on conflict (id) do nothing;
 
+-- -----------------------------------------------------------------------------
+-- Bibliothèques : articles + fournisseurs + ouvrages modèles
+-- -----------------------------------------------------------------------------
+insert into articles (id, nom, description, typ, prix, unite) values
+  ('a1a1a1a1-a1a1-a1a1-a1a1-000000000001', 'MDF 2800x2070x16',    'MDF standard 16mm',    'panneau',       45.00, 'panneau'),
+  ('a1a1a1a1-a1a1-a1a1-a1a1-000000000002', 'Mélaminé Egger W980', 'Mélaminé blanc 19mm',  'panneau',       62.00, 'panneau'),
+  ('a1a1a1a1-a1a1-a1a1-a1a1-000000000003', 'Chant PVC 1mm ABS',   'Chant de finition',    'chants',        12.00, 'rouleau'),
+  ('a1a1a1a1-a1a1-a1a1-a1a1-000000000004', 'Poignées inox',       'Inox brossé standard', 'quincaillerie',  8.50, 'pièce')
+on conflict (id) do nothing;
+
+insert into article_fournisseurs (article_id, fournisseur_id) values
+  ('a1a1a1a1-a1a1-a1a1-a1a1-000000000001', '33333333-3333-3333-3333-000000000002'),
+  ('a1a1a1a1-a1a1-a1a1-a1a1-000000000001', '33333333-3333-3333-3333-000000000009'),
+  ('a1a1a1a1-a1a1-a1a1-a1a1-000000000002', '33333333-3333-3333-3333-000000000010'),
+  ('a1a1a1a1-a1a1-a1a1-a1a1-000000000003', '33333333-3333-3333-3333-000000000003'),
+  ('a1a1a1a1-a1a1-a1a1-a1a1-000000000004', '33333333-3333-3333-3333-000000000006')
+on conflict do nothing;
+
+insert into ouvrage_modeles (id, nom, description, typs) values
+  ('a2a2a2a2-a2a2-a2a2-a2a2-000000000001', 'Banque d''accueil',   'Avec plan de travail et rangements', '{panneau,chants,quincaillerie}'),
+  ('a2a2a2a2-a2a2-a2a2-a2a2-000000000002', 'Bibliothèque murale', 'Avec niches et portes',              '{panneau,strat,chants}')
+on conflict (id) do nothing;
+
 commit;
