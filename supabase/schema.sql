@@ -61,6 +61,10 @@ begin
   if not exists (select 1 from pg_type where typname = 'phase_planning') then
     create type phase_planning as enum ('etude', 'fabrication', 'pose');
   end if;
+
+  if not exists (select 1 from pg_type where typname = 'statut_reunion') then
+    create type statut_reunion as enum ('on_track', 'attention', 'bloque');
+  end if;
 end
 $$;
 
@@ -209,8 +213,7 @@ create table if not exists courses (
   chantier_id uuid references chantiers (id) on delete set null,
   ouvrage     text,
   quoi        text,
-  commentaire text,
-  urgent      boolean not null default false
+  commentaire text
 );
 comment on column courses.qui_id is 'Acteur de la course (référence polymorphe selon qui_type)';
 comment on column courses.qui_type is 'Type d''acteur (employe / fournisseur / externe…)';
@@ -289,7 +292,7 @@ create table if not exists reunions (
   id          uuid primary key default gen_random_uuid(),
   chantier_id uuid references chantiers (id) on delete cascade,
   date        date,
-  statut      text,
+  statut      statut_reunion,
   notes       text
 );
 
@@ -334,7 +337,6 @@ create index if not exists idx_achats_ouvrages_ouvrage on achats_ouvrages (ouvra
 create index if not exists idx_courses_chantier on courses (chantier_id);
 create index if not exists idx_courses_date     on courses (date);
 create index if not exists idx_courses_statut   on courses (statut);
-create index if not exists idx_courses_urgent   on courses (urgent) where urgent;
 
 -- plan_affectations
 create index if not exists idx_plan_chantier on plan_affectations (chantier_id);
