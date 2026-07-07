@@ -8,6 +8,7 @@ import ChantierEditModal from './ChantierEditModal'
 const SUBTABS = [
   { to: 'ouvrages', label: 'Ouvrages' },
   { to: 'achats', label: 'Achats' },
+  { to: 'courses', label: '🚚 Courses' },
   { to: 'fil', label: '💬 Fil' },
   { to: 'reunion', label: '📋 Réunion' },
   { to: 'feedbacks', label: '🔧 Feedbacks' },

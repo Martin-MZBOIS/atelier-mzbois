@@ -12,6 +12,7 @@ export default function CourseModal({
   chantiers,
   employes,
   transporteurs = [],
+  defaultChantierId,
   onClose,
   onSaved,
 }) {
@@ -19,7 +20,7 @@ export default function CourseModal({
   const [form, setForm] = useState({
     date: today(),
     statut: 'programmee',
-    chantier_id: '',
+    chantier_id: defaultChantierId ?? '',
     qui_id: '',
     quoi: '',
     commentaire: '',

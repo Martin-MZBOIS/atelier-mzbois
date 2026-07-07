@@ -8,6 +8,7 @@ import ChantierDetail from './pages/ChantierDetail'
 import OuvragesTab from './pages/OuvragesTab'
 import AnalytiqueTab from './pages/AnalytiqueTab'
 import AchatsTab from './pages/AchatsTab'
+import ChantierCoursesTab from './pages/ChantierCoursesTab'
 import FilTab from './pages/FilTab'
 import ReunionTab from './pages/ReunionTab'
 import FeedbacksTab from './pages/FeedbacksTab'
@@ -35,6 +36,7 @@ function App() {
           <Route index element={<Navigate to="ouvrages" replace />} />
           <Route path="ouvrages" element={<OuvragesTab />} />
           <Route path="achats" element={<AchatsTab />} />
+          <Route path="courses" element={<ChantierCoursesTab />} />
           <Route path="fil" element={<FilTab />} />
           <Route path="reunion" element={<ReunionTab />} />
           <Route path="feedbacks" element={<FeedbacksTab />} />
