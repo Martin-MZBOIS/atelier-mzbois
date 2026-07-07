@@ -103,4 +103,53 @@ insert into achats_ouvrages (achat_id, ouvrage_id) values
   ('66666666-6666-6666-6666-000000000005', '55555555-5555-5555-5555-000000000005')
 on conflict do nothing;
 
+-- -----------------------------------------------------------------------------
+-- Courses / navettes
+-- (qui_id -> employé selon qui_type ; de_id/vers_id polymorphes, sans FK)
+-- -----------------------------------------------------------------------------
+insert into courses (id, date, statut, qui_id, qui_type, de_id, vers_id, chantier_id, ouvrage, quoi, commentaire) values
+  ('77777777-7777-7777-7777-000000000001', '2026-09-08', 'programmee', '22222222-2222-2222-2222-000000000004', 'employe', '33333333-3333-3333-3333-000000000002', '44444444-4444-4444-4444-000000000001', '44444444-4444-4444-4444-000000000001', 'Cuisine sur mesure', 'Récupérer panneaux mélaminé chez DISPANO', 'Prévoir remorque'),
+  ('77777777-7777-7777-7777-000000000002', '2026-09-09', 'urgente',    '22222222-2222-2222-2222-000000000007', 'employe', '33333333-3333-3333-3333-000000000003', '44444444-4444-4444-4444-000000000001', '44444444-4444-4444-4444-000000000001', null,                 'Chercher quincaillerie manquante chez Würth',   'Bloque le montage'),
+  ('77777777-7777-7777-7777-000000000003', '2026-08-14', 'faite',      '22222222-2222-2222-2222-000000000008', 'employe', null,                                   '44444444-4444-4444-4444-000000000003', '44444444-4444-4444-4444-000000000003', 'Meubles salle de bain', 'Livraison meubles SDB sur chantier',        null)
+on conflict (id) do nothing;
+
+-- -----------------------------------------------------------------------------
+-- Planning — affectations
+-- -----------------------------------------------------------------------------
+insert into plan_affectations (id, chantier_id, phase, sal_id, date_debut, date_fin, commentaire) values
+  ('88888888-8888-8888-8888-000000000001', '44444444-4444-4444-4444-000000000001', 'fabrication', '22222222-2222-2222-2222-000000000004', '2026-09-08', '2026-09-12', 'Fabrication cuisine'),
+  ('88888888-8888-8888-8888-000000000002', '44444444-4444-4444-4444-000000000001', 'pose',        '22222222-2222-2222-2222-000000000008', '2026-09-15', '2026-09-17', 'Pose cuisine + dressing'),
+  ('88888888-8888-8888-8888-000000000003', '44444444-4444-4444-4444-000000000002', 'etude',       '22222222-2222-2222-2222-000000000001', '2026-09-01', '2026-09-10', 'Étude banque accueil'),
+  ('88888888-8888-8888-8888-000000000004', '44444444-4444-4444-4444-000000000003', 'fabrication', '22222222-2222-2222-2222-000000000005', '2026-08-10', '2026-08-14', 'Fabrication meubles SDB')
+on conflict (id) do nothing;
+
+-- -----------------------------------------------------------------------------
+-- Feedbacks
+-- -----------------------------------------------------------------------------
+insert into feedbacks (id, chantier_id, ouvrage_id, description, saisi_par, date, statut, solution, date_solution) values
+  ('99999999-9999-9999-9999-000000000001', '44444444-4444-4444-4444-000000000001', '55555555-5555-5555-5555-000000000001', 'Défaut d''alignement sur façade tiroir', '11111111-1111-1111-1111-000000000004', '2026-09-11 09:30:00+02', 'remonte',  null,                                 null),
+  ('99999999-9999-9999-9999-000000000002', '44444444-4444-4444-4444-000000000003', '55555555-5555-5555-5555-000000000005', 'Chant décollé sur meuble bas',           '11111111-1111-1111-1111-000000000004', '2026-08-15 14:00:00+02', 'resolu',   'Rechampi et recollage en atelier',   '2026-08-16'),
+  ('99999999-9999-9999-9999-000000000003', '44444444-4444-4444-4444-000000000002', '55555555-5555-5555-5555-000000000003', 'Cote client à confirmer avant lancement','11111111-1111-1111-1111-000000000002', '2026-09-02 11:15:00+02', 'en_cours', null,                                 null)
+on conflict (id) do nothing;
+
+-- -----------------------------------------------------------------------------
+-- Tâches
+-- -----------------------------------------------------------------------------
+insert into taches (id, texte, done, chantier_id, assigne_a, source, echeance) values
+  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000001', 'Valider plans BE banque accueil',        false, '44444444-4444-4444-4444-000000000002', '22222222-2222-2222-2222-000000000001', 'reunion',  '2026-09-05'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000002', 'Commander panneaux mélaminé chêne',      false, '44444444-4444-4444-4444-000000000001', '22222222-2222-2222-2222-000000000002', 'achat',    '2026-09-06'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000003', 'Préparer la pose du dressing',           false, '44444444-4444-4444-4444-000000000001', '22222222-2222-2222-2222-000000000008', 'manuel',   '2026-09-17'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000004', 'Reprendre chant meuble SDB',             true,  '44444444-4444-4444-4444-000000000003', '22222222-2222-2222-2222-000000000003', 'feedback', '2026-08-16')
+on conflict (id) do nothing;
+
+-- -----------------------------------------------------------------------------
+-- Fil de discussion par chantier
+-- -----------------------------------------------------------------------------
+insert into fil_messages (id, chantier_id, auteur_id, texte, ouvrage_tag, date) values
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000001', '44444444-4444-4444-4444-000000000001', '11111111-1111-1111-1111-000000000002', 'Plans cuisine validés, transmis à la prog.',                  'Cuisine sur mesure', '2026-09-05 08:45:00+02'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000002', '44444444-4444-4444-4444-000000000001', '11111111-1111-1111-1111-000000000003', 'Débit lancé, panneaux à commander en urgence.',               'Cuisine sur mesure', '2026-09-07 16:20:00+02'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000003', '44444444-4444-4444-4444-000000000002', '11111111-1111-1111-1111-000000000001', 'RDV client la semaine prochaine pour valider l''habillage.',   'Habillage mural',    '2026-09-03 10:00:00+02'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000004', '44444444-4444-4444-4444-000000000003', '11111111-1111-1111-1111-000000000004', 'Meubles SDB livrés et posés, chantier clôturé.',              null,                 '2026-08-19 17:30:00+02')
+on conflict (id) do nothing;
+
 commit;
