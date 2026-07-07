@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { TYP_ACHAT, TYP_ACHAT_ORDER, resolve } from '../lib/statuts'
 import ArticleModal from './ArticleModal'
+import ModeleModal from './ModeleModal'
 
 // Prix unitaire € avec décimales (0 à 2), sans arrondi à l'entier.
 function formatPrix(value) {
@@ -27,7 +28,16 @@ export default function Bibliotheque() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [typFilt, setTypFilt] = useState('tous')
-  const [showModal, setShowModal] = useState(false)
+  const [articleModal, setArticleModal] = useState(null) // { article } | null
+  const [modeleModal, setModeleModal] = useState(null) // { modele } | null
+
+  const loadModeles = useCallback(async () => {
+    const { data } = await supabase
+      .from('ouvrage_modeles')
+      .select('id, nom, description, typs')
+      .order('nom')
+    setModeles(data ?? [])
+  }, [])
 
   async function loadArticles() {
     const { data, error: dbError } = await supabase
@@ -50,14 +60,12 @@ export default function Bibliotheque() {
     async function load() {
       setLoading(true)
       setError('')
-      const [, mod, fo] = await Promise.all([
+      const [, , fo] = await Promise.all([
         loadArticles(),
-        supabase.from('ouvrage_modeles').select('id, nom, description, typs').order('nom'),
+        loadModeles(),
         supabase.from('fournisseurs').select('id, nom').eq('type', 'fournisseur').order('nom'),
       ])
       if (!active) return
-      if (mod.error) setError(mod.error.message)
-      else setModeles(mod.data ?? [])
       setFournisseurs(fo.data ?? [])
       setLoading(false)
     }
@@ -65,7 +73,8 @@ export default function Bibliotheque() {
     return () => {
       active = false
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadModeles])
 
   const filtered = useMemo(
     () =>
@@ -118,7 +127,7 @@ export default function Bibliotheque() {
             <button
               className="btn bp bsm"
               style={{ marginLeft: 'auto' }}
-              onClick={() => setShowModal(true)}
+              onClick={() => setArticleModal({ article: null })}
             >
               + Article
             </button>
@@ -158,7 +167,7 @@ export default function Bibliotheque() {
                     .map((af) => af.fournisseur?.nom)
                     .filter(Boolean)
                   return (
-                    <tr key={a.id}>
+                    <tr key={a.id} className="row-link" onClick={() => setArticleModal({ article: a })}>
                       <td>{a.typ && <TypBadge slug={a.typ} />}</td>
                       <td className="strong">{a.nom}</td>
                       <td>{a.description ?? '—'}</td>
@@ -185,11 +194,25 @@ export default function Bibliotheque() {
 
       {!loading && tab === 'modeles' && (
         <>
+          <div className="page-head">
+            <span className="card-title">{modeles.length} modèle(s)</span>
+            <button
+              className="btn bp bsm"
+              style={{ marginLeft: 'auto' }}
+              onClick={() => setModeleModal({ modele: null })}
+            >
+              + Modèle
+            </button>
+          </div>
           {modeles.length === 0 ? (
             <div className="empty">Aucun modèle</div>
           ) : (
             modeles.map((m) => (
-              <div key={m.id} className="card">
+              <div
+                key={m.id}
+                className="card model-pick"
+                onClick={() => setModeleModal({ modele: m })}
+              >
                 <div className="modele-nom">⭐ {m.nom}</div>
                 {m.description && (
                   <div className="modele-desc">{m.description}</div>
@@ -205,13 +228,24 @@ export default function Bibliotheque() {
         </>
       )}
 
-      {showModal && (
+      {articleModal && (
         <ArticleModal
+          article={articleModal.article}
           fournisseurs={fournisseurs}
-          onClose={() => setShowModal(false)}
+          onClose={() => setArticleModal(null)}
           onSaved={async () => {
-            setShowModal(false)
+            setArticleModal(null)
             await loadArticles()
+          }}
+        />
+      )}
+      {modeleModal && (
+        <ModeleModal
+          modele={modeleModal.modele}
+          onClose={() => setModeleModal(null)}
+          onSaved={async () => {
+            setModeleModal(null)
+            await loadModeles()
           }}
         />
       )}

@@ -8,16 +8,22 @@ function num(v) {
   return Number.isNaN(n) ? null : n
 }
 
-// Création d'un article de bibliothèque (+ fournisseurs associés).
-export default function ArticleModal({ fournisseurs, onClose, onSaved }) {
+// Création / édition d'un article de bibliothèque (+ fournisseurs associés).
+export default function ArticleModal({ article, fournisseurs, onClose, onSaved }) {
+  const isEdit = Boolean(article)
   const [form, setForm] = useState({
-    nom: '',
-    description: '',
-    typ: 'panneau',
-    prix: '',
-    unite: '',
+    nom: article?.nom ?? '',
+    description: article?.description ?? '',
+    typ: article?.typ ?? 'panneau',
+    prix: article?.prix ?? '',
+    unite: article?.unite ?? '',
   })
-  const [fids, setFids] = useState([])
+  const [fids, setFids] = useState(
+    () =>
+      (article?.article_fournisseurs ?? [])
+        .map((af) => af.fournisseur?.id)
+        .filter(Boolean)
+  )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -37,33 +43,40 @@ export default function ArticleModal({ fournisseurs, onClose, onSaved }) {
     }
     setSaving(true)
     setError('')
-    const { data, error: dbError } = await supabase
-      .from('articles')
-      .insert({
-        nom: form.nom.trim(),
-        description: form.description.trim() || null,
-        typ: form.typ || null,
-        prix: num(form.prix),
-        unite: form.unite.trim() || null,
-      })
-      .select('id')
-      .single()
-    if (dbError) {
-      setSaving(false)
-      setError(dbError.message)
-      return
+    const payload = {
+      nom: form.nom.trim(),
+      description: form.description.trim() || null,
+      typ: form.typ || null,
+      prix: num(form.prix),
+      unite: form.unite.trim() || null,
     }
+
+    let articleId = article?.id
+    if (isEdit) {
+      const { error: uErr } = await supabase.from('articles').update(payload).eq('id', articleId)
+      if (uErr) {
+        setSaving(false)
+        setError(uErr.message)
+        return
+      }
+      // Resynchronise les fournisseurs : on efface puis on réinsère.
+      await supabase.from('article_fournisseurs').delete().eq('article_id', articleId)
+    } else {
+      const { data, error: iErr } = await supabase.from('articles').insert(payload).select('id').single()
+      if (iErr) {
+        setSaving(false)
+        setError(iErr.message)
+        return
+      }
+      articleId = data.id
+    }
+
     if (fids.length) {
-      const rows = fids.map((fid) => ({
-        article_id: data.id,
-        fournisseur_id: fid,
-      }))
-      const { error: jErr } = await supabase
-        .from('article_fournisseurs')
-        .insert(rows)
+      const rows = fids.map((fid) => ({ article_id: articleId, fournisseur_id: fid }))
+      const { error: jErr } = await supabase.from('article_fournisseurs').insert(rows)
       if (jErr) {
         setSaving(false)
-        setError('Article créé mais fournisseurs en échec : ' + jErr.message)
+        setError('Article enregistré mais fournisseurs en échec : ' + jErr.message)
         return
       }
     }
@@ -77,7 +90,7 @@ export default function ArticleModal({ fournisseurs, onClose, onSaved }) {
         <button className="modal-close" onClick={onClose}>
           ×
         </button>
-        <div className="modal-title">Nouvel article</div>
+        <div className="modal-title">{isEdit ? "Modifier l'article" : 'Nouvel article'}</div>
 
         <div className="fg">
           <div className="fl">
@@ -130,7 +143,7 @@ export default function ArticleModal({ fournisseurs, onClose, onSaved }) {
 
         <div className="modal-actions">
           <button className="btn bp" disabled={saving} onClick={handleSave}>
-            {saving ? 'Enregistrement…' : 'Créer'}
+            {saving ? 'Enregistrement…' : isEdit ? 'Enregistrer' : 'Créer'}
           </button>
           <button className="btn bg" onClick={onClose}>
             Annuler
