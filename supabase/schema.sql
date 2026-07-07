@@ -191,7 +191,8 @@ create table if not exists achats (
   acmd           numeric(12, 2),
   st             statut_achat,
   prix_u         numeric(12, 2),
-  mht            numeric(12, 2)
+  mht            numeric(12, 2),
+  date_reception date
 );
 comment on column achats.dtl is 'Détail / désignation complémentaire';
 comment on column achats.qty is 'Quantité à acheter';

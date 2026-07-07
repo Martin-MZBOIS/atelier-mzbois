@@ -41,6 +41,7 @@ export default function AchatModal({
     st: achat?.st ?? 'a_traiter',
     prix_u: achat?.prix_u ?? '',
     mht: achat?.mht ?? '',
+    date_reception: achat?.date_reception ?? '',
   }))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -73,6 +74,7 @@ export default function AchatModal({
       st: form.st || null,
       prix_u: num(form.prix_u),
       mht: num(form.mht),
+      date_reception: form.date_reception || null,
     }
     if (isEdit) {
       const { error: dbError } = await supabase
@@ -239,6 +241,15 @@ export default function AchatModal({
               onChange={(e) => set('mht', e.target.value)}
             />
           </div>
+        </div>
+
+        <div className="fl">
+          <label>Date de réception</label>
+          <input
+            type="date"
+            value={form.date_reception}
+            onChange={(e) => set('date_reception', e.target.value)}
+          />
         </div>
 
         {error && <div className="alert">{error}</div>}
