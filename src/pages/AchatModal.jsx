@@ -7,20 +7,6 @@ import {
   STATUT_ACHAT_ORDER,
 } from '../lib/statuts'
 
-const EMPTY = {
-  nom: '',
-  ref: '',
-  typ: 'panneau',
-  fournisseur_id: '',
-  dtl: '',
-  qty: '',
-  stk: '',
-  acmd: '',
-  st: 'a_traiter',
-  prix_u: '',
-  mht: '',
-}
-
 // Convertit une saisie en nombre ou null.
 function num(v) {
   if (v === '' || v == null) return null
@@ -28,25 +14,32 @@ function num(v) {
   return Number.isNaN(n) ? null : n
 }
 
-export default function AchatModal({ chantierId, fournisseurs, achat, onClose, onSaved }) {
+// chantiers (optionnel) : si fourni, affiche un sélecteur de chantier (ajout global).
+// chantierId : chantier par défaut / fixe (onglet d'une fiche chantier).
+export default function AchatModal({
+  chantierId,
+  chantiers,
+  fournisseurs,
+  achat,
+  onClose,
+  onSaved,
+}) {
   const isEdit = Boolean(achat)
-  const [form, setForm] = useState(() =>
-    achat
-      ? {
-          nom: achat.nom ?? '',
-          ref: achat.ref ?? '',
-          typ: achat.typ ?? 'panneau',
-          fournisseur_id: achat.fournisseur_id ?? '',
-          dtl: achat.dtl ?? '',
-          qty: achat.qty ?? '',
-          stk: achat.stk ?? '',
-          acmd: achat.acmd ?? '',
-          st: achat.st ?? 'a_traiter',
-          prix_u: achat.prix_u ?? '',
-          mht: achat.mht ?? '',
-        }
-      : EMPTY
-  )
+  const showChantierPicker = Array.isArray(chantiers) && chantiers.length > 0
+  const [form, setForm] = useState(() => ({
+    chantier_id: achat?.chantier_id ?? chantierId ?? '',
+    nom: achat?.nom ?? '',
+    ref: achat?.ref ?? '',
+    typ: achat?.typ ?? 'panneau',
+    fournisseur_id: achat?.fournisseur_id ?? '',
+    dtl: achat?.dtl ?? '',
+    qty: achat?.qty ?? '',
+    stk: achat?.stk ?? '',
+    acmd: achat?.acmd ?? '',
+    st: achat?.st ?? 'a_traiter',
+    prix_u: achat?.prix_u ?? '',
+    mht: achat?.mht ?? '',
+  }))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -59,10 +52,14 @@ export default function AchatModal({ chantierId, fournisseurs, achat, onClose, o
       setError('Le nom est obligatoire.')
       return
     }
+    if (!form.chantier_id) {
+      setError('Le chantier est obligatoire.')
+      return
+    }
     setSaving(true)
     setError('')
     const payload = {
-      chantier_id: chantierId,
+      chantier_id: form.chantier_id,
       nom: form.nom.trim(),
       ref: form.ref.trim() || null,
       typ: form.typ || null,
@@ -96,6 +93,23 @@ export default function AchatModal({ chantierId, fournisseurs, achat, onClose, o
         <div className="modal-title">
           {isEdit ? "Modifier l'achat" : 'Nouvel achat'}
         </div>
+
+        {showChantierPicker && (
+          <div className="fl">
+            <label>Chantier *</label>
+            <select
+              value={form.chantier_id}
+              onChange={(e) => set('chantier_id', e.target.value)}
+            >
+              <option value="">—</option>
+              {chantiers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.num} · {c.nom}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="fg">
           <div className="fl">

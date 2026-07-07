@@ -436,6 +436,54 @@ body {
   cursor: pointer;
 }
 
+/* Filtres rapides (Achats global) */
+.qf-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.qf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 2px;
+  border: 1px solid var(--g4);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
+}
+.qf-count {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+.qf-typ {
+  margin-bottom: 14px;
+}
+.qf-typ select {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--g3);
+  font-family: inherit;
+  outline: none;
+  background: var(--w);
+}
+
+.data-table.striped tbody tr:nth-child(even) {
+  background: var(--g6);
+}
+.data-table .ac-chantier {
+  color: var(--brun);
+}
+
 code {
   font-family: 'DM Mono', ui-monospace, monospace;
   background: var(--g5);
