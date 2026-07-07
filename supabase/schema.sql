@@ -65,6 +65,12 @@ begin
   if not exists (select 1 from pg_type where typname = 'statut_reunion') then
     create type statut_reunion as enum ('on_track', 'attention', 'bloque');
   end if;
+
+  if not exists (select 1 from pg_type where typname = 'type_societe') then
+    create type type_societe as enum (
+      'fournisseur', 'client', 'sous_traitant', 'transporteur'
+    );
+  end if;
 end
 $$;
 
@@ -82,12 +88,13 @@ create table if not exists utilisateurs (
   created_at timestamptz not null default now()
 );
 
--- Fournisseurs
+-- Sociétés (fournisseurs, clients, sous-traitants, transporteurs)
 create table if not exists fournisseurs (
-  id        uuid primary key default gen_random_uuid(),
-  nom       text not null,
-  adresse   text,
-  categorie text
+  id      uuid primary key default gen_random_uuid(),
+  nom     text not null,
+  adresse text,
+  famille text, -- famille produit (panneaux, quincaillerie…)
+  type    type_societe not null default 'fournisseur'
 );
 
 -- Employés (main-d'œuvre atelier / pose — distincts des utilisateurs de l'app)
@@ -314,7 +321,8 @@ comment on column reunion_actions.assigne_a is 'Employé assigné (référence e
 -- utilisateurs
 create index if not exists idx_utilisateurs_role on utilisateurs (role);
 
--- contacts
+-- sociétés / contacts
+create index if not exists idx_fournisseurs_type on fournisseurs (type);
 create index if not exists idx_contacts_fournisseur on contacts (fournisseur_id);
 
 -- chantiers

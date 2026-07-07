@@ -9,6 +9,7 @@ const TABS = [
   { to: '/achats', label: 'Achats' },
   { to: '/courses', label: 'Courses' },
   { to: '/planning', label: 'Planning' },
+  { to: '/contacts', label: 'Contacts' },
 ]
 
 export default function Layout() {

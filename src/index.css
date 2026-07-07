@@ -1839,6 +1839,133 @@ textarea.ni:focus {
   opacity: 0.5;
 }
 
+/* ------------------------------------------------------------- Contacts */
+.contacts-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .contacts-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contacts-list {
+  background: var(--w);
+  border: 1px solid var(--g4);
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 1px 4px rgba(132, 106, 87, 0.06);
+}
+
+.contact-item {
+  padding: 8px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+}
+.contact-item:hover {
+  background: var(--g5);
+}
+.contact-item--on {
+  background: var(--brun2);
+  border-color: var(--brun);
+  border-left: 3px solid var(--brun);
+}
+.contact-item-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+.contact-item-sub {
+  font-size: 11px;
+  color: var(--g2);
+  margin-top: 1px;
+}
+
+.contacts-detail {
+  min-height: 200px;
+}
+.contacts-empty {
+  padding: 40px;
+}
+
+.detail-panel {
+  background: var(--w);
+  border: 1px solid var(--g4);
+  border-radius: 4px;
+  padding: 18px;
+  box-shadow: 0 1px 4px rgba(132, 106, 87, 0.06);
+}
+.detail-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.detail-panel-head h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.detail-fields {
+  margin-bottom: 14px;
+}
+.detail-fields > div {
+  display: flex;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--g5);
+  font-size: 13px;
+}
+.detail-fields dt {
+  width: 110px;
+  flex-shrink: 0;
+  color: var(--g2);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding-top: 1px;
+}
+.detail-fields dd {
+  flex: 1;
+}
+
+.contact-card {
+  background: var(--g6);
+  border: 1px solid var(--g4);
+  border-radius: 3px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+}
+.contact-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.contact-card-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+.contact-card-role {
+  font-size: 11px;
+  background: var(--g5);
+  color: var(--g1);
+  padding: 1px 7px;
+  border-radius: 99px;
+}
+.contact-card-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--g1);
+}
+
 /* -------------------------------------------------------------- Modal */
 .modal-overlay {
   position: fixed;

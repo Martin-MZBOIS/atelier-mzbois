@@ -104,6 +104,14 @@ export const PHASE_PLANNING = {
   pose: { label: 'Pose' },
 }
 
+// --- type_societe -----------------------------------------------------------
+export const TYPE_SOCIETE = {
+  fournisseur: { label: 'Fournisseur', color: '#8a7040' },
+  client: { label: 'Client', color: '#4a6b8a' },
+  sous_traitant: { label: 'Sous-traitant', color: '#6b5a8a' },
+  transporteur: { label: 'Transporteur', color: '#5a7a5a' },
+}
+
 // Résout un slug dans une table donnée, avec repli sûr.
 export function resolve(table, slug) {
   return (

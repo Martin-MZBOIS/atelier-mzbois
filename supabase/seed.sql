@@ -37,24 +37,34 @@ on conflict (id) do nothing;
 -- -----------------------------------------------------------------------------
 -- Fournisseurs (10)
 -- -----------------------------------------------------------------------------
-insert into fournisseurs (id, nom, adresse, categorie) values
-  ('33333333-3333-3333-3333-000000000001', 'ARTICOP',    'Zone Industrielle, Lyon',        'Stratifiés'),
-  ('33333333-3333-3333-3333-000000000002', 'DISPANO',    '12 rue des Ébénistes, Villeurbanne', 'Panneaux'),
-  ('33333333-3333-3333-3333-000000000003', 'Würth Pro',  'Route de Strasbourg, Erstein',   'Quincaillerie / consommables'),
-  ('33333333-3333-3333-3333-000000000004', 'Bois & Co',  '5 avenue du Rhône, Vénissieux',  'Bois massif'),
-  ('33333333-3333-3333-3333-000000000005', 'BAIE PLAST', 'Parc Activités, Saint-Priest',   'Menuiseries PVC / alu'),
-  ('33333333-3333-3333-3333-000000000006', 'HÄFELE',     'ZA Nord, Chassieu',              'Quincaillerie'),
-  ('33333333-3333-3333-3333-000000000007', 'BLUM France','Rue de l''Industrie, Bron',      'Ferrures / charnières'),
-  ('33333333-3333-3333-3333-000000000008', 'SALICE',     'Allée des Artisans, Corbas',     'Charnières / coulisses'),
-  ('33333333-3333-3333-3333-000000000009', 'PANOFRANCE', 'Boulevard Yves Farge, Lyon',     'Panneaux / dérivés'),
-  ('33333333-3333-3333-3333-000000000010', 'EGGER',      'Distribution France',            'Panneaux mélaminés')
+insert into fournisseurs (id, nom, adresse, famille, type) values
+  ('33333333-3333-3333-3333-000000000001', 'ARTICOP',    'Zone Industrielle, Lyon',            'Stratifiés',                   'fournisseur'),
+  ('33333333-3333-3333-3333-000000000002', 'DISPANO',    '12 rue des Ébénistes, Villeurbanne', 'Panneaux',                     'fournisseur'),
+  ('33333333-3333-3333-3333-000000000003', 'Würth Pro',  'Route de Strasbourg, Erstein',       'Quincaillerie / consommables', 'fournisseur'),
+  ('33333333-3333-3333-3333-000000000004', 'Bois & Co',  '5 avenue du Rhône, Vénissieux',      'Bois massif',                  'fournisseur'),
+  ('33333333-3333-3333-3333-000000000005', 'BAIE PLAST', 'Parc Activités, Saint-Priest',       'Menuiseries PVC / alu',        'fournisseur'),
+  ('33333333-3333-3333-3333-000000000006', 'HÄFELE',     'ZA Nord, Chassieu',                  'Quincaillerie',                'fournisseur'),
+  ('33333333-3333-3333-3333-000000000007', 'BLUM France','Rue de l''Industrie, Bron',          'Ferrures / charnières',        'fournisseur'),
+  ('33333333-3333-3333-3333-000000000008', 'SALICE',     'Allée des Artisans, Corbas',         'Charnières / coulisses',       'fournisseur'),
+  ('33333333-3333-3333-3333-000000000009', 'PANOFRANCE', 'Boulevard Yves Farge, Lyon',         'Panneaux / dérivés',           'fournisseur'),
+  ('33333333-3333-3333-3333-000000000010', 'EGGER',      'Distribution France',                'Panneaux mélaminés',           'fournisseur'),
+  -- Clients
+  ('33333333-3333-3333-3333-000000000011', 'Maison Lefebvre', '18 chemin des Vignes, 69170 Tarare',      null,         'client'),
+  ('33333333-3333-3333-3333-000000000012', 'TF Groupe',       '4 rue de l''Industrie, 69200 Vénissieux', null,         'client'),
+  ('33333333-3333-3333-3333-000000000013', 'DVN Agencement',  '25 av. du Commerce, 69003 Lyon',          null,         'client'),
+  -- Sous-traitants
+  ('33333333-3333-3333-3333-000000000014', 'A2 Metal',        'Les Jacquins, 42590 Neulise',             'Métallerie', 'sous_traitant'),
+  ('33333333-3333-3333-3333-000000000015', 'Laquage Pro',     'ZA des Sables, 69170 Tarare',             'Laquage',    'sous_traitant')
 on conflict (id) do nothing;
 
 -- Un contact par principal fournisseur
 insert into contacts (id, fournisseur_id, nom, role, tel, email) values
   ('33333333-0000-0000-0000-000000000001', '33333333-3333-3333-3333-000000000002', 'Sophie Lambert',  'Commercial',    '0478112233', 'commercial@dispano.fr'),
   ('33333333-0000-0000-0000-000000000002', '33333333-3333-3333-3333-000000000001', 'Karim Benali',    'Commercial',    '0472445566', 'contact@articop.fr'),
-  ('33333333-0000-0000-0000-000000000003', '33333333-3333-3333-3333-000000000003', 'Hélène Dubois',   'ADV',           '0388998877', 'adv@wurth.fr')
+  ('33333333-0000-0000-0000-000000000003', '33333333-3333-3333-3333-000000000003', 'Hélène Dubois',   'ADV',           '0388998877', 'adv@wurth.fr'),
+  ('33333333-0000-0000-0000-000000000011', '33333333-3333-3333-3333-000000000011', 'Julien Lefebvre', 'Client',        '0611002011', 'j.lefebvre@email.fr'),
+  ('33333333-0000-0000-0000-000000000012', '33333333-3333-3333-3333-000000000014', 'Pierre Favre',    'Dirigeant',     '0477654321', 'contact@a2metal.fr'),
+  ('33333333-0000-0000-0000-000000000013', '33333333-3333-3333-3333-000000000015', 'Sandra Meunier',  'Commande',      '0478223344', 'contact@laquagepro.fr')
 on conflict (id) do nothing;
 
 -- -----------------------------------------------------------------------------
