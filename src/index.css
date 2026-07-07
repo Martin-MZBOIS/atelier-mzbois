@@ -1326,6 +1326,10 @@ textarea.ni:focus {
   flex-wrap: wrap;
   margin-bottom: 14px;
 }
+.filter-count {
+  opacity: 0.7;
+  font-size: 10px;
+}
 
 .course-list {
   display: flex;

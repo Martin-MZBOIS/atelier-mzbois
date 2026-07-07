@@ -1,17 +1,38 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatDate } from '../lib/format'
+
+const DONE = ['termine', 'facture']
+
+// État d'un chantier dérivé de ses ouvrages.
+function chantierFlags(c) {
+  const statuts = (c.ouvrages ?? []).map((o) => o.statut)
+  const total = statuts.length
+  const isTermine = total > 0 && statuts.every((s) => DONE.includes(s))
+  const hasEnCours = statuts.some((s) => !DONE.includes(s))
+  const hasAFacturer = statuts.some((s) => s === 'termine')
+  return { total, isTermine, hasEnCours, hasAFacturer }
+}
+
+const FILTERS = [
+  { id: 'tous', label: 'Tous', test: () => true },
+  { id: 'encours', label: 'En cours', test: (f) => !f.isTermine && f.hasEnCours },
+  { id: 'actifs', label: 'Actifs', test: (f) => !f.isTermine },
+  { id: 'afacturer', label: 'À facturer', test: (f) => !f.isTermine && f.hasAFacturer },
+  { id: 'termines', label: 'Terminés', test: (f) => f.isTermine },
+]
 
 export default function Chantiers() {
   const navigate = useNavigate()
   const [chantiers, setChantiers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState('tous')
 
   useEffect(() => {
     let active = true
-
     async function load() {
       setLoading(true)
       setError('')
@@ -20,10 +41,9 @@ export default function Chantiers() {
         .select(
           'id, num, client, nom, dep_approx, avec_pose, created_at, ' +
             'ca:utilisateurs!ca_id(prenom, nom), ' +
-            'ouvrages(count)'
+            'ouvrages(statut)'
         )
         .order('num', { ascending: true })
-
       if (!active) return
       if (dbError) {
         setError(dbError.message)
@@ -33,32 +53,75 @@ export default function Chantiers() {
       }
       setLoading(false)
     }
-
     load()
     return () => {
       active = false
     }
   }, [])
 
+  const counts = useMemo(() => {
+    const c = {}
+    for (const f of FILTERS) {
+      c[f.id] = chantiers.filter((ch) => f.test(chantierFlags(ch))).length
+    }
+    return c
+  }, [chantiers])
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    const activeFilter = FILTERS.find((f) => f.id === filter) ?? FILTERS[0]
+    return chantiers.filter((c) => {
+      if (!activeFilter.test(chantierFlags(c))) return false
+      if (!q) return true
+      return (
+        (c.num ?? '').toLowerCase().includes(q) ||
+        (c.client ?? '').toLowerCase().includes(q)
+      )
+    })
+  }, [chantiers, search, filter])
+
   return (
     <section className="page">
       <div className="page-head">
         <h2>Chantiers</h2>
         <span className="page-count">
-          {loading ? '' : `${chantiers.length} chantier(s)`}
+          {loading ? '' : `${filtered.length} / ${chantiers.length}`}
         </span>
       </div>
+
+      {!loading && !error && (
+        <>
+          <input
+            className="plan-search"
+            style={{ width: 260 }}
+            placeholder="🔍 Rechercher (n° ou client)…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="course-filters">
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                className="btn bg bsm"
+                style={
+                  filter === f.id
+                    ? { background: 'var(--acier)', color: '#fff', borderColor: 'var(--acier)' }
+                    : undefined
+                }
+                onClick={() => setFilter(f.id)}
+              >
+                {f.label} <span className="filter-count">{counts[f.id] ?? 0}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       {loading && <p className="muted">Chargement…</p>}
 
       {error && (
         <div className="alert">
           <strong>Erreur de chargement :</strong> {error}
-          <div className="alert-sub">
-            Vérifie que <code>schema.sql</code> et <code>seed.sql</code> ont été
-            exécutés dans Supabase et que les clés dans <code>.env.local</code>{' '}
-            sont correctes.
-          </div>
         </div>
       )}
 
@@ -81,9 +144,9 @@ export default function Chantiers() {
               </tr>
             </thead>
             <tbody>
-              {chantiers.map((c) => {
+              {filtered.map((c) => {
                 const ca = c.ca
-                const nbOuvrages = c.ouvrages?.[0]?.count ?? 0
+                const nbOuvrages = (c.ouvrages ?? []).length
                 return (
                   <tr
                     key={c.id}
@@ -96,11 +159,7 @@ export default function Chantiers() {
                     <td>{ca ? `${ca.prenom} ${ca.nom}` : '—'}</td>
                     <td>{formatDate(c.dep_approx)}</td>
                     <td>
-                      <span
-                        className={
-                          'bdg ' + (c.avec_pose ? 'bdg--yes' : 'bdg--no')
-                        }
-                      >
+                      <span className={'bdg ' + (c.avec_pose ? 'bdg--yes' : 'bdg--no')}>
                         {c.avec_pose ? 'Avec pose' : 'Sans pose'}
                       </span>
                     </td>
@@ -108,6 +167,13 @@ export default function Chantiers() {
                   </tr>
                 )
               })}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="empty">
+                    Aucun chantier pour ce filtre.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
