@@ -1,7 +1,16 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
-export const useStore = create((set) => ({
-  user: null,
-  setUser: (user) => set({ user }),
-  clearUser: () => set({ user: null }),
-}))
+// Store d'authentification (mode démo).
+// L'utilisateur courant est persisté en localStorage pour survivre au refresh.
+export const useAuthStore = create(
+  persist(
+    (set) => ({
+      user: null,
+      isAuthenticated: false,
+      login: (user) => set({ user, isAuthenticated: true }),
+      logout: () => set({ user: null, isAuthenticated: false }),
+    }),
+    { name: 'mzbois-auth' }
+  )
+)
