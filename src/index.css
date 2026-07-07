@@ -435,6 +435,16 @@ body {
 .row-link {
   cursor: pointer;
 }
+.row-stock {
+  background: var(--brun2);
+}
+.row-stock:hover {
+  background: var(--brun3) !important;
+}
+.row-stock .mono {
+  font-weight: 700;
+  color: var(--brun);
+}
 
 /* Filtres rapides (Achats global) */
 .qf-row {

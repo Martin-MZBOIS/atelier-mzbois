@@ -70,14 +70,17 @@ export default function Chantiers() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     const activeFilter = FILTERS.find((f) => f.id === filter) ?? FILTERS[0]
-    return chantiers.filter((c) => {
-      if (!activeFilter.test(chantierFlags(c))) return false
-      if (!q) return true
-      return (
-        (c.num ?? '').toLowerCase().includes(q) ||
-        (c.client ?? '').toLowerCase().includes(q)
-      )
-    })
+    return chantiers
+      .filter((c) => {
+        if (!activeFilter.test(chantierFlags(c))) return false
+        if (!q) return true
+        return (
+          (c.num ?? '').toLowerCase().includes(q) ||
+          (c.client ?? '').toLowerCase().includes(q)
+        )
+      })
+      // Épingle le chantier STOCK en tête de liste.
+      .sort((a, b) => (a.num === 'STOCK' ? -1 : b.num === 'STOCK' ? 1 : 0))
   }, [chantiers, search, filter])
 
   return (
@@ -147,13 +150,14 @@ export default function Chantiers() {
               {filtered.map((c) => {
                 const ca = c.ca
                 const nbOuvrages = (c.ouvrages ?? []).length
+                const isStock = c.num === 'STOCK'
                 return (
                   <tr
                     key={c.id}
-                    className="row-link"
+                    className={'row-link' + (isStock ? ' row-stock' : '')}
                     onClick={() => navigate(`/chantiers/${c.id}/ouvrages`)}
                   >
-                    <td className="mono">{c.num ?? '—'}</td>
+                    <td className="mono">{isStock ? '📦 STOCK' : c.num ?? '—'}</td>
                     <td className="strong">{c.nom}</td>
                     <td>{c.client ?? '—'}</td>
                     <td>{ca ? `${ca.prenom} ${ca.nom}` : '—'}</td>
