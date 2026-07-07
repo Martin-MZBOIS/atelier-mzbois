@@ -1613,6 +1613,9 @@ textarea.ni:focus {
 .task-body {
   flex: 1;
 }
+.task-body--click {
+  cursor: pointer;
+}
 .task-text {
   font-size: 13px;
 }

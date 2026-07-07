@@ -10,6 +10,7 @@ import {
   resolve,
 } from '../lib/statuts'
 import TaskModal from './TaskModal'
+import TaskEditModal from './TaskEditModal'
 
 const CHANTIER_COLORS = [
   '#FEE2E2', '#DBEAFE', '#D1FAE5', '#EDE9FE', '#FEF3C7', '#FCE7F3', '#E0F2FE',
@@ -84,12 +85,13 @@ export default function Dashboard() {
   const [filShowAll, setFilShowAll] = useState(false)
   const [ovFilt, setOvFilt] = useState('tous')
   const [showTaskModal, setShowTaskModal] = useState(false)
+  const [editingTask, setEditingTask] = useState(null)
 
   async function loadAll() {
     const [ouv, ach, tach, fil, fb, plan, emp, ch] = await Promise.all([
       supabase.from('ouvrages').select('id, nom, statut, dep, chantier:chantiers!chantier_id(id, num)'),
       supabase.from('achats').select('id, nom, st, chantier:chantiers!chantier_id(id, num)'),
-      supabase.from('taches').select('id, texte, done, created_at, source, chantier:chantiers!chantier_id(id, num), employe:employes!assigne_a(prenom)').order('created_at', { ascending: true }),
+      supabase.from('taches').select('id, texte, done, created_at, source, echeance, chantier:chantiers!chantier_id(id, num), employe:employes!assigne_a(id, prenom)').order('created_at', { ascending: true }),
       supabase.from('fil_messages').select('id, texte, date, chantier:chantiers!chantier_id(id, num), auteur:utilisateurs!auteur_id(prenom, nom)'),
       supabase.from('feedbacks').select('id, description, statut, date, chantier:chantiers!chantier_id(id, num)'),
       supabase.from('plan_affectations').select('sal_id, chantier_id, date_debut, date_fin, chantier:chantiers!chantier_id(num)'),
@@ -346,7 +348,10 @@ export default function Dashboard() {
                     checked={t.done}
                     onChange={() => toggleTask(t)}
                   />
-                  <div className="task-body">
+                  <div
+                    className="task-body task-body--click"
+                    onClick={() => setEditingTask(t)}
+                  >
                     <div className="task-text">{t.texte}</div>
                     <div className="task-meta">
                       {t.chantier && <span className="task-num mono">{t.chantier.num}</span>}
@@ -522,6 +527,18 @@ export default function Dashboard() {
           onClose={() => setShowTaskModal(false)}
           onSaved={async () => {
             setShowTaskModal(false)
+            await reload()
+          }}
+        />
+      )}
+      {editingTask && (
+        <TaskEditModal
+          task={editingTask}
+          chantiers={data?.chantiers ?? []}
+          employes={data?.employes ?? []}
+          onClose={() => setEditingTask(null)}
+          onSaved={async () => {
+            setEditingTask(null)
             await reload()
           }}
         />
