@@ -517,6 +517,26 @@ code {
   padding: 18px 22px;
   color: #fff;
   margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detail-edit {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  border-radius: 3px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.detail-edit:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .detail-client {
