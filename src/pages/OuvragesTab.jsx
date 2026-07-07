@@ -11,6 +11,7 @@ import {
 } from '../lib/statuts'
 import ModelsModal from './ModelsModal'
 import OuvrageApplyModal from './OuvrageApplyModal'
+import OuvrageEditModal from './OuvrageEditModal'
 import AchatModal from './AchatModal'
 
 const EMPTY_ADD = {
@@ -41,6 +42,7 @@ export default function OuvragesTab() {
   const [showModels, setShowModels] = useState(false)
   const [applyMode, setApplyMode] = useState(null) // 'depart' | 'pose' | null
   const [quickPurchase, setQuickPurchase] = useState(null) // { ouvrageId, typ }
+  const [editing, setEditing] = useState(null) // ouvrage en cours d'édition
 
   async function loadOuvrages() {
     const { data, error: dbError } = await supabase
@@ -304,6 +306,9 @@ export default function OuvragesTab() {
                   </option>
                 ))}
               </select>
+              <button className="btn bg bxs" onClick={() => setEditing(o)}>
+                ✏ Détail
+              </button>
             </div>
           </div>
         )
@@ -328,6 +333,17 @@ export default function OuvragesTab() {
           linkOuvrageId={quickPurchase.ouvrageId}
           onClose={() => setQuickPurchase(null)}
           onSaved={() => setQuickPurchase(null)}
+        />
+      )}
+      {editing && (
+        <OuvrageEditModal
+          ouvrage={editing}
+          employes={employes}
+          onClose={() => setEditing(null)}
+          onSaved={async () => {
+            setEditing(null)
+            await loadOuvrages()
+          }}
         />
       )}
     </div>

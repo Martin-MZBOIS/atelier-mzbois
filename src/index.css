@@ -2247,6 +2247,16 @@ textarea.ni:focus {
   padding: 4px 10px;
   font-size: 11px;
 }
+.btn.bxs {
+  padding: 3px 8px;
+  font-size: 10px;
+}
+
+.ov-edit-checks {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 10px;
+}
 .btn:disabled {
   opacity: 0.55;
   cursor: default;
