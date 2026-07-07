@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(\"---\")",
+      "PowerShell($paths = @\\(\"$env:ProgramFiles\\\\nodejs\\\\node.exe\",\"${env:ProgramFiles\\(x86\\)}\\\\nodejs\\\\node.exe\",\"$env:APPDATA\\\\npm\\\\node.exe\",\"$env:LOCALAPPDATA\\\\nodejs\\\\node.exe\",\"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\\\\node.exe\",\"$env:USERPROFILE\\\\scoop\\\\shims\\\\node.exe\",\"$env:ProgramData\\\\nvm\\\\node.exe\"\\); foreach\\($p in $paths\\){ if\\(Test-Path $p\\){ \"FOUND: $p\" } }; \"--- searching fnm/volta/nvm ---\"; Get-ChildItem \"$env:LOCALAPPDATA\\\\fnm_multishells\" -ErrorAction SilentlyContinue | Select-Object -First 3; Get-Command node,npm,npx,pnpm,yarn,volta,fnm,nvm -ErrorAction SilentlyContinue | Select-Object Name,Source)"
+    ]
+  }
+}
