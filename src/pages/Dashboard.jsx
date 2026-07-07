@@ -86,6 +86,7 @@ export default function Dashboard() {
   const [ovFilt, setOvFilt] = useState('tous')
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
+  const [taskView, setTaskView] = useState('pending') // 'pending' | 'done'
 
   async function loadAll() {
     const [ouv, ach, tach, fil, fb, plan, emp, ch] = await Promise.all([
@@ -181,6 +182,11 @@ export default function Dashboard() {
     () => (data?.taches ?? []).filter((t) => !t.done),
     [data]
   )
+  const doneTasks = useMemo(
+    () => (data?.taches ?? []).filter((t) => t.done),
+    [data]
+  )
+  const displayedTasks = taskView === 'done' ? doneTasks : pendingTasks
   const lateTasks = useMemo(
     () =>
       user?.role === 'dir'
@@ -331,18 +337,39 @@ export default function Dashboard() {
         <div className="card" ref={tasksRef}>
           <div className="card-head">
             <span className="card-title">Mes tâches</span>
-            <button className="btn bp bsm" onClick={() => setShowTaskModal(true)}>
-              + Tâche
-            </button>
+            <div className="card-actions">
+              <div className="view-toggle">
+                <button
+                  className={'vt' + (taskView === 'pending' ? ' vt--on' : '')}
+                  onClick={() => setTaskView('pending')}
+                >
+                  En attente ({pendingTasks.length})
+                </button>
+                <button
+                  className={'vt' + (taskView === 'done' ? ' vt--on' : '')}
+                  onClick={() => setTaskView('done')}
+                >
+                  Terminées ({doneTasks.length})
+                </button>
+              </div>
+              <button className="btn bp bsm" onClick={() => setShowTaskModal(true)}>
+                + Tâche
+              </button>
+            </div>
           </div>
-          {pendingTasks.length === 0 ? (
-            <div className="empty">✓ Aucune tâche en attente</div>
+          {displayedTasks.length === 0 ? (
+            <div className="empty">
+              {taskView === 'done' ? 'Aucune tâche terminée' : '✓ Aucune tâche en attente'}
+            </div>
           ) : (
-            pendingTasks.map((t) => {
+            displayedTasks.map((t) => {
               const age = taskAge(t)
               const d = daysSince(t.created_at)
               return (
-                <div key={t.id} className={'task-item task-item--' + age}>
+                <div
+                  key={t.id}
+                  className={'task-item task-item--' + (t.done ? 'done' : age)}
+                >
                   <input
                     type="checkbox"
                     checked={t.done}
@@ -352,12 +379,14 @@ export default function Dashboard() {
                     className="task-body task-body--click"
                     onClick={() => setEditingTask(t)}
                   >
-                    <div className="task-text">{t.texte}</div>
+                    <div className={'task-text' + (t.done ? ' task-text--done' : '')}>
+                      {t.texte}
+                    </div>
                     <div className="task-meta">
                       {t.chantier && <span className="task-num mono">{t.chantier.num}</span>}
                       {t.source === 'reunion' && <span className="task-tag">📋 Réunion</span>}
                       {t.employe && <span className="task-assignee">👤 {t.employe.prenom}</span>}
-                      {d > 0 && <span className={'task-age task-age--' + age}>{d}j</span>}
+                      {!t.done && d > 0 && <span className={'task-age task-age--' + age}>{d}j</span>}
                     </div>
                   </div>
                   <button className="task-del" onClick={() => deleteTask(t.id)}>✕</button>

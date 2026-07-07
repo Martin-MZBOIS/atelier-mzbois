@@ -1606,6 +1606,13 @@ textarea.ni:focus {
   background: var(--rd2);
   border-color: #fca5a5;
 }
+.task-item--done {
+  opacity: 0.7;
+}
+.task-text--done {
+  text-decoration: line-through;
+  color: var(--g2);
+}
 .task-item input[type='checkbox'] {
   margin-top: 2px;
   accent-color: var(--brun);
