@@ -152,4 +152,10 @@ insert into fil_messages (id, chantier_id, auteur_id, texte, ouvrage_tag, date) 
   ('bbbbbbbb-bbbb-bbbb-bbbb-000000000004', '44444444-4444-4444-4444-000000000003', '11111111-1111-1111-1111-000000000004', 'Meubles SDB livrés et posés, chantier clôturé.',              null,                 '2026-08-19 17:30:00+02')
 on conflict (id) do nothing;
 
+-- Réponses en fil (parent_id -> message racine)
+insert into fil_messages (id, chantier_id, auteur_id, texte, ouvrage_tag, parent_id, date) values
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000005', '44444444-4444-4444-4444-000000000001', '11111111-1111-1111-1111-000000000003', 'Bien reçu, je lance le débit dès demain matin.', null, 'bbbbbbbb-bbbb-bbbb-bbbb-000000000001', '2026-09-05 09:10:00+02'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000006', '44444444-4444-4444-4444-000000000002', '11111111-1111-1111-1111-000000000002', 'Je prépare les plans pour le RDV client.',      null, 'bbbbbbbb-bbbb-bbbb-bbbb-000000000003', '2026-09-03 11:30:00+02')
+on conflict (id) do nothing;
+
 commit;

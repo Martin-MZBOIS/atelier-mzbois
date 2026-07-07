@@ -280,9 +280,11 @@ create table if not exists fil_messages (
   auteur_id   uuid references utilisateurs (id) on delete set null,
   texte       text not null,
   ouvrage_tag text,
+  parent_id   uuid references fil_messages (id) on delete cascade,
   date        timestamptz not null default now()
 );
 comment on column fil_messages.ouvrage_tag is 'Étiquette d''ouvrage mentionné dans le message';
+comment on column fil_messages.parent_id is 'Message parent si réponse en fil (null = message racine)';
 
 -- =============================================================================
 -- 9. Réunions et actions
@@ -357,6 +359,7 @@ create index if not exists idx_taches_echeance on taches (echeance);
 -- fil_messages
 create index if not exists idx_fil_chantier on fil_messages (chantier_id);
 create index if not exists idx_fil_auteur   on fil_messages (auteur_id);
+create index if not exists idx_fil_parent   on fil_messages (parent_id);
 create index if not exists idx_fil_date     on fil_messages (date);
 
 -- reunions / actions

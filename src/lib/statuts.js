@@ -38,13 +38,31 @@ export const STATUT_ACHAT = {
 
 // --- typ_achat --------------------------------------------------------------
 export const TYP_ACHAT = {
-  panneau: { label: 'Panneau' },
-  strat: { label: 'Strat' },
-  chants: { label: 'Chants' },
-  quincaillerie: { label: 'Quincaillerie' },
-  sous_traitance: { label: 'Sous-traitance' },
-  divers: { label: 'Divers' },
+  panneau: { label: 'Panneau', cls: 'typ-pan' },
+  strat: { label: 'Strat', cls: 'typ-str' },
+  chants: { label: 'Chants', cls: 'typ-cha' },
+  quincaillerie: { label: 'Quincaillerie', cls: 'typ-qui' },
+  sous_traitance: { label: 'Sous-traitance', cls: 'typ-sst' },
+  divers: { label: 'Divers', cls: 'typ-div' },
 }
+export const TYP_ACHAT_ORDER = [
+  'panneau',
+  'strat',
+  'chants',
+  'quincaillerie',
+  'sous_traitance',
+  'divers',
+]
+
+export const STATUT_ACHAT_ORDER = [
+  'a_traiter',
+  'en_stock',
+  'a_commander',
+  'en_cours_livraison',
+  'recu',
+  'recu_partiellement',
+  'non_conforme',
+]
 
 // --- statut_course ----------------------------------------------------------
 export const STATUT_COURSE = {
