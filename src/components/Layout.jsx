@@ -11,6 +11,7 @@ const TABS = [
   { to: '/planning', label: 'Planning' },
   { to: '/bibliotheque', label: 'Bibliothèques' },
   { to: '/contacts', label: 'Contacts' },
+  { to: '/assistance', label: 'Assistance' },
 ]
 
 export default function Layout() {
