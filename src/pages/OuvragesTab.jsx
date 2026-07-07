@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { formatDate, formatEuro } from '../lib/format'
+import { formatDate } from '../lib/format'
 import {
   STATUT_OUVRAGE,
   STATUT_OUVRAGE_ORDER,
@@ -110,7 +110,7 @@ export default function OuvragesTab() {
       nom: addForm.nom.trim(),
       statut: 'a_faire_be',
       qty: num(addForm.qty) ?? 1,
-      devis: num(addForm.devis),
+      devis: addForm.devis.trim() || null,
       dep: addForm.dep || null,
       livraison: addForm.livraison || null,
       camion: addForm.camion.trim() || null,
@@ -199,8 +199,8 @@ export default function OuvragesTab() {
           </div>
           <div className="fg">
             <div className="fl">
-              <label>Devis (€ HT)</label>
-              <input type="number" value={addForm.devis} onChange={(e) => setAdd('devis', e.target.value)} placeholder="ex : 12000" />
+              <label>N° Devis</label>
+              <input value={addForm.devis} onChange={(e) => setAdd('devis', e.target.value)} placeholder="ex : DEV-001" />
             </div>
             <div className="fl">
               <label>Départ atelier</label>
@@ -237,7 +237,7 @@ export default function OuvragesTab() {
       {ouvrages.map((o) => {
         const st = resolve(STATUT_OUVRAGE, o.statut)
         const qty = Number(o.qty)
-        const devis = formatEuro(o.devis)
+        const devis = o.devis
         return (
           <div key={o.id} className="ov" style={{ borderLeftColor: st.color }}>
             <div className="ov-main">

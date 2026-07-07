@@ -160,7 +160,7 @@ create table if not exists ouvrages (
   pose       boolean not null default false,
   dp_pose    date,
   poseur_id  uuid references employes (id) on delete set null,
-  devis      numeric(12, 2),
+  devis      text, -- N° de devis (référence, ex : DEV-001)
   sit_pct    numeric(6, 2),
   fact_def   boolean not null default false
 );
@@ -170,7 +170,7 @@ comment on column ouvrages.camion is 'Camion / tournée de livraison';
 comment on column ouvrages.pose is 'Ouvrage à poser';
 comment on column ouvrages.dp_pose is 'Date prévue de pose';
 comment on column ouvrages.poseur_id is 'Employé chargé de la pose';
-comment on column ouvrages.devis is 'Montant du devis (€ HT)';
+comment on column ouvrages.devis is 'N° de devis (référence, ex : DEV-001)';
 comment on column ouvrages.sit_pct is 'Avancement de la situation (%)';
 comment on column ouvrages.fact_def is 'Facturé définitivement (oui/non)';
 
