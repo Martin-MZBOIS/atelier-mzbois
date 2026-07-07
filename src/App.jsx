@@ -10,6 +10,7 @@ import FilTab from './pages/FilTab'
 import ReunionTab from './pages/ReunionTab'
 import FeedbacksTab from './pages/FeedbacksTab'
 import AchatsGlobal from './pages/AchatsGlobal'
+import CoursesGlobal from './pages/CoursesGlobal'
 import Placeholder from './pages/Placeholder'
 
 function App() {
@@ -35,7 +36,7 @@ function App() {
         </Route>
         <Route path="/achats" element={<AchatsGlobal />} />
         <Route path="/planning" element={<Placeholder title="Planning" />} />
-        <Route path="/courses" element={<Placeholder title="Courses" />} />
+        <Route path="/courses" element={<CoursesGlobal />} />
       </Route>
 
       <Route path="/" element={<Navigate to="/chantiers" replace />} />

@@ -73,6 +73,14 @@ export const STATUT_COURSE = {
   annulee: { label: 'Annulée', color: '#6b5e58' },
 }
 
+export const STATUT_COURSE_ORDER = [
+  'programmee',
+  'urgente',
+  'en_cours',
+  'faite',
+  'annulee',
+]
+
 // --- statut_feedback --------------------------------------------------------
 export const STATUT_FEEDBACK = {
   remonte: { label: 'Remonté', color: '#8b3a3a', cls: 'fbo' },
