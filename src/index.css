@@ -1583,6 +1583,9 @@ textarea.ni:focus {
     grid-template-columns: 1fr;
   }
 }
+.dash-full {
+  grid-column: 1 / -1;
+}
 
 /* Tâches */
 .task-item {

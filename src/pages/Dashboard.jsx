@@ -406,7 +406,7 @@ export default function Dashboard() {
         </div>
 
         {/* Mini planning */}
-        <div className="card">
+        <div className="card dash-full">
           <div className="card-head">
             <span className="card-title">Planning cette semaine</span>
             <button className="btn bg bsm" onClick={() => navigate('/planning')}>
@@ -457,7 +457,7 @@ export default function Dashboard() {
         </div>
 
         {/* Ouvrages en cours */}
-        <div className="card">
+        <div className="card dash-full">
           <div className="card-head">
             <span className="card-title">
               Ouvrages en cours <span className="card-count">{filtOuvrages.length}</span>
