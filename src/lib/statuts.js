@@ -75,10 +75,11 @@ export const STATUT_COURSE = {
 
 // --- statut_feedback --------------------------------------------------------
 export const STATUT_FEEDBACK = {
-  remonte: { label: 'Remonté', color: '#8b3a3a' },
-  en_cours: { label: 'En cours', color: '#8a7040' },
-  resolu: { label: 'Résolu', color: '#5a7a5a' },
+  remonte: { label: 'Remonté', color: '#8b3a3a', cls: 'fbo' },
+  en_cours: { label: 'En cours', color: '#8a7040', cls: 'fbp' },
+  resolu: { label: 'Résolu', color: '#5a7a5a', cls: 'fbd' },
 }
+export const STATUT_FEEDBACK_ORDER = ['remonte', 'en_cours', 'resolu']
 
 // --- statut_reunion ---------------------------------------------------------
 export const STATUT_REUNION = {
@@ -86,6 +87,7 @@ export const STATUT_REUNION = {
   attention: { label: 'Attention', color: '#8a7040' },
   bloque: { label: 'Bloqué', color: '#8b3a3a' },
 }
+export const STATUT_REUNION_ORDER = ['on_track', 'attention', 'bloque']
 
 // --- phase_planning ---------------------------------------------------------
 export const PHASE_PLANNING = {

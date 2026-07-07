@@ -7,7 +7,8 @@ import ChantierDetail from './pages/ChantierDetail'
 import OuvragesTab from './pages/OuvragesTab'
 import AchatsTab from './pages/AchatsTab'
 import FilTab from './pages/FilTab'
-import ChantierTabPlaceholder from './pages/ChantierTabPlaceholder'
+import ReunionTab from './pages/ReunionTab'
+import FeedbacksTab from './pages/FeedbacksTab'
 import Placeholder from './pages/Placeholder'
 
 function App() {
@@ -28,14 +29,8 @@ function App() {
           <Route path="ouvrages" element={<OuvragesTab />} />
           <Route path="achats" element={<AchatsTab />} />
           <Route path="fil" element={<FilTab />} />
-          <Route
-            path="reunion"
-            element={<ChantierTabPlaceholder title="Réunion" />}
-          />
-          <Route
-            path="feedbacks"
-            element={<ChantierTabPlaceholder title="Feedbacks" />}
-          />
+          <Route path="reunion" element={<ReunionTab />} />
+          <Route path="feedbacks" element={<FeedbacksTab />} />
         </Route>
         <Route path="/achats" element={<Placeholder title="Achats" />} />
         <Route path="/planning" element={<Placeholder title="Planning" />} />

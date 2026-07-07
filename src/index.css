@@ -1017,6 +1017,161 @@ textarea.ni:focus {
   margin-left: auto;
 }
 
+/* ------------------------------------------------------------ Réunion */
+.reunion {
+  border: 1px solid var(--g4);
+  border-radius: 4px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.reunion-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.reunion-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.reunion-notes {
+  font-size: 13px;
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+}
+
+.sl {
+  font-size: 10px;
+  color: var(--g2);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 7px;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--g5);
+}
+.action-item input[type='checkbox'] {
+  accent-color: var(--brun);
+}
+.action-text {
+  flex: 1;
+  font-size: 13px;
+}
+.action-text.done {
+  text-decoration: line-through;
+  color: var(--g2);
+}
+.action-assignee {
+  font-size: 11px;
+  background: var(--g5);
+  padding: 1px 8px;
+  border-radius: 99px;
+}
+
+/* Ligne d'action dans le modal CR */
+.action-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.action-row input {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--g3);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.action-row select {
+  width: 150px;
+  padding: 7px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--g3);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.action-row input:focus,
+.action-row select:focus {
+  border-color: var(--brun);
+}
+
+/* ---------------------------------------------------------- Feedbacks */
+.fb {
+  padding: 12px 14px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+  border: 1px solid var(--g4);
+  background: var(--g6);
+  border-left: 3px solid var(--g3);
+}
+.fb.fbo {
+  border-left-color: var(--rd);
+}
+.fb.fbp {
+  border-left-color: #8a7040;
+}
+.fb.fbd {
+  border-left-color: var(--gn);
+  opacity: 0.75;
+}
+
+.fb-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.fb-desc {
+  font-weight: 600;
+  font-size: 13px;
+}
+.fb-ouvrage {
+  font-size: 11px;
+  color: var(--g2);
+  margin-top: 2px;
+}
+.fb-status {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.fb-meta {
+  font-size: 11px;
+  color: var(--g2);
+}
+.fb-solution {
+  font-size: 12px;
+  background: var(--gn2);
+  border-radius: 3px;
+  padding: 5px 8px;
+  margin-top: 6px;
+  color: var(--gn);
+}
+.fb-solve {
+  margin-top: 8px;
+}
+.fb-solve-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 5px;
+}
+.fb-resolve-btn {
+  margin-top: 8px;
+}
+
 /* -------------------------------------------------------------- Modal */
 .modal-overlay {
   position: fixed;
