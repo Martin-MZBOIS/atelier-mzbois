@@ -2041,6 +2041,13 @@ textarea.ni:focus {
   flex: 1;
 }
 
+.detail-contacts-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
 .contact-card {
   background: var(--g6);
   border: 1px solid var(--g4);

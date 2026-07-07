@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
 import { formatDate, formatEuro } from '../lib/format'
 import { TYPE_SOCIETE, resolve } from '../lib/statuts'
+import SocieteModal from './SocieteModal'
+import ContactPersonModal from './ContactPersonModal'
 
 // Sous-onglets : les 3 premiers filtrent `fournisseurs` par type ;
 // « Salariés » (employes) n'est visible que pour dir et prod.
@@ -23,25 +25,31 @@ export default function Contacts() {
   const [tab, setTab] = useState('fournisseur')
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState(null)
+  const [showSocieteModal, setShowSocieteModal] = useState(false)
+  const [addContactFor, setAddContactFor] = useState(null)
+
+  const loadSocietes = useCallback(async () => {
+    const { data, error: dbError } = await supabase
+      .from('fournisseurs')
+      .select(
+        'id, nom, adresse, famille, type, ' +
+          'contacts:contacts!fournisseur_id(id, nom, role, tel, email)'
+      )
+      .order('nom')
+    if (dbError) setError(dbError.message)
+    else setSocietes(data ?? [])
+  }, [])
 
   useEffect(() => {
     let active = true
     async function load() {
       setLoading(true)
       setError('')
-      const [soc, emp] = await Promise.all([
-        supabase
-          .from('fournisseurs')
-          .select(
-            'id, nom, adresse, famille, type, ' +
-              'contacts:contacts!fournisseur_id(id, nom, role, tel, email)'
-          )
-          .order('nom'),
+      const [, emp] = await Promise.all([
+        loadSocietes(),
         supabase.from('employes').select('*').order('nom'),
       ])
       if (!active) return
-      if (soc.error) setError(soc.error.message)
-      else setSocietes(soc.data ?? [])
       setEmployes(emp.data ?? [])
       setLoading(false)
     }
@@ -49,7 +57,7 @@ export default function Contacts() {
     return () => {
       active = false
     }
-  }, [])
+  }, [loadSocietes])
 
   const isSalaries = tab === 'salaries'
 
@@ -79,6 +87,15 @@ export default function Contacts() {
     <section className="page">
       <div className="page-head">
         <h2>Contacts</h2>
+        {!isSalaries && (
+          <button
+            className="btn bp bsm"
+            style={{ marginLeft: 'auto' }}
+            onClick={() => setShowSocieteModal(true)}
+          >
+            + Nouveau
+          </button>
+        )}
       </div>
 
       <nav className="subtabs">
@@ -146,16 +163,41 @@ export default function Contacts() {
             ) : isSalaries ? (
               <EmployeDetail e={selected.raw} />
             ) : (
-              <SocieteDetail s={selected.raw} />
+              <SocieteDetail
+                s={selected.raw}
+                onAddContact={() => setAddContactFor(selected.id)}
+              />
             )}
           </div>
         </div>
+      )}
+
+      {showSocieteModal && (
+        <SocieteModal
+          defaultType={tab}
+          onClose={() => setShowSocieteModal(false)}
+          onSaved={async (newId) => {
+            setShowSocieteModal(false)
+            await loadSocietes()
+            setSelectedId(newId)
+          }}
+        />
+      )}
+      {addContactFor && (
+        <ContactPersonModal
+          fournisseurId={addContactFor}
+          onClose={() => setAddContactFor(null)}
+          onSaved={async () => {
+            setAddContactFor(null)
+            await loadSocietes()
+          }}
+        />
       )}
     </section>
   )
 }
 
-function SocieteDetail({ s }) {
+function SocieteDetail({ s, onAddContact }) {
   const t = resolve(TYPE_SOCIETE, s.type)
   const contacts = s.contacts ?? []
   return (
@@ -184,7 +226,12 @@ function SocieteDetail({ s }) {
         )}
       </dl>
 
-      <div className="sl">Contacts</div>
+      <div className="detail-contacts-head">
+        <div className="sl">Contacts</div>
+        <button className="btn bg bxs" onClick={onAddContact}>
+          + Nouveau contact
+        </button>
+      </div>
       {contacts.length === 0 ? (
         <div className="empty">Aucun contact</div>
       ) : (
