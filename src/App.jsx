@@ -11,7 +11,7 @@ import ReunionTab from './pages/ReunionTab'
 import FeedbacksTab from './pages/FeedbacksTab'
 import AchatsGlobal from './pages/AchatsGlobal'
 import CoursesGlobal from './pages/CoursesGlobal'
-import Placeholder from './pages/Placeholder'
+import PlanningGlobal from './pages/PlanningGlobal'
 
 function App() {
   return (
@@ -35,7 +35,7 @@ function App() {
           <Route path="feedbacks" element={<FeedbacksTab />} />
         </Route>
         <Route path="/achats" element={<AchatsGlobal />} />
-        <Route path="/planning" element={<Placeholder title="Planning" />} />
+        <Route path="/planning" element={<PlanningGlobal />} />
         <Route path="/courses" element={<CoursesGlobal />} />
       </Route>
 

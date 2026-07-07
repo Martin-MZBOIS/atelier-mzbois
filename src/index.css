@@ -1386,6 +1386,170 @@ textarea.ni:focus {
   color: var(--noir);
 }
 
+/* ------------------------------------------------------------- Planning */
+.chip-view {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--g1);
+  background: var(--g5);
+  padding: 4px 10px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.plan-search {
+  padding: 7px 12px;
+  border-radius: 3px;
+  border: 1px solid var(--g3);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  width: 240px;
+  margin-bottom: 12px;
+}
+.plan-search:focus {
+  border-color: var(--brun);
+}
+
+.plan-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.plan-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.plan-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.plan-scroll {
+  overflow-x: auto;
+}
+.plan-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 700px;
+}
+.plan-th-name {
+  width: 140px;
+  background: var(--acier);
+  color: #fff;
+  padding: 7px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: left;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.plan-th-day {
+  background: var(--acier);
+  color: #fff;
+  padding: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  min-width: 44px;
+}
+.plan-th-day--we {
+  background: #3a3330;
+  color: var(--g2);
+}
+.plan-th-day--today {
+  background: var(--brun2);
+  color: var(--brun);
+}
+.plan-daynum {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.plan-emp {
+  background: var(--w);
+  border: 1px solid var(--g4);
+  padding: 8px 12px;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 140px;
+}
+.plan-emp-inner {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.plan-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 99px;
+  background: var(--brun);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.plan-emp-name {
+  font-weight: 600;
+  font-size: 12px;
+}
+.plan-emp-role {
+  font-size: 10px;
+  color: var(--g2);
+}
+
+.plan-cell {
+  padding: 3px;
+  background: var(--w);
+  border: 1px solid var(--g4);
+  vertical-align: top;
+  height: 46px;
+}
+.plan-cell--we {
+  background: var(--g5);
+}
+.plan-cell--today {
+  background: #fff7ed;
+}
+
+.plan-block {
+  color: #333;
+  border-radius: 3px;
+  padding: 4px 6px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.plan-block-num {
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.plan-block-sub {
+  font-size: 9px;
+  opacity: 0.65;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.plan-block-phase {
+  font-size: 9px;
+  font-style: italic;
+  opacity: 0.5;
+}
+
 /* -------------------------------------------------------------- Modal */
 .modal-overlay {
   position: fixed;
