@@ -29,13 +29,18 @@ export default function Contacts() {
   const [addContactFor, setAddContactFor] = useState(null)
 
   const loadSocietes = useCallback(async () => {
-    const { data, error: dbError } = await supabase
+    const contactsSel = 'contacts:contacts!fournisseur_id(id, nom, role, tel, email)'
+    // Tente avec site_web ; repli sans si la colonne n'existe pas encore.
+    let { data, error: dbError } = await supabase
       .from('fournisseurs')
-      .select(
-        'id, nom, adresse, famille, type, ' +
-          'contacts:contacts!fournisseur_id(id, nom, role, tel, email)'
-      )
+      .select(`id, nom, adresse, famille, type, site_web, ${contactsSel}`)
       .order('nom')
+    if (dbError && /site_web/.test(dbError.message)) {
+      ;({ data, error: dbError } = await supabase
+        .from('fournisseurs')
+        .select(`id, nom, adresse, famille, type, ${contactsSel}`)
+        .order('nom'))
+    }
     if (dbError) setError(dbError.message)
     else setSocietes(data ?? [])
   }, [])
@@ -223,6 +228,21 @@ function SocieteDetail({ s, onAddContact }) {
           <div>
             <dt>Famille</dt>
             <dd>{s.famille}</dd>
+          </div>
+        )}
+        {s.site_web && (
+          <div>
+            <dt>Site web</dt>
+            <dd>
+              <a
+                className="site-link"
+                href={/^https?:\/\//.test(s.site_web) ? s.site_web : 'https://' + s.site_web}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                🔗 {s.site_web.replace(/^https?:\/\//, '')}
+              </a>
+            </dd>
           </div>
         )}
       </dl>

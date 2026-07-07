@@ -2234,6 +2234,15 @@ textarea.ni:focus {
   color: var(--g1);
 }
 
+.site-link {
+  color: var(--brun);
+  text-decoration: none;
+  font-weight: 600;
+}
+.site-link:hover {
+  text-decoration: underline;
+}
+
 /* --------------------------------------------------------- Bibliothèque */
 .modele-nom {
   font-weight: 700;

@@ -90,11 +90,12 @@ create table if not exists utilisateurs (
 
 -- Sociétés (fournisseurs, clients, sous-traitants, transporteurs)
 create table if not exists fournisseurs (
-  id      uuid primary key default gen_random_uuid(),
-  nom     text not null,
-  adresse text,
-  famille text, -- famille produit (panneaux, quincaillerie…)
-  type    type_societe not null default 'fournisseur'
+  id       uuid primary key default gen_random_uuid(),
+  nom      text not null,
+  adresse  text,
+  famille  text, -- famille produit (panneaux, quincaillerie…)
+  type     type_societe not null default 'fournisseur',
+  site_web text
 );
 
 -- Employés (main-d'œuvre atelier / pose — distincts des utilisateurs de l'app)

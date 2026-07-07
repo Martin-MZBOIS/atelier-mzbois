@@ -10,6 +10,7 @@ export default function SocieteModal({ defaultType, onClose, onSaved }) {
     nom: '',
     adresse: '',
     famille: '',
+    site_web: '',
     type: defaultType ?? 'fournisseur',
   })
   const [saving, setSaving] = useState(false)
@@ -26,16 +27,25 @@ export default function SocieteModal({ defaultType, onClose, onSaved }) {
     }
     setSaving(true)
     setError('')
-    const { data, error: dbError } = await supabase
+    const base = {
+      nom: form.nom.trim(),
+      adresse: form.adresse.trim() || null,
+      famille: form.famille.trim() || null,
+      type: form.type,
+    }
+    // Tente avec site_web ; repli sans si la colonne n'existe pas (migration 0010).
+    let { data, error: dbError } = await supabase
       .from('fournisseurs')
-      .insert({
-        nom: form.nom.trim(),
-        adresse: form.adresse.trim() || null,
-        famille: form.famille.trim() || null,
-        type: form.type,
-      })
+      .insert({ ...base, site_web: form.site_web.trim() || null })
       .select('id')
       .single()
+    if (dbError && /site_web/.test(dbError.message)) {
+      ;({ data, error: dbError } = await supabase
+        .from('fournisseurs')
+        .insert(base)
+        .select('id')
+        .single())
+    }
     setSaving(false)
     if (dbError) {
       setError(dbError.message)
@@ -77,6 +87,11 @@ export default function SocieteModal({ defaultType, onClose, onSaved }) {
         <div className="fl">
           <label>Famille (produit)</label>
           <input value={form.famille} onChange={(e) => set('famille', e.target.value)} placeholder="ex : Panneaux" />
+        </div>
+
+        <div className="fl">
+          <label>Site web</label>
+          <input value={form.site_web} onChange={(e) => set('site_web', e.target.value)} placeholder="https://…" />
         </div>
 
         {error && <div className="alert">{error}</div>}
