@@ -1,31 +1,62 @@
+/* =============================================================================
+   MZ Bois & Compagnie — charte reprise de la maquette (chantiers.html)
+   ========================================================================== */
 :root {
-  --bg: #f4f1ec;
-  --surface: #ffffff;
-  --border: #e2ddd3;
-  --text: #2b2620;
-  --muted: #8a8378;
-  --accent: #a4682f; /* bois / noyer */
-  --accent-dark: #7c4e21;
-  --danger: #c0392b;
-  --radius: 10px;
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Palette de marque « Ermine » */
+  --brun: #846a57; /* couleur principale */
+  --brun2: #f5f0eb; /* brun très clair — fonds */
+  --brun3: #e8dfd6; /* brun clair — hover */
+  --brun4: #6b5444; /* brun foncé — hover bouton */
+  --beige: #dfd7cf; /* fond cartes */
+  --beige2: #f7f4f1; /* fond page */
+  --noir: #1a1412; /* quasi-noir chaud */
+  --acier: #2c2420; /* fond topbar */
+  --acier2: #3d302a; /* topbar secondaire */
+  --g1: #6b5e58; /* textes secondaires */
+  --g2: #a59a94; /* textes tertiaires */
+  --g3: #cec6be; /* bordures */
+  --g4: #e0d8d0; /* bordures légères */
+  --g5: #f0ebe6; /* fonds légers */
+  --g6: #f7f4f1; /* fond page */
+  --w: #ffffff;
+  /* Fonctionnelles (statuts) */
+  --gn: #5a7a5a;
+  --gn2: #eef4ee;
+  --rd: #8b3a3a;
+  --rd2: #f9eeee;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+@font-face {
+  font-family: 'Avenir Next';
+  src: local('Avenir Next'), local('AvenirNext-Regular');
 }
 
 html,
 body,
 #root {
   height: 100%;
-  margin: 0;
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
+  font-family: 'Avenir Next', 'Nunito Sans', 'Gill Sans', 'Trebuchet MS',
+    sans-serif;
+  background: var(--beige2);
+  color: var(--noir);
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+
+.mono {
+  font-family: 'DM Mono', ui-monospace, monospace;
 }
 
 /* ------------------------------------------------------------------ Login */
@@ -34,124 +65,130 @@ body {
   display: grid;
   place-items: center;
   padding: 1.5rem;
+  background: var(--beige2);
 }
 
 .login-card {
   width: 100%;
-  max-width: 440px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  padding: 2rem;
+  max-width: 430px;
+  background: var(--w);
+  border: 1px solid var(--g4);
+  border-radius: 4px;
+  border-top: 3px solid var(--brun);
+  box-shadow: 0 8px 30px rgba(132, 106, 87, 0.12);
+  padding: 30px;
 }
 
 .login-brand {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
-  margin-bottom: 1.75rem;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
-.login-logo,
-.app-logo {
+.login-logo {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: var(--accent);
+  width: 44px;
+  height: 44px;
+  background: var(--brun);
   color: #fff;
-  font-weight: 800;
+  font-weight: 700;
+  font-size: 15px;
   letter-spacing: 0.5px;
 }
 
 .login-brand h1 {
-  margin: 0;
-  font-size: 1.25rem;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--noir);
 }
 
 .login-brand p {
-  margin: 0.15rem 0 0;
-  color: var(--muted);
-  font-size: 0.85rem;
+  margin-top: 3px;
+  color: var(--g2);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .login-hint {
-  color: var(--muted);
-  font-size: 0.9rem;
-  margin: 0 0 1rem;
+  color: var(--g1);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
 }
 
 .role-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 8px;
 }
 
 .role-btn {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.6rem;
-  padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--g3);
+  border-radius: 3px;
+  background: var(--w);
   cursor: pointer;
-  transition: border-color 0.15s, transform 0.05s, box-shadow 0.15s;
+  transition: all 0.15s;
+  text-align: left;
+  font-family: inherit;
 }
 
 .role-btn:hover:not(:disabled) {
-  border-color: var(--role-color);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--role-color) 15%, transparent);
-}
-
-.role-btn:active:not(:disabled) {
-  transform: translateY(1px);
+  border-color: var(--brun);
+  background: var(--brun2);
+  border-left: 3px solid var(--brun);
 }
 
 .role-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: default;
 }
 
-.role-badge {
-  display: inline-grid;
-  place-items: center;
-  min-width: 44px;
-  height: 26px;
-  padding: 0 0.5rem;
-  border-radius: 6px;
-  background: var(--role-color);
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 700;
+.role-icon {
+  font-size: 18px;
+  color: var(--brun);
+  line-height: 1;
 }
 
 .role-label {
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--noir);
 }
 
-.role-spinner {
-  color: var(--muted);
+.role-short {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--g2);
+  letter-spacing: 0.06em;
 }
 
 .login-error,
 .alert {
-  margin-top: 1rem;
-  padding: 0.75rem 0.9rem;
-  border-radius: var(--radius);
-  background: #fdecea;
-  color: var(--danger);
-  font-size: 0.85rem;
-  border: 1px solid #f5c6c0;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 3px;
+  background: var(--rd2);
+  color: var(--rd);
+  font-size: 12px;
+  border: 1px solid #e8c0c0;
+  border-left: 3px solid var(--rd);
 }
 
 .alert-sub {
-  margin-top: 0.4rem;
-  color: #9a4038;
+  margin-top: 5px;
+  color: var(--g1);
 }
 
 /* -------------------------------------------------------------------- App */
@@ -161,158 +198,195 @@ body {
   flex-direction: column;
 }
 
+/* Topbar sombre */
 .app-header {
+  background: var(--acier);
+  height: 54px;
+  padding: 0 22px;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 0.65rem 1.5rem;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  justify-content: space-between;
+  flex-shrink: 0;
+  border-bottom: 2px solid var(--brun);
 }
 
 .app-brand {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 10px;
 }
 
 .app-logo {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-}
-
-.app-title {
-  font-weight: 700;
-}
-
-.app-nav {
-  display: flex;
-  gap: 0.25rem;
-  flex: 1;
-}
-
-.app-tab {
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
-  text-decoration: none;
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.app-tab:hover {
-  background: var(--bg);
-  color: var(--text);
-}
-
-.app-tab--active {
-  background: var(--accent);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  background: var(--brun);
   color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.app-brand-text .app-title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.app-brand-text .app-subtitle {
+  color: var(--g2);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .app-user {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 10px;
 }
 
 .app-role {
   display: inline-grid;
   place-items: center;
-  min-width: 40px;
-  height: 22px;
-  padding: 0 0.45rem;
-  border-radius: 6px;
-  background: var(--role-color, var(--accent));
+  padding: 5px 12px;
+  background: var(--brun);
   color: #fff;
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 3px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .app-username {
-  font-size: 0.88rem;
+  color: #fff;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .btn-ghost {
-  border: 1px solid var(--border);
   background: transparent;
-  color: var(--muted);
-  padding: 0.35rem 0.7rem;
-  border-radius: 8px;
+  color: var(--g2);
+  border: 1px solid var(--acier2);
+  padding: 5px 12px;
+  border-radius: 3px;
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
 }
 
 .btn-ghost:hover {
-  color: var(--danger);
-  border-color: var(--danger);
+  color: #fff;
+  border-color: var(--brun);
+}
+
+/* Barre d'onglets */
+.app-nav {
+  background: var(--w);
+  border-bottom: 1px solid var(--g4);
+  padding: 0 22px;
+  display: flex;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.app-tab {
+  padding: 12px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--g1);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.app-tab:hover {
+  color: var(--noir);
+}
+
+.app-tab--active {
+  color: var(--brun);
+  border-bottom-color: var(--brun);
 }
 
 .app-main {
   flex: 1;
-  padding: 1.5rem;
+  overflow-y: auto;
+  padding: 22px;
 }
 
 /* ------------------------------------------------------------------ Pages */
 .page {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
 }
 
 .page-head {
   display: flex;
   align-items: baseline;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .page-head h2 {
-  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .page-count {
-  color: var(--muted);
-  font-size: 0.85rem;
+  color: var(--g2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .muted {
-  color: var(--muted);
+  color: var(--g2);
+  font-size: 13px;
 }
 
+/* Cartes / tableaux */
 .table-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--w);
+  border: 1px solid var(--g4);
+  border-radius: 4px;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: 0 1px 4px rgba(132, 106, 87, 0.06);
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 13px;
 }
 
 .data-table thead th {
   text-align: left;
-  padding: 0.7rem 0.9rem;
-  background: #faf8f4;
-  border-bottom: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 0.78rem;
+  padding: 10px 14px;
+  background: var(--g6);
+  border-bottom: 1px solid var(--g4);
+  color: var(--g2);
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
 
 .data-table tbody td {
-  padding: 0.7rem 0.9rem;
-  border-bottom: 1px solid var(--border);
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--g4);
 }
 
 .data-table tbody tr:last-child td {
@@ -320,43 +394,57 @@ body {
 }
 
 .data-table tbody tr:hover {
-  background: #faf8f4;
+  background: var(--g6);
 }
 
 .data-table .num {
   text-align: right;
 }
 
-.mono {
-  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  font-size: 0.85rem;
+.data-table td.mono {
+  font-size: 11px;
+  color: var(--g1);
 }
 
 .strong {
+  font-weight: 700;
+}
+
+/* Badges de statut (repris des classes .bdg de la maquette) */
+.bdg {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
-.chip {
-  display: inline-block;
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
+.bdg--yes {
+  color: var(--gn);
+  background: var(--gn2);
 }
 
-.chip--yes {
-  background: #e6f5ec;
-  color: #1c7a44;
-}
-
-.chip--no {
-  background: #f0ede8;
-  color: var(--muted);
+.bdg--no {
+  color: var(--g1);
+  background: var(--g5);
 }
 
 code {
-  background: #f0ede8;
+  font-family: 'DM Mono', ui-monospace, monospace;
+  background: var(--g5);
   padding: 0.1rem 0.35rem;
-  border-radius: 4px;
+  border-radius: 3px;
   font-size: 0.85em;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--g3);
+  border-radius: 99px;
 }

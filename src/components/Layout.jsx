@@ -27,27 +27,16 @@ export default function Layout() {
       <header className="app-header">
         <div className="app-brand">
           <span className="app-logo">MZ</span>
-          <span className="app-title">Atelier MZ Bois</span>
+          <div className="app-brand-text">
+            <div className="app-title">MZ Bois &amp; Compagnie</div>
+            <div className="app-subtitle">Atelier — Gestion chantiers</div>
+          </div>
         </div>
-
-        <nav className="app-nav">
-          {TABS.map((tab) => (
-            <NavLink
-              key={tab.to}
-              to={tab.to}
-              className={({ isActive }) =>
-                'app-tab' + (isActive ? ' app-tab--active' : '')
-              }
-            >
-              {tab.label}
-            </NavLink>
-          ))}
-        </nav>
 
         <div className="app-user">
           {role && (
-            <span className="app-role" style={{ '--role-color': role.color }}>
-              {role.short}
+            <span className="app-role">
+              {role.icon} {role.label}
             </span>
           )}
           <span className="app-username">
@@ -58,6 +47,20 @@ export default function Layout() {
           </button>
         </div>
       </header>
+
+      <nav className="app-nav">
+        {TABS.map((tab) => (
+          <NavLink
+            key={tab.to}
+            to={tab.to}
+            className={({ isActive }) =>
+              'app-tab' + (isActive ? ' app-tab--active' : '')
+            }
+          >
+            {tab.label}
+          </NavLink>
+        ))}
+      </nav>
 
       <main className="app-main">
         <Outlet />

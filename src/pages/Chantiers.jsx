@@ -99,7 +99,7 @@ export default function Chantiers() {
                     <td>
                       <span
                         className={
-                          'chip ' + (c.avec_pose ? 'chip--yes' : 'chip--no')
+                          'bdg ' + (c.avec_pose ? 'bdg--yes' : 'bdg--no')
                         }
                       >
                         {c.avec_pose ? 'Avec pose' : 'Sans pose'}

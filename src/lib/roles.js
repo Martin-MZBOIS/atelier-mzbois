@@ -1,9 +1,9 @@
-// Rôles applicatifs — libellés et métadonnées d'affichage
+// Rôles applicatifs — libellés et icônes repris de la maquette MZ Bois.
 export const ROLES = {
-  dir: { key: 'dir', label: 'Direction', short: 'DIR', color: '#8b5cf6' },
-  be: { key: 'be', label: "Bureau d'études", short: 'BE', color: '#0ea5e9' },
-  prog: { key: 'prog', label: 'Programmation', short: 'PROG', color: '#f59e0b' },
-  prod: { key: 'prod', label: 'Production', short: 'PROD', color: '#10b981' },
+  dir: { key: 'dir', label: 'Dirigeant', short: 'DIR', icon: '◈' },
+  be: { key: 'be', label: 'Resp. BE', short: 'BE', icon: '✏' },
+  prog: { key: 'prog', label: 'Programmeur', short: 'PROG', icon: '⌨' },
+  prod: { key: 'prod', label: 'Production', short: 'PROD', icon: '⚙' },
 }
 
 export const ROLE_ORDER = ['dir', 'be', 'prog', 'prod']

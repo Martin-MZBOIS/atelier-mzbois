@@ -55,12 +55,12 @@ export default function Login() {
         <div className="login-brand">
           <span className="login-logo">MZ</span>
           <div>
-            <h1>Atelier MZ Bois</h1>
-            <p>Gestion de chantiers de menuiserie</p>
+            <h1>MZ Bois &amp; Compagnie</h1>
+            <p>Atelier — Gestion chantiers</p>
           </div>
         </div>
 
-        <p className="login-hint">Connexion démo — choisis ton rôle&nbsp;:</p>
+        <p className="login-hint">Connexion démo — choisis ton rôle</p>
 
         <div className="role-grid">
           {ROLE_ORDER.map((key) => {
@@ -69,13 +69,14 @@ export default function Login() {
               <button
                 key={key}
                 className="role-btn"
-                style={{ '--role-color': role.color }}
                 disabled={loading !== null}
                 onClick={() => handleSelectRole(key)}
               >
-                <span className="role-badge">{role.short}</span>
+                <span className="role-icon">{role.icon}</span>
                 <span className="role-label">{role.label}</span>
-                {loading === key && <span className="role-spinner">…</span>}
+                <span className="role-short">
+                  {loading === key ? 'Connexion…' : role.short}
+                </span>
               </button>
             )
           })}
