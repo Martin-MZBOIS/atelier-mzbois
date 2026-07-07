@@ -1,15 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-
-// Format date FR court (jj/mm/aaaa) ; renvoie '—' si vide.
-function formatDate(value) {
-  if (!value) return '—'
-  const d = new Date(value)
-  if (Number.isNaN(d.getTime())) return '—'
-  return d.toLocaleDateString('fr-FR')
-}
+import { formatDate } from '../lib/format'
 
 export default function Chantiers() {
+  const navigate = useNavigate()
   const [chantiers, setChantiers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -90,7 +85,11 @@ export default function Chantiers() {
                 const ca = c.ca
                 const nbOuvrages = c.ouvrages?.[0]?.count ?? 0
                 return (
-                  <tr key={c.id}>
+                  <tr
+                    key={c.id}
+                    className="row-link"
+                    onClick={() => navigate(`/chantiers/${c.id}/ouvrages`)}
+                  >
                     <td className="mono">{c.num ?? '—'}</td>
                     <td className="strong">{c.nom}</td>
                     <td>{c.client ?? '—'}</td>

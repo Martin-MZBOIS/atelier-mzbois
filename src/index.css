@@ -432,12 +432,299 @@ body {
   background: var(--g5);
 }
 
+.row-link {
+  cursor: pointer;
+}
+
 code {
   font-family: 'DM Mono', ui-monospace, monospace;
   background: var(--g5);
   padding: 0.1rem 0.35rem;
   border-radius: 3px;
   font-size: 0.85em;
+}
+
+/* ------------------------------------------------------ Fiche chantier */
+.back-link {
+  background: none;
+  border: none;
+  color: var(--g1);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.back-link:hover {
+  color: var(--brun);
+}
+
+.detail-head {
+  background: var(--acier);
+  border-radius: 4px;
+  border-left: 4px solid var(--brun);
+  padding: 18px 22px;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.detail-client {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.detail-num {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--brun3);
+  margin-top: 3px;
+}
+
+.detail-pills {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.detail-pill {
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+/* Sous-onglets */
+.subtabs {
+  display: flex;
+  border-bottom: 2px solid var(--g4);
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+
+.subtab {
+  padding: 9px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  color: var(--g1);
+  text-decoration: none;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.subtab:hover {
+  color: var(--noir);
+}
+.subtab--active {
+  color: var(--brun);
+  border-bottom-color: var(--brun);
+}
+
+/* Carte générique */
+.card {
+  background: var(--w);
+  border: 1px solid var(--g4);
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(132, 106, 87, 0.06);
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.card-title {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+
+.card-count {
+  font-size: 12px;
+  color: var(--g2);
+  margin-left: 6px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--g2);
+  font-size: 13px;
+  padding: 16px;
+}
+
+/* Ligne ouvrage */
+.ov {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--g6);
+  border-radius: 3px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--g3);
+}
+
+.ov-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.ov-title-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.ov-title {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.ov-qty {
+  font-size: 11px;
+  background: var(--g5);
+  border-radius: 5px;
+  padding: 1px 6px;
+  color: var(--g1);
+}
+
+.ov-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  font-size: 11px;
+}
+.ov-dep {
+  color: var(--brun);
+  font-weight: 600;
+}
+.ov-liv,
+.ov-cam {
+  color: var(--g1);
+}
+.ov-pose {
+  color: #4a6b8a;
+}
+
+.ov-badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.ov-tag {
+  font-size: 11px;
+  background: var(--g5);
+  border-radius: 5px;
+  padding: 1px 6px;
+  color: var(--g1);
+}
+.ov-tag--pct {
+  background: #eef2f7;
+  color: #4a6b8a;
+}
+.ov-tag--fac {
+  background: var(--gn2);
+  color: var(--gn);
+}
+
+.ov-notes {
+  font-size: 11px;
+  color: var(--g1);
+  margin-top: 3px;
+  font-style: italic;
+}
+
+.ov-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+/* Badge de statut avec pastille */
+.stbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.stdot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.st-af {
+  color: #6b5e58;
+  background: #ede8e4;
+}
+.st-at {
+  color: #8a7040;
+  background: #f7f2e6;
+}
+.st-vc {
+  color: #4a6b8a;
+  background: #eef2f7;
+}
+.st-pr {
+  color: #3d7a7a;
+  background: #eef6f6;
+}
+.st-pf {
+  color: #6b5a8a;
+  background: #f2eef9;
+}
+.st-fa {
+  color: #7a5a30;
+  background: #f5eedf;
+}
+.st-te {
+  color: #5a7a5a;
+  background: #eef4ee;
+}
+.st-fc {
+  color: #8b3a3a;
+  background: #f9eeee;
+}
+.st-none {
+  color: var(--g1);
+  background: var(--g5);
+}
+
+/* Petit select (statut) */
+.ss {
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 3px;
+  border: 1px solid var(--g3);
+  background: var(--w);
+  font-family: inherit;
+  color: var(--acier2);
+  cursor: pointer;
+  outline: none;
+}
+.ss:focus {
+  border-color: var(--brun);
 }
 
 ::-webkit-scrollbar {

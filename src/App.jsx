@@ -3,6 +3,9 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Chantiers from './pages/Chantiers'
+import ChantierDetail from './pages/ChantierDetail'
+import OuvragesTab from './pages/OuvragesTab'
+import ChantierTabPlaceholder from './pages/ChantierTabPlaceholder'
 import Placeholder from './pages/Placeholder'
 
 function App() {
@@ -18,6 +21,26 @@ function App() {
         }
       >
         <Route path="/chantiers" element={<Chantiers />} />
+        <Route path="/chantiers/:id" element={<ChantierDetail />}>
+          <Route index element={<Navigate to="ouvrages" replace />} />
+          <Route path="ouvrages" element={<OuvragesTab />} />
+          <Route
+            path="achats"
+            element={<ChantierTabPlaceholder title="Achats" />}
+          />
+          <Route
+            path="fil"
+            element={<ChantierTabPlaceholder title="Fil d'actu" />}
+          />
+          <Route
+            path="reunion"
+            element={<ChantierTabPlaceholder title="Réunion" />}
+          />
+          <Route
+            path="feedbacks"
+            element={<ChantierTabPlaceholder title="Feedbacks" />}
+          />
+        </Route>
         <Route path="/achats" element={<Placeholder title="Achats" />} />
         <Route path="/planning" element={<Placeholder title="Planning" />} />
         <Route path="/courses" element={<Placeholder title="Courses" />} />
