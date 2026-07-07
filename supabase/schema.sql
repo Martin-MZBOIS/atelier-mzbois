@@ -136,6 +136,9 @@ create table if not exists chantiers (
   dep_approx date,
   ca_id      uuid references utilisateurs (id) on delete set null,
   avec_pose  boolean not null default false,
+  heures_vendues      numeric(12, 2) not null default 0,
+  heures_realisees    numeric(12, 2) not null default 0,
+  fournitures_vendues numeric(12, 2) not null default 0,
   created_at timestamptz not null default now()
 );
 comment on column chantiers.num is 'Numéro de chantier (identifiant métier)';

@@ -2057,6 +2057,95 @@ textarea.ni:focus {
   accent-color: var(--brun);
 }
 
+/* ------------------------------------------------------------ Analytique */
+.ana-costline {
+  font-size: 11px;
+  color: var(--g2);
+  margin-bottom: 14px;
+}
+.ana-import {
+  font-size: 12px;
+  background: var(--gn2);
+  color: var(--gn);
+  border-radius: 3px;
+  padding: 6px 10px;
+  margin-bottom: 12px;
+}
+.dg2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+@media (max-width: 640px) {
+  .dg2 {
+    grid-template-columns: 1fr;
+  }
+}
+.ana-box {
+  background: var(--g6);
+  border-radius: 4px;
+  padding: 14px;
+}
+.ana-box-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--g1);
+  margin-bottom: 8px;
+}
+.ana-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.ana-bar {
+  height: 8px;
+  border-radius: 2px;
+  background: var(--g4);
+  overflow: hidden;
+  margin-top: 6px;
+}
+.ana-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s;
+}
+.ana-sub {
+  font-size: 11px;
+  color: var(--g2);
+  margin-top: 4px;
+}
+.ana-result {
+  border-radius: 4px;
+  padding: 16px;
+  text-align: center;
+  margin-top: 8px;
+}
+.ana-result--pos {
+  background: var(--gn2);
+}
+.ana-result--neg {
+  background: var(--rd2);
+}
+.ana-result-lbl {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.ana-result--pos .ana-result-lbl,
+.ana-result--pos .ana-result-val {
+  color: var(--gn);
+}
+.ana-result--neg .ana-result-lbl,
+.ana-result--neg .ana-result-val {
+  color: var(--rd);
+}
+.ana-result-val {
+  font-size: 28px;
+  font-weight: 800;
+}
+
 /* -------------------------------------------------------------- Modal */
 .modal-overlay {
   position: fixed;

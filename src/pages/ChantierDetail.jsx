@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuthStore } from '../store'
 import { formatDate } from '../lib/format'
 
 const SUBTABS = [
@@ -14,6 +15,11 @@ const SUBTABS = [
 export default function ChantierDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const role = useAuthStore((s) => s.user?.role)
+  const subtabs =
+    role === 'dir'
+      ? [...SUBTABS, { to: 'analytique', label: '📊 Analytique' }]
+      : SUBTABS
   const [chantier, setChantier] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -85,7 +91,7 @@ export default function ChantierDetail() {
           </div>
 
           <nav className="subtabs">
-            {SUBTABS.map((tab) => (
+            {subtabs.map((tab) => (
               <NavLink
                 key={tab.to}
                 to={tab.to}
