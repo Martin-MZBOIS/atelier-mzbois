@@ -54,7 +54,10 @@ insert into fournisseurs (id, nom, adresse, famille, type) values
   ('33333333-3333-3333-3333-000000000013', 'DVN Agencement',  '25 av. du Commerce, 69003 Lyon',          null,         'client'),
   -- Sous-traitants
   ('33333333-3333-3333-3333-000000000014', 'A2 Metal',        'Les Jacquins, 42590 Neulise',             'Métallerie', 'sous_traitant'),
-  ('33333333-3333-3333-3333-000000000015', 'Laquage Pro',     'ZA des Sables, 69170 Tarare',             'Laquage',    'sous_traitant')
+  ('33333333-3333-3333-3333-000000000015', 'Laquage Pro',     'ZA des Sables, 69170 Tarare',             'Laquage',    'sous_traitant'),
+  -- Transporteurs (coursiers externes)
+  ('33333333-3333-3333-3333-000000000016', 'Transports Rapides 69', 'ZI Est, 69800 Saint-Priest',        null,         'transporteur'),
+  ('33333333-3333-3333-3333-000000000017', 'Chrono Menuiserie',     '12 rue du Fret, 69100 Villeurbanne', null,        'transporteur')
 on conflict (id) do nothing;
 
 -- Un contact par principal fournisseur
@@ -64,7 +67,9 @@ insert into contacts (id, fournisseur_id, nom, role, tel, email) values
   ('33333333-0000-0000-0000-000000000003', '33333333-3333-3333-3333-000000000003', 'Hélène Dubois',   'ADV',           '0388998877', 'adv@wurth.fr'),
   ('33333333-0000-0000-0000-000000000011', '33333333-3333-3333-3333-000000000011', 'Julien Lefebvre', 'Client',        '0611002011', 'j.lefebvre@email.fr'),
   ('33333333-0000-0000-0000-000000000012', '33333333-3333-3333-3333-000000000014', 'Pierre Favre',    'Dirigeant',     '0477654321', 'contact@a2metal.fr'),
-  ('33333333-0000-0000-0000-000000000013', '33333333-3333-3333-3333-000000000015', 'Sandra Meunier',  'Commande',      '0478223344', 'contact@laquagepro.fr')
+  ('33333333-0000-0000-0000-000000000013', '33333333-3333-3333-3333-000000000015', 'Sandra Meunier',  'Commande',      '0478223344', 'contact@laquagepro.fr'),
+  ('33333333-0000-0000-0000-000000000016', '33333333-3333-3333-3333-000000000016', 'Accueil Transports 69', 'Livraison','0478556677', 'contact@transports69.fr'),
+  ('33333333-0000-0000-0000-000000000017', '33333333-3333-3333-3333-000000000017', 'Chrono Menuiserie',     'Livraison','0478889900', 'commande@chrono-menuiserie.fr')
 on conflict (id) do nothing;
 
 -- -----------------------------------------------------------------------------

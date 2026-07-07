@@ -1354,6 +1354,25 @@ textarea.ni:focus {
   align-items: center;
   flex-wrap: wrap;
 }
+.course-top-right {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Toggle Qui (interne / externe) dans le modal course */
+.qui-toggle {
+  display: flex;
+  background: var(--g5);
+  border-radius: 3px;
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+.qui-toggle .vt {
+  flex: 1;
+}
 .course-date {
   font-size: 12px;
   color: var(--brun);

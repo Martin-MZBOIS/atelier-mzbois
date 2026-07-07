@@ -62,7 +62,10 @@ export default function CoursesGlobal() {
         loadCourses(),
         supabase.from('chantiers').select('id, num, nom').order('num'),
         supabase.from('employes').select('id, prenom, nom').order('nom'),
-        supabase.from('fournisseurs').select('id, nom').order('nom'),
+        supabase
+          .from('fournisseurs')
+          .select('id, nom, type, contacts:contacts!fournisseur_id(email)')
+          .order('nom'),
       ])
       if (!active) return
       setChantiers(ch.data ?? [])
@@ -87,6 +90,15 @@ export default function CoursesGlobal() {
     for (const f of fournisseurs) m[f.id] = f.nom
     return m
   }, [fournisseurs])
+  const transporteurs = useMemo(
+    () => fournisseurs.filter((f) => f.type === 'transporteur'),
+    [fournisseurs]
+  )
+  const transporteurEmail = useMemo(() => {
+    const m = {}
+    for (const f of transporteurs) m[f.id] = f.contacts?.[0]?.email ?? null
+    return m
+  }, [transporteurs])
   const chMap = useMemo(() => {
     const m = {}
     for (const c of chantiers) m[c.id] = c.num
@@ -95,7 +107,8 @@ export default function CoursesGlobal() {
 
   function quiName(c) {
     if (c.qui_type === 'employe') return empMap[c.qui_id] ?? '—'
-    if (c.qui_type === 'fournisseur') return fourMap[c.qui_id] ?? '—'
+    if (c.qui_type === 'transporteur' || c.qui_type === 'fournisseur')
+      return fourMap[c.qui_id] ?? '—'
     return empMap[c.qui_id] ?? fourMap[c.qui_id] ?? '—'
   }
   function lieuName(id) {
@@ -215,18 +228,35 @@ export default function CoursesGlobal() {
                         {st.label}
                       </span>
                     </div>
-                    <select
-                      className="ss"
-                      value={c.statut ?? ''}
-                      onChange={(e) => changeStatut(c.id, e.target.value)}
-                    >
-                      {c.statut == null && <option value="">—</option>}
-                      {STATUT_COURSE_ORDER.map((slug) => (
-                        <option key={slug} value={slug}>
-                          {STATUT_COURSE[slug].label}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="course-top-right">
+                      {c.qui_type === 'transporteur' && (
+                        <a
+                          className="btn bg bsm"
+                          href={
+                            'mailto:' +
+                            (transporteurEmail[c.qui_id] ?? '') +
+                            '?subject=' +
+                            encodeURIComponent(
+                              'Course ' + (c.chantier?.num ?? '') + ' — ' + (c.quoi ?? '')
+                            )
+                          }
+                        >
+                          📧 Mail
+                        </a>
+                      )}
+                      <select
+                        className="ss"
+                        value={c.statut ?? ''}
+                        onChange={(e) => changeStatut(c.id, e.target.value)}
+                      >
+                        {c.statut == null && <option value="">—</option>}
+                        {STATUT_COURSE_ORDER.map((slug) => (
+                          <option key={slug} value={slug}>
+                            {STATUT_COURSE[slug].label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   <div className="course-grid">
@@ -352,6 +382,7 @@ export default function CoursesGlobal() {
         <CourseModal
           chantiers={chantiers}
           employes={employes}
+          transporteurs={transporteurs}
           onClose={() => setShowModal(false)}
           onSaved={async () => {
             setShowModal(false)

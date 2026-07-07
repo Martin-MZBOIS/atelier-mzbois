@@ -8,7 +8,14 @@ function today() {
 
 // Création d'une course. Champs cœur ; les lieux DE/VERS (polymorphes) sont
 // différés pour l'instant.
-export default function CourseModal({ chantiers, employes, onClose, onSaved }) {
+export default function CourseModal({
+  chantiers,
+  employes,
+  transporteurs = [],
+  onClose,
+  onSaved,
+}) {
+  const [quiKind, setQuiKind] = useState('interne') // 'interne' | 'externe'
   const [form, setForm] = useState({
     date: today(),
     statut: 'programmee',
@@ -23,6 +30,10 @@ export default function CourseModal({ chantiers, employes, onClose, onSaved }) {
   function set(key, value) {
     setForm((f) => ({ ...f, [key]: value }))
   }
+  function switchKind(kind) {
+    setQuiKind(kind)
+    set('qui_id', '') // reset la sélection en changeant de type
+  }
 
   async function handleSave() {
     if (!form.quoi.trim()) {
@@ -36,7 +47,11 @@ export default function CourseModal({ chantiers, employes, onClose, onSaved }) {
       statut: form.statut || null,
       chantier_id: form.chantier_id || null,
       qui_id: form.qui_id || null,
-      qui_type: form.qui_id ? 'employe' : null,
+      qui_type: form.qui_id
+        ? quiKind === 'externe'
+          ? 'transporteur'
+          : 'employe'
+        : null,
       quoi: form.quoi.trim(),
       commentaire: form.commentaire.trim() || null,
     })
@@ -96,18 +111,42 @@ export default function CourseModal({ chantiers, employes, onClose, onSaved }) {
             </select>
           </div>
           <div className="fl">
-            <label>Qui (employé)</label>
-            <select
-              value={form.qui_id}
-              onChange={(e) => set('qui_id', e.target.value)}
-            >
-              <option value="">—</option>
-              {employes.map((em) => (
-                <option key={em.id} value={em.id}>
-                  {em.prenom} {em.nom}
-                </option>
-              ))}
-            </select>
+            <label>Qui</label>
+            <div className="qui-toggle">
+              <button
+                type="button"
+                className={'vt' + (quiKind === 'interne' ? ' vt--on' : '')}
+                onClick={() => switchKind('interne')}
+              >
+                👷 Employé interne
+              </button>
+              <button
+                type="button"
+                className={'vt' + (quiKind === 'externe' ? ' vt--on' : '')}
+                onClick={() => switchKind('externe')}
+              >
+                🚚 Coursier externe
+              </button>
+            </div>
+            {quiKind === 'interne' ? (
+              <select value={form.qui_id} onChange={(e) => set('qui_id', e.target.value)}>
+                <option value="">—</option>
+                {employes.map((em) => (
+                  <option key={em.id} value={em.id}>
+                    {em.prenom} {em.nom}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <select value={form.qui_id} onChange={(e) => set('qui_id', e.target.value)}>
+                <option value="">—</option>
+                {transporteurs.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.nom}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
 
