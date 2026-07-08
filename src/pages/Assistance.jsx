@@ -73,9 +73,9 @@ function General() {
             réponses en fil, tag d’un ouvrage.
           </li>
           <li>
-            <strong>📋 Réunion</strong> — les comptes-rendus du lundi (statut on
-            track / attention / bloqué, notes). Les <em>actions</em> assignées
-            créent automatiquement des <strong>tâches</strong>.
+            <strong>📋 Réunion de chantiers</strong> — les comptes-rendus du
+            lundi (date, notes). Les <em>actions</em> assignées créent
+            automatiquement des <strong>tâches</strong>.
           </li>
           <li>
             <strong>🔧 Feedbacks</strong> — les remontées atelier (problème sur un
@@ -181,8 +181,8 @@ function Be() {
             et note les échanges dans le <strong>Fil</strong> du chantier.
           </li>
           <li>
-            Suis les décisions des <strong>Réunions du lundi</strong> — tes actions
-            deviennent des tâches assignées.
+            Suis les décisions des <strong>Réunions de chantiers</strong> (lundi)
+            — tes actions deviennent des tâches assignées.
           </li>
         </ul>
       </Bloc>

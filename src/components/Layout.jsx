@@ -12,6 +12,7 @@ const TABS = [
   { to: '/courses', id: 'courses', label: 'Courses' },
   { to: '/planning', id: 'planning', label: 'Planning' },
   { to: '/bibliotheque', id: 'bibliotheque', label: 'Bibliothèques' },
+  { to: '/copil', id: 'copil', label: 'COPIL' },
   { to: '/contacts', id: 'contacts', label: 'Contacts' },
   { to: '/assistance', id: 'assistance', label: 'Assistance' },
   { to: '/parametres', id: 'parametres', label: 'Paramètres', dirOnly: true },

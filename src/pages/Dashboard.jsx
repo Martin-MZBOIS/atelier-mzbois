@@ -397,7 +397,7 @@ export default function Dashboard() {
                     </div>
                     <div className="task-meta">
                       {t.chantier && <span className="task-num mono">{t.chantier.num}</span>}
-                      {t.source === 'reunion' && <span className="task-tag">📋 Réunion</span>}
+                      {t.source === 'reunion' && <span className="task-tag">📋 Réunion de chantiers</span>}
                       {t.employe && <span className="task-assignee">👤 {t.employe.prenom}</span>}
                       {!t.done && d > 0 && <span className={'task-age task-age--' + age}>{d}j</span>}
                     </div>

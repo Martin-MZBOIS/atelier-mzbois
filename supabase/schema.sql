@@ -71,6 +71,16 @@ begin
       'fournisseur', 'client', 'sous_traitant', 'transporteur'
     );
   end if;
+
+  if not exists (select 1 from pg_type where typname = 'copil_type') then
+    create type copil_type as enum ('chantiers', 'hommes_cles', 'strategie');
+  end if;
+  if not exists (select 1 from pg_type where typname = 'copil_reunion_statut') then
+    create type copil_reunion_statut as enum ('planifiee', 'faite');
+  end if;
+  if not exists (select 1 from pg_type where typname = 'copil_sujet_statut') then
+    create type copil_sujet_statut as enum ('boite', 'ordre_du_jour', 'traite');
+  end if;
 end
 $$;
 
@@ -347,6 +357,36 @@ create table if not exists ouvrage_modeles (
   nom         text not null,
   description text,
   typs        typ_achat[] not null default '{}'
+);
+
+-- COPIL (comités de pilotage)
+create table if not exists copil_reunions (
+  id            uuid primary key default gen_random_uuid(),
+  type          copil_type not null,
+  date          date,
+  heure         time,
+  ordre_du_jour text,
+  notes         text,
+  statut        copil_reunion_statut not null default 'planifiee',
+  created_at    timestamptz not null default now()
+);
+
+create table if not exists copil_sujets (
+  id          uuid primary key default gen_random_uuid(),
+  type        copil_type not null,
+  titre       text not null,
+  description text,
+  soumis_par  uuid references utilisateurs (id) on delete set null,
+  date        date not null default current_date,
+  statut      copil_sujet_statut not null default 'boite'
+);
+
+create table if not exists copil_actions (
+  id         uuid primary key default gen_random_uuid(),
+  reunion_id uuid not null references copil_reunions (id) on delete cascade,
+  texte      text not null,
+  assigne_a  uuid references employes (id) on delete set null,
+  done       boolean not null default false
 );
 
 -- Configuration globale (ligne unique id = 1)

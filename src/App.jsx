@@ -17,6 +17,7 @@ import CoursesGlobal from './pages/CoursesGlobal'
 import PlanningGlobal from './pages/PlanningGlobal'
 import Contacts from './pages/Contacts'
 import Bibliotheque from './pages/Bibliotheque'
+import Copil from './pages/Copil'
 import Assistance from './pages/Assistance'
 import Parametres from './pages/Parametres'
 
@@ -48,6 +49,7 @@ function App() {
         <Route path="/planning" element={<PlanningGlobal />} />
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/bibliotheque" element={<Bibliotheque />} />
+        <Route path="/copil" element={<Copil />} />
         <Route path="/assistance" element={<Assistance />} />
         <Route path="/parametres" element={<Parametres />} />
         <Route path="/courses" element={<CoursesGlobal />} />

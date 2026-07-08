@@ -10,7 +10,7 @@ const SUBTABS = [
   { to: 'achats', label: 'Achats' },
   { to: 'courses', label: '🚚 Courses' },
   { to: 'fil', label: '💬 Fil' },
-  { to: 'reunion', label: '📋 Réunion' },
+  { to: 'reunion', label: '📋 Réunion de chantiers' },
   { to: 'feedbacks', label: '🔧 Feedbacks' },
 ]
 

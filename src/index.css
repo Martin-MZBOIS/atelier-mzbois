@@ -2594,6 +2594,129 @@ textarea.ni:focus {
   color: var(--g3);
 }
 
+/* --------------------------------------------------------------- COPIL */
+.copil-freq {
+  font-size: 12px;
+  color: var(--g1);
+  background: var(--g6);
+  border-left: 3px solid var(--brun);
+  border-radius: 3px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+}
+.copil-ch-card .card-title.mono {
+  color: var(--brun);
+}
+.copil-stale {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--rd);
+  background: var(--rd2);
+  padding: 2px 8px;
+  border-radius: 99px;
+  margin-left: 8px;
+}
+.copil-reunion-line {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.copil-notes {
+  font-size: 13px;
+  color: var(--g1);
+  white-space: pre-wrap;
+  margin-bottom: 8px;
+}
+.copil-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.copil-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 3px;
+  background: var(--g6);
+  font-size: 13px;
+}
+.copil-action--late {
+  background: var(--rd2);
+  border: 1px solid #f5c6c0;
+}
+.copil-action-state {
+  flex-shrink: 0;
+}
+.copil-action-text {
+  flex: 1;
+}
+.copil-action-who {
+  font-size: 11px;
+  background: var(--g5);
+  color: var(--g1);
+  padding: 1px 7px;
+  border-radius: 99px;
+}
+.copil-late-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--rd);
+  padding: 1px 7px;
+  border-radius: 99px;
+}
+.copil-empty-actions {
+  font-size: 12px;
+}
+
+/* Sujets / boîte à idées / ordre du jour (onglets Hommes clés & Stratégie) */
+.copil-sujet {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--g4);
+  border-radius: 3px;
+  background: var(--g6);
+  margin-bottom: 6px;
+}
+.copil-sujet-main {
+  flex: 1;
+}
+.copil-sujet-titre {
+  font-weight: 600;
+  font-size: 13px;
+}
+.copil-sujet-desc {
+  font-size: 12px;
+  color: var(--g1);
+  margin-top: 2px;
+}
+.copil-sujet-meta {
+  font-size: 11px;
+  color: var(--g2);
+  margin-top: 3px;
+}
+.copil-next {
+  background: var(--acier);
+  color: #fff;
+  border-radius: 4px;
+  border-left: 4px solid var(--brun);
+  padding: 12px 16px;
+  margin-bottom: 14px;
+}
+.copil-next-lbl {
+  font-size: 11px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.copil-next-date {
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
 /* -------------------------------------------------------------- Modal */
 .modal-overlay {
   position: fixed;

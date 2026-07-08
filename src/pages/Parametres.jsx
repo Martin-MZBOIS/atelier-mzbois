@@ -10,6 +10,7 @@ const FEATURES = [
   { id: 'courses', label: 'Courses' },
   { id: 'planning', label: 'Planning' },
   { id: 'bibliotheque', label: 'Bibliothèques' },
+  { id: 'copil', label: 'COPIL' },
   { id: 'contacts', label: 'Contacts' },
   { id: 'assistance', label: 'Assistance' },
 ]

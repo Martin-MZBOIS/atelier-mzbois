@@ -74,7 +74,7 @@ export default function ReunionTab() {
   return (
     <div className="card">
       <div className="card-head">
-        <span className="card-title">Réunions lundi</span>
+        <span className="card-title">Réunions de chantiers (lundi)</span>
         <button className="btn bp bsm" onClick={() => setShowModal(true)}>
           + Ajouter CR
         </button>
@@ -96,7 +96,7 @@ export default function ReunionTab() {
         return (
           <div key={r.id} className="reunion">
             <div className="reunion-head">
-              <div className="reunion-title">📋 Réunion du {formatDate(r.date)}</div>
+              <div className="reunion-title">📋 Réunion de chantiers du {formatDate(r.date)}</div>
               {r.statut && (
                 <span
                   className="aspill"
