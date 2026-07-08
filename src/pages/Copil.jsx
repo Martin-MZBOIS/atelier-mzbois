@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import CopilChantiers from './CopilChantiers'
 import CopilMeeting from './CopilMeeting'
 import { nextHommesCles, nextStrategie } from '../lib/copil'
@@ -17,8 +18,23 @@ const SUBTABS = [
   { id: 'strategie', label: '📊 Stratégie' },
 ]
 
+const VALID_TABS = ['chantiers', 'hommes_cles', 'strategie']
+
 export default function Copil() {
-  const [tab, setTab] = useState('chantiers')
+  const [params, setParams] = useSearchParams()
+  const urlTab = params.get('o')
+  const [tab, setTab] = useState(VALID_TABS.includes(urlTab) ? urlTab : 'chantiers')
+
+  // Synchronise l'onglet actif avec le paramètre ?o= (navigation depuis la sidebar).
+  useEffect(() => {
+    if (VALID_TABS.includes(urlTab) && urlTab !== tab) setTab(urlTab)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlTab])
+
+  function selectTab(id) {
+    setTab(id)
+    setParams({ o: id }, { replace: true })
+  }
 
   return (
     <section className="page">
@@ -31,7 +47,7 @@ export default function Copil() {
           <button
             key={t.id}
             className={'subtab' + (tab === t.id ? ' subtab--active' : '')}
-            onClick={() => setTab(t.id)}
+            onClick={() => selectTab(t.id)}
           >
             {t.label}
           </button>
