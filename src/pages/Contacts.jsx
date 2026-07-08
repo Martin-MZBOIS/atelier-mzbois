@@ -5,6 +5,7 @@ import { formatDate, formatEuro } from '../lib/format'
 import { TYPE_SOCIETE, resolve } from '../lib/statuts'
 import SocieteModal from './SocieteModal'
 import ContactPersonModal from './ContactPersonModal'
+import SalarieModal from './SalarieModal'
 
 // Sous-onglets : les 3 premiers filtrent `fournisseurs` par type ;
 // « Salariés » (employes) n'est visible que pour dir et prod.
@@ -27,6 +28,7 @@ export default function Contacts() {
   const [selectedId, setSelectedId] = useState(null)
   const [societeModal, setSocieteModal] = useState(null) // { societe } | null
   const [addContactFor, setAddContactFor] = useState(null)
+  const [showSalarieModal, setShowSalarieModal] = useState(false)
 
   const loadSocietes = useCallback(async () => {
     const contactsSel = 'contacts:contacts!fournisseur_id(id, nom, role, tel, email)'
@@ -100,6 +102,15 @@ export default function Contacts() {
             onClick={() => setSocieteModal({ societe: null })}
           >
             + Nouveau
+          </button>
+        )}
+        {isSalaries && (
+          <button
+            className="btn bp bsm"
+            style={{ marginLeft: 'auto' }}
+            onClick={() => setShowSalarieModal(true)}
+          >
+            + Nouveau salarié
           </button>
         )}
       </div>
@@ -198,6 +209,16 @@ export default function Contacts() {
           onSaved={async () => {
             setAddContactFor(null)
             await loadSocietes()
+          }}
+        />
+      )}
+      {showSalarieModal && (
+        <SalarieModal
+          onClose={() => setShowSalarieModal(false)}
+          onSaved={async (newId) => {
+            setShowSalarieModal(false)
+            await loadEmployes()
+            setSelectedId(newId)
           }}
         />
       )}
