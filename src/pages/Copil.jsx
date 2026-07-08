@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import CopilChantiers from './CopilChantiers'
+import CopilMeeting from './CopilMeeting'
+import { nextHommesCles } from '../lib/copil'
 
 const SUBTABS = [
   { id: 'chantiers', label: '🏗 Réunion de chantiers' },
@@ -30,7 +32,12 @@ export default function Copil() {
 
       {tab === 'chantiers' && <CopilChantiers />}
       {tab === 'hommes_cles' && (
-        <div className="empty">Onglet « Hommes clés » — à venir.</div>
+        <CopilMeeting
+          type="hommes_cles"
+          freqLabel="1er jeudi du mois à 11h. Sujets : organisation, process, RH, amélioration continue (pas les chantiers)."
+          nextDate={nextHommesCles}
+          canSubmit={(role) => ['dir', 'be', 'prod'].includes(role)}
+        />
       )}
       {tab === 'strategie' && (
         <div className="empty">Onglet « Stratégie » — à venir.</div>

@@ -5,6 +5,7 @@ import { useAuthStore } from '../store'
 import { useSettings } from '../store/settings'
 import { ROLES } from '../lib/roles'
 import { formatDateTime } from '../lib/format'
+import { nextHommesCles } from '../lib/copil'
 import {
   STATUT_OUVRAGE,
   STATUT_OUVRAGE_ORDER,
@@ -295,6 +296,11 @@ export default function Dashboard() {
     alerts.push({ ico: '🔴', txt: `${lateTasks.length} tâche${lateTasks.length > 1 ? 's' : ''} en retard`, onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }) })
   if (achatsSansMontant.length)
     alerts.push({ ico: '💶', txt: `${achatsSansMontant.length} achat${achatsSansMontant.length > 1 ? 's' : ''} sans montant à compléter (avant l'analytique)`, onClick: () => navigate('/achats') })
+  if (user?.role === 'dir') {
+    const dHc = daysUntil(nextHommesCles())
+    if (dHc >= 0 && dHc <= 7)
+      alerts.push({ ico: '⚠️', txt: `Réunion Hommes clés dans ${dHc} jour${dHc > 1 ? 's' : ''} — préparez l'ordre du jour`, onClick: () => navigate('/copil') })
+  }
 
   return (
     <section className="page">
