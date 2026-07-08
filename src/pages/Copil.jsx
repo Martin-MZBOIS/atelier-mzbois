@@ -1,7 +1,15 @@
 import { useState } from 'react'
 import CopilChantiers from './CopilChantiers'
 import CopilMeeting from './CopilMeeting'
-import { nextHommesCles } from '../lib/copil'
+import { nextHommesCles, nextStrategie } from '../lib/copil'
+
+const STRATEGIE_TEMPLATE = [
+  'Bilan des 6 derniers mois',
+  'Objectifs CA / marge / marchés',
+  'Nouveaux clients à cibler',
+  'Priorités et décisions stratégiques',
+  'Notes libres',
+]
 
 const SUBTABS = [
   { id: 'chantiers', label: '🏗 Réunion de chantiers' },
@@ -40,7 +48,13 @@ export default function Copil() {
         />
       )}
       {tab === 'strategie' && (
-        <div className="empty">Onglet « Stratégie » — à venir.</div>
+        <CopilMeeting
+          type="strategie"
+          freqLabel="Septembre et Mars de chaque année. Prise de recul, vision long terme (>1 an) : CA/marge/marchés/nouveaux clients, décisions stratégiques."
+          nextDate={nextStrategie}
+          canSubmit={(role) => role === 'dir'}
+          odjTemplate={STRATEGIE_TEMPLATE}
+        />
       )}
     </section>
   )

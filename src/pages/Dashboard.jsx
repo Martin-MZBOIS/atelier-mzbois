@@ -5,7 +5,7 @@ import { useAuthStore } from '../store'
 import { useSettings } from '../store/settings'
 import { ROLES } from '../lib/roles'
 import { formatDateTime } from '../lib/format'
-import { nextHommesCles } from '../lib/copil'
+import { nextHommesCles, nextStrategie } from '../lib/copil'
 import {
   STATUT_OUVRAGE,
   STATUT_OUVRAGE_ORDER,
@@ -300,6 +300,9 @@ export default function Dashboard() {
     const dHc = daysUntil(nextHommesCles())
     if (dHc >= 0 && dHc <= 7)
       alerts.push({ ico: '⚠️', txt: `Réunion Hommes clés dans ${dHc} jour${dHc > 1 ? 's' : ''} — préparez l'ordre du jour`, onClick: () => navigate('/copil') })
+    const dStr = daysUntil(nextStrategie())
+    if (dStr >= 0 && dStr <= 14)
+      alerts.push({ ico: '📊', txt: `Réunion Stratégie dans ${dStr} jour${dStr > 1 ? 's' : ''} — préparez l'ordre du jour`, onClick: () => navigate('/copil') })
   }
 
   return (
