@@ -245,6 +245,8 @@ create table if not exists plan_affectations (
   sal_id      uuid references employes (id) on delete set null,
   date_debut  date,
   date_fin    date,
+  heure_debut time, -- null = toute la journée
+  heure_fin   time,
   commentaire text
 );
 comment on column plan_affectations.sal_id is 'Salarié affecté (référence employes)';

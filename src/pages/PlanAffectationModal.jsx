@@ -4,6 +4,13 @@ import { PHASE_PLANNING } from '../lib/statuts'
 
 const PHASE_ORDER = ['etude', 'fabrication', 'pose']
 
+// Horaires entreprise par défaut selon le jour (vendredi = journée courte).
+function defaultHours(dateStr) {
+  const d = dateStr ? new Date(dateStr + 'T00:00:00') : null
+  const isFriday = d && d.getDay() === 5
+  return { debut: '07:00', fin: isFriday ? '12:00' : '16:30' }
+}
+
 // Création d'une affectation de planning.
 // - salarie fourni  => salarié fixe (vue Salariés), on choisit chantier + phase.
 // - prefill { chantier_id, phase } => chantier/phase fixes (vue Chantiers),
@@ -29,6 +36,13 @@ export default function PlanAffectationModal({
   const [error, setError] = useState('')
   const [chSearch, setChSearch] = useState('')
   const [chOpen, setChOpen] = useState(false)
+  const [touteLaJournee, setTouteLaJournee] = useState(true)
+  const [heures, setHeures] = useState({ debut: '07:00', fin: '16:30' })
+
+  function toggleJournee(checked) {
+    setTouteLaJournee(checked)
+    if (!checked) setHeures(defaultHours(form.date_debut))
+  }
 
   const chantierFixed = Boolean(prefill?.chantier_id)
   const salarieFixed = Boolean(salarie)
@@ -58,14 +72,24 @@ export default function PlanAffectationModal({
       return setError('La date de fin doit être après la date de début.')
     setSaving(true)
     setError('')
-    const { error: dbError } = await supabase.from('plan_affectations').insert({
+    const base = {
       chantier_id: form.chantier_id,
       phase: form.phase || null,
       sal_id: form.sal_id,
       date_debut: form.date_debut,
       date_fin: form.date_fin,
       commentaire: form.commentaire.trim() || null,
-    })
+    }
+    const withHours = {
+      ...base,
+      heure_debut: touteLaJournee ? null : heures.debut || null,
+      heure_fin: touteLaJournee ? null : heures.fin || null,
+    }
+    // Tente avec les horaires ; repli sans si les colonnes n'existent pas (migration 0011).
+    let { error: dbError } = await supabase.from('plan_affectations').insert(withHours)
+    if (dbError && /heure_/.test(dbError.message)) {
+      ;({ error: dbError } = await supabase.from('plan_affectations').insert(base))
+    }
     setSaving(false)
     if (dbError) return setError(dbError.message)
     onSaved()
@@ -166,6 +190,35 @@ export default function PlanAffectationModal({
             <input type="date" value={form.date_fin} onChange={(e) => set('date_fin', e.target.value)} />
           </div>
         </div>
+
+        <label className="checkbox-label" style={{ marginBottom: touteLaJournee ? 10 : 6 }}>
+          <input
+            type="checkbox"
+            checked={touteLaJournee}
+            onChange={(e) => toggleJournee(e.target.checked)}
+          />
+          Toute la journée
+        </label>
+        {!touteLaJournee && (
+          <div className="fg">
+            <div className="fl">
+              <label>Heure début</label>
+              <input
+                type="time"
+                value={heures.debut}
+                onChange={(e) => setHeures((h) => ({ ...h, debut: e.target.value }))}
+              />
+            </div>
+            <div className="fl">
+              <label>Heure fin</label>
+              <input
+                type="time"
+                value={heures.fin}
+                onChange={(e) => setHeures((h) => ({ ...h, fin: e.target.value }))}
+              />
+            </div>
+          </div>
+        )}
 
         <div className="fl">
           <label>Commentaire</label>
