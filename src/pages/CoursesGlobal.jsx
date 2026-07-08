@@ -35,6 +35,8 @@ export default function CoursesGlobal() {
   const [view, setView] = useState('liste')
   const [filter, setFilter] = useState('tous')
   const [weekOffset, setWeekOffset] = useState(0)
+  const [monthOffset, setMonthOffset] = useState(0)
+  const [calMode, setCalMode] = useState('sem') // 'sem' | 'mois'
   const [showModal, setShowModal] = useState(false)
 
   async function loadCourses() {
@@ -148,6 +150,31 @@ export default function CoursesGlobal() {
       return d
     })
   }, [weekOffset])
+
+  // Grille du mois : semaines (lundi→dimanche) couvrant le mois affiché.
+  const month = useMemo(() => {
+    const today = new Date()
+    const first = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1)
+    const monthIndex = first.getMonth()
+    // Recule au lundi de la semaine du 1er.
+    const start = new Date(first)
+    start.setDate(first.getDate() - ((first.getDay() + 6) % 7))
+    const weeks = []
+    const cursor = new Date(start)
+    for (let w = 0; w < 6; w++) {
+      const row = []
+      for (let d = 0; d < 7; d++) {
+        row.push({ date: new Date(cursor), inMonth: cursor.getMonth() === monthIndex })
+        cursor.setDate(cursor.getDate() + 1)
+      }
+      weeks.push(row)
+      if (cursor.getMonth() !== monthIndex && cursor > first) {
+        // stoppe si la semaine suivante est entièrement hors du mois
+        if (row.every((c) => !c.inMonth) && w >= 4) break
+      }
+    }
+    return { label: first.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }), weeks }
+  }, [monthOffset])
 
   const todayIso = isoDay(new Date())
 
@@ -298,17 +325,91 @@ export default function CoursesGlobal() {
       {!loading && view === 'cal' && (
         <>
           <div className="cal-nav">
-            <button className="btn bg bsm" onClick={() => setWeekOffset((w) => w - 1)}>
+            <button
+              className="btn bg bsm"
+              onClick={() =>
+                calMode === 'sem'
+                  ? setWeekOffset((w) => w - 1)
+                  : setMonthOffset((m) => m - 1)
+              }
+            >
               ← Préc.
             </button>
-            <span className="cal-period">
-              {ddmm(week[0])} – {ddmm(week[6])}
+            <span className="cal-period" style={{ textTransform: 'capitalize' }}>
+              {calMode === 'sem' ? `${ddmm(week[0])} – ${ddmm(week[6])}` : month.label}
             </span>
-            <button className="btn bg bsm" onClick={() => setWeekOffset((w) => w + 1)}>
+            <button
+              className="btn bg bsm"
+              onClick={() =>
+                calMode === 'sem'
+                  ? setWeekOffset((w) => w + 1)
+                  : setMonthOffset((m) => m + 1)
+              }
+            >
               Suiv. →
             </button>
+            <div className="view-toggle" style={{ marginLeft: 6 }}>
+              <button className={'vt' + (calMode === 'sem' ? ' vt--on' : '')} onClick={() => setCalMode('sem')}>
+                Semaine
+              </button>
+              <button className={'vt' + (calMode === 'mois' ? ' vt--on' : '')} onClick={() => setCalMode('mois')}>
+                Mois
+              </button>
+            </div>
           </div>
 
+          {calMode === 'mois' && (
+            <div className="cal-scroll">
+              <table className="cal-table cal-month">
+                <thead>
+                  <tr>
+                    {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((j, i) => (
+                      <th key={i} className={'cal-th' + (i >= 5 ? ' cal-th--we' : '')}>{j}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {month.weeks.map((row, wi) => (
+                    <tr key={wi}>
+                      {row.map((cell, di) => {
+                        const iso = isoDay(cell.date)
+                        const isT = iso === todayIso
+                        const we = cell.date.getDay() === 0 || cell.date.getDay() === 6
+                        const dayCourses = courses.filter(
+                          (c) => c.date === iso && CAL_STATUTS.includes(c.statut)
+                        )
+                        return (
+                          <td
+                            key={di}
+                            className={
+                              'cal-cell cal-month-cell' +
+                              (!cell.inMonth ? ' cal-cell--out' : isT ? ' cal-cell--today' : we ? ' cal-cell--we' : '')
+                            }
+                          >
+                            <div className="cal-month-daynum">{cell.date.getDate()}</div>
+                            {dayCourses.map((c) => {
+                              const st = resolve(STATUT_COURSE, c.statut)
+                              return (
+                                <div
+                                  key={c.id}
+                                  className="cal-course"
+                                  style={{ background: st.color + '22', borderLeftColor: st.color, color: st.color }}
+                                >
+                                  <div className="cal-course-qui">{quiName(c)}</div>
+                                </div>
+                              )
+                            })}
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {calMode === 'sem' && (
           <div className="cal-scroll">
             <table className="cal-table">
               <thead>
@@ -375,6 +476,7 @@ export default function CoursesGlobal() {
               </tbody>
             </table>
           </div>
+          )}
         </>
       )}
 
