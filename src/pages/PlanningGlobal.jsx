@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { PHASE_PLANNING, resolve } from '../lib/statuts'
 import PlanAffectationModal from './PlanAffectationModal'
@@ -44,6 +44,71 @@ export default function PlanningGlobal() {
     if (dbError) setError(dbError.message)
     else setAffectations(data ?? [])
   }, [])
+
+  const dragAffRef = useRef(null)
+  const resizeRef = useRef(null) // { affId, dateFin } pendant un redimensionnement
+
+  // Déplacement d'un bloc (glisser vers une cellule vide).
+  function onDragStartBlock(e, aff) {
+    dragAffRef.current = aff
+    e.dataTransfer.effectAllowed = 'move'
+  }
+  async function onDropCell(emp, iso) {
+    const aff = dragAffRef.current
+    dragAffRef.current = null
+    if (!aff) return
+    const durDays = Math.round(
+      (new Date(aff.date_fin) - new Date(aff.date_debut)) / 86400000
+    )
+    const fin = new Date(iso + 'T00:00:00')
+    fin.setDate(fin.getDate() + durDays)
+    const { error: dbError } = await supabase
+      .from('plan_affectations')
+      .update({ sal_id: emp.id, date_debut: iso, date_fin: isoDay(fin) })
+      .eq('id', aff.id)
+    if (dbError) setError(dbError.message)
+    await loadAffectations()
+  }
+
+  // Redimensionnement d'un bloc (glisser le bord droit) — étend la date de fin.
+  function onResizeStart(e, aff) {
+    e.preventDefault()
+    e.stopPropagation()
+    const th = document.querySelector('.plan-th-day')
+    const cellW = th ? th.getBoundingClientRect().width : 44
+    const startX = e.clientX
+    const origFin = new Date(aff.date_fin + 'T00:00:00')
+    const debut = aff.date_debut
+    resizeRef.current = { affId: aff.id, dateFin: aff.date_fin }
+
+    function onMove(ev) {
+      const deltaDays = Math.round((ev.clientX - startX) / cellW)
+      const fin = new Date(origFin)
+      fin.setDate(origFin.getDate() + deltaDays)
+      let iso = isoDay(fin)
+      if (iso < debut) iso = debut
+      resizeRef.current = { affId: aff.id, dateFin: iso }
+      setAffectations((prev) =>
+        prev.map((a) => (a.id === aff.id ? { ...a, date_fin: iso } : a))
+      )
+    }
+    async function onUp() {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+      const r = resizeRef.current
+      resizeRef.current = null
+      if (r && r.dateFin !== aff.date_fin) {
+        const { error: dbError } = await supabase
+          .from('plan_affectations')
+          .update({ date_fin: r.dateFin })
+          .eq('id', r.affId)
+        if (dbError) setError(dbError.message)
+        await loadAffectations()
+      }
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }
 
   useEffect(() => {
     let active = true
@@ -258,6 +323,8 @@ export default function PlanningGlobal() {
                             className={'plan-cell plan-cell--empty' + (isT ? ' plan-cell--today' : we ? ' plan-cell--we' : '')}
                             title="Affecter un chantier"
                             onClick={() => setNewAff({ salId: emp.id, date: isoDay(cell.day) })}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={() => onDropCell(emp, isoDay(cell.day))}
                           />
                         )
                       }
@@ -267,7 +334,9 @@ export default function PlanningGlobal() {
                       return (
                         <td key={cell.key} colSpan={span} className="plan-cell" title={aff.commentaire ?? ''}>
                           <div
-                            className="plan-block"
+                            className="plan-block plan-block--draggable"
+                            draggable
+                            onDragStart={(e) => onDragStartBlock(e, aff)}
                             style={{
                               background: chantierColor[aff.chantier_id],
                               borderLeft: `4px solid ${emp.couleur ?? 'transparent'}`,
@@ -279,6 +348,14 @@ export default function PlanningGlobal() {
                               {span > 1 ? ` · ${span}j` : ''}
                             </div>
                             {phase && <div className="plan-block-phase">{phase}</div>}
+                            <div
+                              className="plan-block-resize"
+                              title="Étendre"
+                              onMouseDown={(e) => onResizeStart(e, aff)}
+                              onDragStart={(e) => e.stopPropagation()}
+                            >
+                              ⟩
+                            </div>
                           </div>
                         </td>
                       )

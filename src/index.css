@@ -1948,6 +1948,27 @@ textarea.ni:focus {
   height: 100%;
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
+}
+.plan-block--draggable {
+  cursor: grab;
+}
+.plan-block--draggable:active {
+  cursor: grabbing;
+}
+.plan-block-resize {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  cursor: col-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.06);
 }
 .plan-block-num {
   font-size: 10px;
