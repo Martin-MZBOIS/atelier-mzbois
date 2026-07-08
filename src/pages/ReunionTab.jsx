@@ -97,12 +97,14 @@ export default function ReunionTab() {
           <div key={r.id} className="reunion">
             <div className="reunion-head">
               <div className="reunion-title">📋 Réunion du {formatDate(r.date)}</div>
-              <span
-                className="aspill"
-                style={{ color: st.color, backgroundColor: st.color + '22' }}
-              >
-                {st.label}
-              </span>
+              {r.statut && (
+                <span
+                  className="aspill"
+                  style={{ color: st.color, backgroundColor: st.color + '22' }}
+                >
+                  {st.label}
+                </span>
+              )}
             </div>
 
             {r.notes && <div className="reunion-notes">{r.notes}</div>}

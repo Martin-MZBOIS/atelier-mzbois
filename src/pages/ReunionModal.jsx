@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { STATUT_REUNION, STATUT_REUNION_ORDER } from '../lib/statuts'
 
 function today() {
   return new Date().toISOString().slice(0, 10)
@@ -10,7 +9,6 @@ function today() {
 // Les actions saisies créent aussi des tâches (source « reunion »).
 export default function ReunionModal({ chantierId, employes, onClose, onSaved }) {
   const [date, setDate] = useState(today())
-  const [statut, setStatut] = useState('on_track')
   const [notes, setNotes] = useState('')
   const [actions, setActions] = useState([{ texte: '', assigne_a: '' }])
   const [saving, setSaving] = useState(false)
@@ -35,7 +33,7 @@ export default function ReunionModal({ chantierId, employes, onClose, onSaved })
     // 1. Réunion
     const { data: reunion, error: rErr } = await supabase
       .from('reunions')
-      .insert({ chantier_id: chantierId, date, statut, notes: notes.trim() || null })
+      .insert({ chantier_id: chantierId, date, notes: notes.trim() || null })
       .select('id')
       .single()
     if (rErr) {
@@ -90,25 +88,13 @@ export default function ReunionModal({ chantierId, employes, onClose, onSaved })
         </button>
         <div className="modal-title">Nouveau compte-rendu</div>
 
-        <div className="fg">
-          <div className="fl">
-            <label>Date</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
-          <div className="fl">
-            <label>Statut</label>
-            <select value={statut} onChange={(e) => setStatut(e.target.value)}>
-              {STATUT_REUNION_ORDER.map((slug) => (
-                <option key={slug} value={slug}>
-                  {STATUT_REUNION[slug].label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="fl">
+          <label>Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
         </div>
 
         <div className="fl">
