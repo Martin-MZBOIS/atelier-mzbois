@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
+import { useSettings } from '../store/settings'
 import { ROLES } from '../lib/roles'
 import { formatDateTime } from '../lib/format'
 import {
@@ -19,8 +20,6 @@ const JOURS5 = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven']
 const ACTIF_STATUTS = STATUT_OUVRAGE_ORDER.filter(
   (s) => !['termine', 'facture'].includes(s)
 )
-const AGE_WARN = 3
-const AGE_LATE = 7
 
 function isoDay(d) {
   return (
@@ -37,10 +36,10 @@ function daysSince(dateStr) {
   if (!dateStr) return 0
   return Math.floor((new Date() - new Date(dateStr)) / 86400000)
 }
-function taskAge(t) {
+function taskAge(t, warn, late) {
   const d = daysSince(t.created_at)
-  if (d >= AGE_LATE) return 'late'
-  if (d >= AGE_WARN) return 'warn'
+  if (d >= late) return 'late'
+  if (d >= warn) return 'warn'
   return 'ok'
 }
 
@@ -75,6 +74,8 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const role = user ? ROLES[user.role] : null
+  const ageWarn = useSettings((s) => s.alerte_orange)
+  const ageLate = useSettings((s) => s.alerte_rouge)
   const tasksRef = useRef(null)
 
   const [data, setData] = useState(null)
@@ -200,9 +201,9 @@ export default function Dashboard() {
   const lateTasks = useMemo(
     () =>
       user?.role === 'dir'
-        ? pendingTasks.filter((t) => taskAge(t) === 'late')
+        ? pendingTasks.filter((t) => taskAge(t, ageWarn, ageLate) === 'late')
         : [],
-    [pendingTasks, user]
+    [pendingTasks, user, ageWarn, ageLate]
   )
 
   const actus = useMemo(() => {
@@ -375,7 +376,7 @@ export default function Dashboard() {
             </div>
           ) : (
             displayedTasks.map((t) => {
-              const age = taskAge(t)
+              const age = taskAge(t, ageWarn, ageLate)
               const d = daysSince(t.created_at)
               return (
                 <div

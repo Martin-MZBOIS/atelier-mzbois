@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useSettings } from '../store/settings'
 import AnalytiqueModal from './AnalytiqueModal'
-
-// Coût horaire moyen (€/h) — paramètre global (configurable plus tard).
-const COUT_H = 45
 
 function eur(n) {
   return Math.round(n).toLocaleString('fr-FR') + ' €'
@@ -44,6 +42,7 @@ function Bar({ pct, color }) {
 
 export default function AnalytiqueTab() {
   const { chantier } = useOutletContext()
+  const COUT_H = useSettings((s) => s.cout_horaire)
   const [ana, setAna] = useState(null)
   const [achHT, setAchHT] = useState(0)
   const [loading, setLoading] = useState(true)

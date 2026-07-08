@@ -18,6 +18,7 @@ import PlanningGlobal from './pages/PlanningGlobal'
 import Contacts from './pages/Contacts'
 import Bibliotheque from './pages/Bibliotheque'
 import Assistance from './pages/Assistance'
+import Parametres from './pages/Parametres'
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/bibliotheque" element={<Bibliotheque />} />
         <Route path="/assistance" element={<Assistance />} />
+        <Route path="/parametres" element={<Parametres />} />
         <Route path="/courses" element={<CoursesGlobal />} />
       </Route>
 

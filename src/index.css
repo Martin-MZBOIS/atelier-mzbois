@@ -2524,6 +2524,76 @@ textarea.ni:focus {
   margin-bottom: 8px;
 }
 
+/* ---------------------------------------------------------- Paramètres */
+.param-hint {
+  font-size: 11px;
+  color: var(--g2);
+  margin-top: 4px;
+}
+.param-add {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.param-add input {
+  flex: 1;
+  max-width: 240px;
+  padding: 7px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--g3);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.param-add input:focus {
+  border-color: var(--brun);
+}
+.param-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+.param-msg {
+  font-size: 13px;
+  color: var(--gn);
+  font-weight: 600;
+}
+
+/* Matrice des droits d'accès */
+.droits-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.droits-table th,
+.droits-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--g4);
+  text-align: center;
+}
+.droits-table th:first-child,
+.droits-table td:first-child {
+  text-align: left;
+  font-weight: 600;
+}
+.droits-table thead th {
+  background: var(--g6);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--g1);
+}
+.droits-table input[type='checkbox'] {
+  accent-color: var(--brun);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+.droits-locked {
+  color: var(--g3);
+}
+
 /* -------------------------------------------------------------- Modal */
 .modal-overlay {
   position: fixed;

@@ -349,6 +349,17 @@ create table if not exists ouvrage_modeles (
   typs        typ_achat[] not null default '{}'
 );
 
+-- Configuration globale (ligne unique id = 1)
+create table if not exists parametres (
+  id            int primary key default 1,
+  cout_horaire  numeric(12, 2) not null default 45,
+  alerte_orange int not null default 3,
+  alerte_rouge  int not null default 7,
+  unites        text[] not null default '{panneau,ml,m²,pièce,rouleau}',
+  droits        jsonb not null default '{}'::jsonb,
+  constraint parametres_singleton check (id = 1)
+);
+
 -- =============================================================================
 -- Index (clés étrangères + colonnes fréquemment filtrées)
 -- =============================================================================

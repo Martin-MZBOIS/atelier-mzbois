@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { useSettings } from '../store/settings'
 import { TYP_ACHAT, TYP_ACHAT_ORDER } from '../lib/statuts'
 
 function num(v) {
@@ -11,6 +12,7 @@ function num(v) {
 // Création / édition d'un article de bibliothèque (+ fournisseurs associés).
 export default function ArticleModal({ article, fournisseurs, onClose, onSaved }) {
   const isEdit = Boolean(article)
+  const unites = useSettings((s) => s.unites)
   const [form, setForm] = useState({
     nom: article?.nom ?? '',
     description: article?.description ?? '',
@@ -132,7 +134,17 @@ export default function ArticleModal({ article, fournisseurs, onClose, onSaved }
           </div>
           <div className="fl">
             <label>Unité</label>
-            <input value={form.unite} onChange={(e) => set('unite', e.target.value)} placeholder="panneau, ml, m²…" />
+            <input
+              list="unites-list"
+              value={form.unite}
+              onChange={(e) => set('unite', e.target.value)}
+              placeholder="panneau, ml, m²…"
+            />
+            <datalist id="unites-list">
+              {unites.map((u) => (
+                <option key={u} value={u} />
+              ))}
+            </datalist>
           </div>
         </div>
 
