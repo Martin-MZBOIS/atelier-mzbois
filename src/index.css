@@ -14,11 +14,15 @@
   --acier2: #3d302a; /* topbar secondaire */
   --g1: #6b5e58; /* textes secondaires */
   --g2: #a59a94; /* textes tertiaires */
-  --g3: #cec6be; /* bordures */
-  --g4: #e0d8d0; /* bordures légères */
-  --g5: #f0ebe6; /* fonds légers */
+  --g3: #dfd7cf; /* bordures (0.5px) */
+  --g4: #dfd7cf; /* bordures légères */
+  --g5: #f0ebe6; /* séparateurs / fonds légers */
   --g6: #f7f4f1; /* fond page */
   --w: #ffffff;
+  --txt3: #b7afa8; /* texte désactivé / labels */
+  --sep: #f0ebe6; /* séparateurs tableaux */
+  --rowh: #faf8f6; /* hover ligne tableau */
+  --rowa: #f7f3ef; /* ligne active */
   /* Fonctionnelles (statuts) */
   --gn: #5a7a5a;
   --gn2: #eef4ee;
@@ -46,11 +50,11 @@ body,
 }
 
 body {
-  font-family: 'Avenir Next', 'Nunito Sans', 'Gill Sans', 'Trebuchet MS',
+  font-family: 'Avenir Next', 'Gill Sans', 'Nunito Sans', 'Trebuchet MS',
     sans-serif;
   background: var(--beige2);
-  color: var(--noir);
-  font-size: 14px;
+  color: var(--acier);
+  font-size: 13px;
   line-height: 1.5;
   letter-spacing: 0.01em;
 }
@@ -72,7 +76,7 @@ body {
   width: 100%;
   max-width: 430px;
   background: var(--w);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   border-radius: 4px;
   border-top: 3px solid var(--brun);
   box-shadow: 0 8px 30px rgba(132, 106, 87, 0.12);
@@ -396,7 +400,7 @@ body {
 /* Cartes / tableaux */
 .table-wrap {
   background: var(--w);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   border-radius: 4px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(132, 106, 87, 0.06);
@@ -411,18 +415,18 @@ body {
 .data-table thead th {
   text-align: left;
   padding: 10px 14px;
-  background: var(--g6);
-  border-bottom: 1px solid var(--g4);
-  color: var(--g2);
-  font-size: 10px;
+  background: var(--w);
+  border-bottom: 0.5px solid var(--sep);
+  color: var(--txt3);
+  font-size: 8px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.18em;
 }
 
 .data-table tbody td {
   padding: 11px 14px;
-  border-bottom: 1px solid var(--g4);
+  border-bottom: 0.5px solid var(--sep);
 }
 
 .data-table tbody tr:last-child td {
@@ -430,7 +434,10 @@ body {
 }
 
 .data-table tbody tr:hover {
-  background: var(--g6);
+  background: var(--rowh);
+}
+.data-table tbody tr.row-active {
+  background: var(--rowa);
 }
 
 .data-table .num {
@@ -438,8 +445,9 @@ body {
 }
 
 .data-table td.mono {
-  font-size: 11px;
-  color: var(--g1);
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 10px;
+  color: var(--brun);
 }
 
 .strong {
@@ -451,11 +459,12 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
-  border-radius: 2px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  padding: 3px 8px;
+  border-radius: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .bdg--yes {
@@ -495,7 +504,7 @@ body {
   gap: 6px;
   padding: 5px 12px;
   border-radius: 2px;
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -612,29 +621,32 @@ code {
   border-radius: 2px;
 }
 
-/* Sous-onglets */
+/* Sous-onglets (style unifié — Point 18) */
 .subtabs {
   display: flex;
-  border-bottom: 2px solid var(--g4);
+  border-bottom: 0.5px solid var(--g4);
   margin-bottom: 16px;
   overflow-x: auto;
 }
 
 .subtab {
   padding: 9px 16px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  color: var(--g1);
+  border: none;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  margin-bottom: -0.5px;
+  color: var(--txt3);
   text-decoration: none;
   white-space: nowrap;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.14em;
+  font-family: inherit;
 }
 .subtab:hover {
-  color: var(--noir);
+  color: var(--acier);
 }
 .subtab--active {
   color: var(--brun);
@@ -644,7 +656,7 @@ code {
 /* Carte générique */
 .card {
   background: var(--w);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(132, 106, 87, 0.06);
   padding: 18px;
@@ -659,9 +671,11 @@ code {
 }
 
 .card-title {
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.02em;
+  font-weight: 400;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--acier);
 }
 
 .card-count {
@@ -714,7 +728,7 @@ code {
 .model-pick {
   padding: 12px 14px;
   border-radius: 3px;
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   margin-bottom: 8px;
   cursor: pointer;
   transition: all 0.12s;
@@ -838,11 +852,12 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 8px;
-  border-radius: 2px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  padding: 3px 8px;
+  border-radius: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 .stdot {
@@ -928,11 +943,12 @@ code {
 .typbdg {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 2px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  padding: 3px 8px;
+  border-radius: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 .typ-pan {
   color: #7a5a30;
@@ -982,7 +998,7 @@ code {
   padding: 10px 12px;
   border-radius: 3px;
   margin-bottom: 6px;
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   background: var(--g6);
   cursor: pointer;
   transition: all 0.12s;
@@ -1030,10 +1046,12 @@ code {
 }
 
 .aspill {
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 99px;
+  padding: 3px 8px;
+  border-radius: 0;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -1052,7 +1070,7 @@ code {
 
 .fil-msg {
   background: var(--w);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   border-radius: 4px;
   padding: 12px 14px;
 }
@@ -1196,7 +1214,7 @@ textarea.ni:focus {
 
 /* ------------------------------------------------------------ Réunion */
 .reunion {
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   border-radius: 4px;
   padding: 14px;
   margin-bottom: 10px;
@@ -1288,7 +1306,7 @@ textarea.ni:focus {
   padding: 12px 14px;
   border-radius: 3px;
   margin-bottom: 8px;
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   background: var(--g6);
   border-left: 3px solid var(--g3);
 }
@@ -1392,7 +1410,7 @@ textarea.ni:focus {
 
 .course-card {
   background: var(--w);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   border-left: 3px solid var(--g3);
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(132, 106, 87, 0.06);
@@ -1494,7 +1512,7 @@ textarea.ni:focus {
   text-align: center;
   background: var(--g6);
   color: var(--acier);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
 }
 .cal-th--we {
   background: var(--g5);
@@ -1512,7 +1530,7 @@ textarea.ni:focus {
   min-height: 90px;
   height: 90px;
   vertical-align: top;
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   padding: 4px;
   background: var(--w);
 }
@@ -1671,7 +1689,7 @@ textarea.ni:focus {
   border-radius: 3px;
   background: var(--g6);
   margin-bottom: 5px;
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
 }
 .task-item--warn {
   background: #f7f2e6;
@@ -1826,7 +1844,7 @@ textarea.ni:focus {
 }
 .mini-plan-cell {
   padding: 3px;
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   vertical-align: top;
 }
 .mini-plan-block {
@@ -1950,7 +1968,7 @@ textarea.ni:focus {
 
 .plan-emp {
   background: var(--w);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   padding: 8px 12px;
   position: sticky;
   left: 0;
@@ -1987,7 +2005,7 @@ textarea.ni:focus {
 .plan-cell {
   padding: 3px;
   background: var(--w);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   vertical-align: top;
   height: 46px;
 }
@@ -2094,7 +2112,7 @@ textarea.ni:focus {
 
 .plan-phase-cell {
   background: var(--w);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   padding: 6px 12px;
   position: sticky;
   left: 0;
@@ -2160,7 +2178,7 @@ textarea.ni:focus {
 
 .contacts-list {
   background: var(--w);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   border-radius: 4px;
   padding: 10px;
   box-shadow: 0 1px 4px rgba(132, 106, 87, 0.06);
@@ -2200,7 +2218,7 @@ textarea.ni:focus {
 
 .detail-panel {
   background: var(--w);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   border-radius: 4px;
   padding: 18px;
   box-shadow: 0 1px 4px rgba(132, 106, 87, 0.06);
@@ -2290,7 +2308,7 @@ textarea.ni:focus {
 
 .contact-card {
   background: var(--g6);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   border-radius: 3px;
   padding: 10px 12px;
   margin-bottom: 6px;
@@ -2535,7 +2553,7 @@ textarea.ni:focus {
 }
 .help-bloc {
   background: var(--w);
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   border-left: 3px solid var(--brun);
   border-radius: 4px;
   padding: 14px 18px;
@@ -2711,7 +2729,7 @@ textarea.ni:focus {
   align-items: flex-start;
   gap: 10px;
   padding: 10px 12px;
-  border: 1px solid var(--g4);
+  border: 0.5px solid var(--g4);
   border-radius: 3px;
   background: var(--g6);
   margin-bottom: 6px;
@@ -2767,12 +2785,12 @@ textarea.ni:focus {
 
 .modal-box {
   background: var(--w);
-  border-radius: 4px;
-  border-top: 3px solid var(--brun);
+  border-radius: 0;
+  border-top: 1px solid var(--brun);
   padding: 26px;
   width: 560px;
   max-width: 95vw;
-  max-height: 88vh;
+  max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(132, 106, 87, 0.2);
 }
@@ -2788,10 +2806,10 @@ textarea.ni:focus {
 }
 
 .modal-title {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 700;
   margin-bottom: 18px;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -2804,13 +2822,13 @@ textarea.ni:focus {
 /* Boutons additionnels (repris de la maquette) */
 .btn {
   border: none;
-  border-radius: 3px;
+  border-radius: 0;
   cursor: pointer;
   font-weight: 600;
   font-family: inherit;
-  font-size: 12px;
-  padding: 7px 14px;
-  letter-spacing: 0.04em;
+  font-size: 10px;
+  padding: 8px 16px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   transition: all 0.15s;
 }
@@ -2823,20 +2841,21 @@ textarea.ni:focus {
 }
 .btn.bg {
   background: transparent;
-  color: var(--g1);
-  border: 1px solid var(--g3);
+  color: var(--g2);
+  border: 0.5px solid var(--g4);
 }
 .btn.bg:hover {
-  background: var(--g5);
-  color: var(--noir);
+  background: transparent;
+  color: var(--acier);
+  border-color: var(--g2);
 }
 .btn.bsm {
-  padding: 4px 10px;
-  font-size: 11px;
+  padding: 5px 11px;
+  font-size: 9px;
 }
 .btn.bxs {
-  padding: 3px 8px;
-  font-size: 10px;
+  padding: 3px 9px;
+  font-size: 9px;
 }
 
 .ov-edit-checks {
@@ -2867,13 +2886,13 @@ textarea.ni:focus {
 }
 .fl label,
 .fg label {
-  font-size: 11px;
-  color: var(--g1);
+  font-size: 9px;
+  color: var(--txt3);
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.14em;
 }
 .fl input,
 .fl select,
@@ -2882,9 +2901,9 @@ textarea.ni:focus {
 .fg3 input,
 .fg3 select {
   width: 100%;
-  padding: 7px 10px;
-  border-radius: 3px;
-  border: 1px solid var(--g3);
+  padding: 7px 12px;
+  border-radius: 0;
+  border: 0.5px solid var(--g4);
   font-size: 13px;
   font-family: inherit;
   outline: none;
@@ -2897,7 +2916,6 @@ textarea.ni:focus {
 .fg3 input:focus,
 .fg3 select:focus {
   border-color: var(--brun);
-  box-shadow: 0 0 0 2px rgba(132, 106, 87, 0.12);
 }
 
 ::-webkit-scrollbar {
