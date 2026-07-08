@@ -26,15 +26,26 @@ export default function ArticleModal({ article, fournisseurs, onClose, onSaved }
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [fournSearch, setFournSearch] = useState('')
+  const [fournOpen, setFournOpen] = useState(false)
 
   function set(key, value) {
     setForm((f) => ({ ...f, [key]: value }))
   }
-  function toggleFid(id) {
-    setFids((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    )
+  function addFid(id) {
+    setFids((prev) => (prev.includes(id) ? prev : [...prev, id]))
+    setFournSearch('')
+    setFournOpen(false)
   }
+  function removeFid(id) {
+    setFids((prev) => prev.filter((x) => x !== id))
+  }
+
+  const fournById = Object.fromEntries(fournisseurs.map((f) => [f.id, f]))
+  const q = fournSearch.trim().toLowerCase()
+  const suggestions = fournisseurs
+    .filter((f) => !fids.includes(f.id) && (!q || f.nom.toLowerCase().includes(q)))
+    .slice(0, 8)
 
   async function handleSave() {
     if (!form.nom.trim()) {
@@ -126,17 +137,42 @@ export default function ArticleModal({ article, fournisseurs, onClose, onSaved }
         </div>
 
         <div className="sl">Fournisseurs</div>
-        <div className="checkbox-grid">
-          {fournisseurs.map((f) => (
-            <label key={f.id} className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={fids.includes(f.id)}
-                onChange={() => toggleFid(f.id)}
-              />
-              {f.nom}
-            </label>
-          ))}
+        {fids.length > 0 && (
+          <div className="chip-row">
+            {fids.map((id) => (
+              <span key={id} className="chip-select">
+                {fournById[id]?.nom ?? '—'}
+                <button type="button" className="chip-x" onClick={() => removeFid(id)}>
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="autocomplete">
+          <input
+            value={fournSearch}
+            placeholder="🔍 Ajouter un fournisseur…"
+            onChange={(e) => {
+              setFournSearch(e.target.value)
+              setFournOpen(true)
+            }}
+            onFocus={() => setFournOpen(true)}
+            onBlur={() => setTimeout(() => setFournOpen(false), 150)}
+          />
+          {fournOpen && suggestions.length > 0 && (
+            <div className="autocomplete-list">
+              {suggestions.map((f) => (
+                <div
+                  key={f.id}
+                  className="autocomplete-item"
+                  onMouseDown={() => addFid(f.id)}
+                >
+                  {f.nom}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {error && <div className="alert">{error}</div>}

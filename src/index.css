@@ -2287,6 +2287,77 @@ textarea.ni:focus {
   gap: 8px;
   margin-bottom: 10px;
 }
+
+/* Multi-select autocomplete (chips + suggestions) */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.chip-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brun2);
+  color: var(--brun4);
+  border: 1px solid var(--brun3);
+  border-radius: 99px;
+  padding: 2px 6px 2px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.chip-x {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--brun4);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+}
+.chip-x:hover {
+  color: var(--rd);
+}
+.autocomplete {
+  position: relative;
+  margin-bottom: 10px;
+}
+.autocomplete input {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--g3);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.autocomplete input:focus {
+  border-color: var(--brun);
+}
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--w);
+  border: 1px solid var(--brun);
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(132, 106, 87, 0.15);
+}
+.autocomplete-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.autocomplete-item:hover {
+  background: var(--brun2);
+  color: var(--brun);
+}
 .checkbox-label {
   display: flex;
   align-items: center;
