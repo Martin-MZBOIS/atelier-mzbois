@@ -54,6 +54,7 @@ export default function AchatsGlobal() {
   const [error, setError] = useState('')
   const [quick, setQuick] = useState(location.state?.quick ?? 'tous')
   const [typ, setTyp] = useState('tous')
+  const [search, setSearch] = useState('')
   const [modal, setModal] = useState(null)
 
   async function loadAchats() {
@@ -104,10 +105,18 @@ export default function AchatsGlobal() {
 
   const filtered = useMemo(() => {
     const qf = QUICK_FILTERS.find((f) => f.id === quick) ?? QUICK_FILTERS[0]
+    const q = search.trim().toLowerCase()
     return achats.filter(
-      (a) => qf.match(a.st) && (typ === 'tous' || (a.typ ?? 'divers') === typ)
+      (a) =>
+        qf.match(a.st) &&
+        (typ === 'tous' || (a.typ ?? 'divers') === typ) &&
+        (!q ||
+          (a.nom ?? '').toLowerCase().includes(q) ||
+          (a.ref ?? '').toLowerCase().includes(q) ||
+          (a.chantier?.num ?? '').toLowerCase().includes(q) ||
+          (a.chantier?.nom ?? '').toLowerCase().includes(q))
     )
-  }, [achats, quick, typ])
+  }, [achats, quick, typ, search])
 
   return (
     <section className="page">
@@ -130,6 +139,14 @@ export default function AchatsGlobal() {
           <strong>Erreur :</strong> {error}
         </div>
       )}
+
+      <input
+        className="plan-search"
+        style={{ width: 300 }}
+        placeholder="🔍 Rechercher (article ou chantier)…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
       {/* Filtres rapides */}
       <div className="qf-row">
