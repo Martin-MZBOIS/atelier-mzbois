@@ -244,7 +244,13 @@ export default function OuvragesTab() {
           <div key={o.id} className="ov" style={{ borderLeftColor: st.color }}>
             <div className="ov-main">
               <div className="ov-title-row">
-                <span className="ov-title">{o.nom}</span>
+                <span
+                  className="ov-title ov-title--click"
+                  title="Voir / modifier"
+                  onClick={() => setEditing(o)}
+                >
+                  {o.nom}
+                </span>
                 {qty > 1 && <span className="ov-qty">×{qty}</span>}
               </div>
 

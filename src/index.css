@@ -725,6 +725,13 @@ code {
   font-weight: 600;
   font-size: 13px;
 }
+.ov-title--click {
+  cursor: pointer;
+}
+.ov-title--click:hover {
+  color: var(--brun);
+  text-decoration: underline;
+}
 
 .ov-qty {
   font-size: 11px;
