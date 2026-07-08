@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store'
 import { useSettings } from '../store/settings'
 import { ROLES } from '../lib/roles'
@@ -19,9 +19,11 @@ const TABS = [
 
 export default function Layout() {
   const navigate = useNavigate()
+  const location = useLocation()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
   const loadSettings = useSettings((s) => s.load)
+  const settingsLoaded = useSettings((s) => s.loaded)
   const canAccess = useSettings((s) => s.canAccess)
   const droits = useSettings((s) => s.droits)
 
@@ -37,6 +39,16 @@ export default function Layout() {
   })
   // (droits référencé pour recalculer la liste quand ils changent)
   void droits
+
+  // Bloque l'accès direct par URL à un onglet non autorisé pour le rôle.
+  const currentTab = TABS.find(
+    (t) => location.pathname === t.to || location.pathname.startsWith(t.to + '/')
+  )
+  const blocked =
+    settingsLoaded &&
+    currentTab &&
+    !currentTab.dirOnly &&
+    !canAccess(user?.role, currentTab.id)
 
   function handleLogout() {
     logout()
@@ -84,7 +96,7 @@ export default function Layout() {
       </nav>
 
       <main className="app-main">
-        <Outlet />
+        {blocked ? <Navigate to="/dashboard" replace /> : <Outlet />}
       </main>
     </div>
   )
