@@ -28,6 +28,7 @@ export default function Bibliotheque() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [typFilt, setTypFilt] = useState('tous')
+  const [search, setSearch] = useState('')
   const [articleModal, setArticleModal] = useState(null) // { article } | null
   const [modeleModal, setModeleModal] = useState(null) // { modele } | null
 
@@ -76,13 +77,26 @@ export default function Bibliotheque() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadModeles])
 
-  const filtered = useMemo(
-    () =>
-      typFilt === 'tous'
-        ? articles
-        : articles.filter((a) => a.typ === typFilt),
-    [articles, typFilt]
-  )
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return articles.filter(
+      (a) =>
+        (typFilt === 'tous' || a.typ === typFilt) &&
+        (!q ||
+          (a.nom ?? '').toLowerCase().includes(q) ||
+          (a.description ?? '').toLowerCase().includes(q))
+    )
+  }, [articles, typFilt, search])
+
+  const filteredModeles = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return modeles
+    return modeles.filter(
+      (m) =>
+        (m.nom ?? '').toLowerCase().includes(q) ||
+        (m.description ?? '').toLowerCase().includes(q)
+    )
+  }, [modeles, search])
 
   return (
     <section className="page">
@@ -132,6 +146,14 @@ export default function Bibliotheque() {
               + Article
             </button>
           </div>
+
+          <input
+            className="plan-search"
+            style={{ width: 300 }}
+            placeholder="🔍 Rechercher un article…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
 
           <div className="course-filters">
             {['tous', ...TYP_ACHAT_ORDER].map((slug) => (
@@ -204,10 +226,17 @@ export default function Bibliotheque() {
               + Modèle
             </button>
           </div>
-          {modeles.length === 0 ? (
+          <input
+            className="plan-search"
+            style={{ width: 300 }}
+            placeholder="🔍 Rechercher un modèle…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {filteredModeles.length === 0 ? (
             <div className="empty">Aucun modèle</div>
           ) : (
-            modeles.map((m) => (
+            filteredModeles.map((m) => (
               <div
                 key={m.id}
                 className="card model-pick"
