@@ -4,14 +4,15 @@ import { TYPE_SOCIETE } from '../lib/statuts'
 
 const TYPE_ORDER = ['fournisseur', 'client', 'sous_traitant', 'transporteur']
 
-// Création d'une fiche société (fournisseur / client / sous-traitant / transporteur).
-export default function SocieteModal({ defaultType, onClose, onSaved }) {
+// Création / édition d'une fiche société (fournisseur / client / sous-traitant / transporteur).
+export default function SocieteModal({ societe, defaultType, onClose, onSaved }) {
+  const isEdit = Boolean(societe)
   const [form, setForm] = useState({
-    nom: '',
-    adresse: '',
-    famille: '',
-    site_web: '',
-    type: defaultType ?? 'fournisseur',
+    nom: societe?.nom ?? '',
+    adresse: societe?.adresse ?? '',
+    famille: societe?.famille ?? '',
+    site_web: societe?.site_web ?? '',
+    type: societe?.type ?? defaultType ?? 'fournisseur',
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -33,18 +34,18 @@ export default function SocieteModal({ defaultType, onClose, onSaved }) {
       famille: form.famille.trim() || null,
       type: form.type,
     }
+    const withSite = { ...base, site_web: form.site_web.trim() || null }
+
+    async function run(payload) {
+      return isEdit
+        ? supabase.from('fournisseurs').update(payload).eq('id', societe.id).select('id').single()
+        : supabase.from('fournisseurs').insert(payload).select('id').single()
+    }
+
     // Tente avec site_web ; repli sans si la colonne n'existe pas (migration 0010).
-    let { data, error: dbError } = await supabase
-      .from('fournisseurs')
-      .insert({ ...base, site_web: form.site_web.trim() || null })
-      .select('id')
-      .single()
+    let { data, error: dbError } = await run(withSite)
     if (dbError && /site_web/.test(dbError.message)) {
-      ;({ data, error: dbError } = await supabase
-        .from('fournisseurs')
-        .insert(base)
-        .select('id')
-        .single())
+      ;({ data, error: dbError } = await run(base))
     }
     setSaving(false)
     if (dbError) {
@@ -60,7 +61,7 @@ export default function SocieteModal({ defaultType, onClose, onSaved }) {
         <button className="modal-close" onClick={onClose}>
           ×
         </button>
-        <div className="modal-title">Nouvelle fiche</div>
+        <div className="modal-title">{isEdit ? 'Modifier la fiche' : 'Nouvelle fiche'}</div>
 
         <div className="fg">
           <div className="fl">
@@ -98,7 +99,7 @@ export default function SocieteModal({ defaultType, onClose, onSaved }) {
 
         <div className="modal-actions">
           <button className="btn bp" disabled={saving} onClick={handleSave}>
-            {saving ? 'Enregistrement…' : 'Créer'}
+            {saving ? 'Enregistrement…' : isEdit ? 'Enregistrer' : 'Créer'}
           </button>
           <button className="btn bg" onClick={onClose}>
             Annuler

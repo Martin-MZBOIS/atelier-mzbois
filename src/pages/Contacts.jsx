@@ -25,7 +25,7 @@ export default function Contacts() {
   const [tab, setTab] = useState('fournisseur')
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState(null)
-  const [showSocieteModal, setShowSocieteModal] = useState(false)
+  const [societeModal, setSocieteModal] = useState(null) // { societe } | null
   const [addContactFor, setAddContactFor] = useState(null)
 
   const loadSocietes = useCallback(async () => {
@@ -97,7 +97,7 @@ export default function Contacts() {
           <button
             className="btn bp bsm"
             style={{ marginLeft: 'auto' }}
-            onClick={() => setShowSocieteModal(true)}
+            onClick={() => setSocieteModal({ societe: null })}
           >
             + Nouveau
           </button>
@@ -171,6 +171,7 @@ export default function Contacts() {
             ) : (
               <SocieteDetail
                 s={selected.raw}
+                onEdit={() => setSocieteModal({ societe: selected.raw })}
                 onAddContact={() => setAddContactFor(selected.id)}
               />
             )}
@@ -178,12 +179,13 @@ export default function Contacts() {
         </div>
       )}
 
-      {showSocieteModal && (
+      {societeModal && (
         <SocieteModal
+          societe={societeModal.societe}
           defaultType={tab}
-          onClose={() => setShowSocieteModal(false)}
+          onClose={() => setSocieteModal(null)}
           onSaved={async (newId) => {
-            setShowSocieteModal(false)
+            setSocieteModal(null)
             await loadSocietes()
             setSelectedId(newId)
           }}
@@ -203,7 +205,7 @@ export default function Contacts() {
   )
 }
 
-function SocieteDetail({ s, onAddContact }) {
+function SocieteDetail({ s, onEdit, onAddContact }) {
   const t = resolve(TYPE_SOCIETE, s.type)
   const contacts = s.contacts ?? []
   return (
@@ -216,6 +218,9 @@ function SocieteDetail({ s, onAddContact }) {
         >
           {t.label}
         </span>
+        <button className="btn bg bxs" style={{ marginLeft: 'auto' }} onClick={onEdit}>
+          ✏ Modifier
+        </button>
       </div>
       <dl className="detail-fields">
         {s.adresse && (
