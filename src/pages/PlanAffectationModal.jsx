@@ -27,6 +27,8 @@ export default function PlanAffectationModal({
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [chSearch, setChSearch] = useState('')
+  const [chOpen, setChOpen] = useState(false)
 
   const chantierFixed = Boolean(prefill?.chantier_id)
   const salarieFixed = Boolean(salarie)
@@ -34,6 +36,18 @@ export default function PlanAffectationModal({
   function set(key, value) {
     setForm((f) => ({ ...f, [key]: value }))
   }
+
+  const chById = Object.fromEntries(chantiers.map((c) => [c.id, c]))
+  const selectedCh = chById[form.chantier_id]
+  const chQuery = chSearch.trim().toLowerCase()
+  const chSuggestions = chantiers
+    .filter(
+      (c) =>
+        !chQuery ||
+        (c.num ?? '').toLowerCase().includes(chQuery) ||
+        (c.nom ?? '').toLowerCase().includes(chQuery)
+    )
+    .slice(0, 8)
 
   async function handleSave() {
     if (!form.chantier_id) return setError('Le chantier est obligatoire.')
@@ -71,18 +85,48 @@ export default function PlanAffectationModal({
 
         <div className="fl">
           <label>Chantier *</label>
-          <select
-            value={form.chantier_id}
-            onChange={(e) => set('chantier_id', e.target.value)}
-            disabled={chantierFixed}
-          >
-            <option value="">—</option>
-            {chantiers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.num} · {c.nom}
-              </option>
-            ))}
-          </select>
+          {chantierFixed || selectedCh ? (
+            <div className="chip-row">
+              <span className="chip-select">
+                {selectedCh ? `${selectedCh.num} · ${selectedCh.nom}` : '—'}
+                {!chantierFixed && (
+                  <button type="button" className="chip-x" onClick={() => set('chantier_id', '')}>
+                    ×
+                  </button>
+                )}
+              </span>
+            </div>
+          ) : (
+            <div className="autocomplete">
+              <input
+                value={chSearch}
+                placeholder="🔍 Rechercher un chantier (n° ou mot)…"
+                onChange={(e) => {
+                  setChSearch(e.target.value)
+                  setChOpen(true)
+                }}
+                onFocus={() => setChOpen(true)}
+                onBlur={() => setTimeout(() => setChOpen(false), 150)}
+              />
+              {chOpen && chSuggestions.length > 0 && (
+                <div className="autocomplete-list">
+                  {chSuggestions.map((c) => (
+                    <div
+                      key={c.id}
+                      className="autocomplete-item"
+                      onMouseDown={() => {
+                        set('chantier_id', c.id)
+                        setChSearch('')
+                        setChOpen(false)
+                      }}
+                    >
+                      {c.num} · {c.nom}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="fl">
