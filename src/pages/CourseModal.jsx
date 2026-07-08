@@ -19,6 +19,7 @@ export default function CourseModal({
   const [quiKind, setQuiKind] = useState('interne') // 'interne' | 'externe'
   const [form, setForm] = useState({
     date: today(),
+    heure_depart: '',
     statut: 'programmee',
     chantier_id: defaultChantierId ?? '',
     qui_id: '',
@@ -43,7 +44,7 @@ export default function CourseModal({
     }
     setSaving(true)
     setError('')
-    const { error: dbError } = await supabase.from('courses').insert({
+    const base = {
       date: form.date || null,
       statut: form.statut || null,
       chantier_id: form.chantier_id || null,
@@ -55,7 +56,14 @@ export default function CourseModal({
         : null,
       quoi: form.quoi.trim(),
       commentaire: form.commentaire.trim() || null,
-    })
+    }
+    // Tente avec heure_depart ; repli sans si la colonne n'existe pas (migration 0012).
+    let { error: dbError } = await supabase
+      .from('courses')
+      .insert({ ...base, heure_depart: form.heure_depart || null })
+    if (dbError && /heure_depart/.test(dbError.message)) {
+      ;({ error: dbError } = await supabase.from('courses').insert(base))
+    }
     setSaving(false)
     if (dbError) {
       setError(dbError.message)
@@ -72,13 +80,21 @@ export default function CourseModal({
         </button>
         <div className="modal-title">Nouvelle course</div>
 
-        <div className="fg">
+        <div className="fg3">
           <div className="fl">
             <label>Date</label>
             <input
               type="date"
               value={form.date}
               onChange={(e) => set('date', e.target.value)}
+            />
+          </div>
+          <div className="fl">
+            <label>Heure de départ</label>
+            <input
+              type="time"
+              value={form.heure_depart}
+              onChange={(e) => set('heure_depart', e.target.value)}
             />
           </div>
           <div className="fl">

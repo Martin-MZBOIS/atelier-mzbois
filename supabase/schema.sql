@@ -216,9 +216,10 @@ create table if not exists achats_ouvrages (
 
 -- Courses / navettes (transports internes ou vers fournisseurs)
 create table if not exists courses (
-  id          uuid primary key default gen_random_uuid(),
-  date        date,
-  statut      statut_course,
+  id           uuid primary key default gen_random_uuid(),
+  date         date,
+  heure_depart time,
+  statut       statut_course,
   qui_id      uuid,
   qui_type    text,
   de_id       uuid,
