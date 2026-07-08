@@ -2,6 +2,23 @@ import { useEffect, useState } from 'react'
 import { useSettings } from '../store/settings'
 import { useAuthStore } from '../store'
 
+// Onglets pouvant être activés/désactivés par rôle.
+const FEATURES = [
+  { id: 'dashboard', label: 'Tableau de bord' },
+  { id: 'chantiers', label: 'Chantiers' },
+  { id: 'achats', label: 'Achats' },
+  { id: 'courses', label: 'Courses' },
+  { id: 'planning', label: 'Planning' },
+  { id: 'bibliotheque', label: 'Bibliothèques' },
+  { id: 'contacts', label: 'Contacts' },
+  { id: 'assistance', label: 'Assistance' },
+]
+const ROLE_COLS = [
+  { id: 'be', label: 'BE' },
+  { id: 'prog', label: 'Prog' },
+  { id: 'prod', label: 'Prod' },
+]
+
 export default function Parametres() {
   const role = useAuthStore((s) => s.user?.role)
   const settings = useSettings()
@@ -14,6 +31,7 @@ export default function Parametres() {
   })
   const [unites, setUnites] = useState(settings.unites)
   const [newUnite, setNewUnite] = useState('')
+  const [droits, setDroits] = useState(settings.droits)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
 
@@ -25,7 +43,8 @@ export default function Parametres() {
       alerte_rouge: settings.alerte_rouge,
     })
     setUnites(settings.unites)
-  }, [settings.loaded, settings.cout_horaire, settings.alerte_orange, settings.alerte_rouge, settings.unites])
+    setDroits(settings.droits ?? {})
+  }, [settings.loaded, settings.cout_horaire, settings.alerte_orange, settings.alerte_rouge, settings.unites, settings.droits])
 
   if (role !== 'dir') {
     return (
@@ -46,6 +65,16 @@ export default function Parametres() {
   function removeUnite(u) {
     setUnites((prev) => prev.filter((x) => x !== u))
   }
+  function isAllowed(roleId, featureId) {
+    return droits[roleId]?.[featureId] !== false
+  }
+  function toggleDroit(roleId, featureId) {
+    setDroits((prev) => {
+      const roleD = { ...(prev[roleId] ?? {}) }
+      roleD[featureId] = !isAllowed(roleId, featureId) // inverse l'état courant
+      return { ...prev, [roleId]: roleD }
+    })
+  }
 
   async function handleSave() {
     setSaving(true)
@@ -55,6 +84,7 @@ export default function Parametres() {
       alerte_orange: parseInt(form.alerte_orange, 10) || 0,
       alerte_rouge: parseInt(form.alerte_rouge, 10) || 0,
       unites,
+      droits,
     })
     setSaving(false)
     setMsg(err ? 'Échec : ' + err.message : '✓ Paramètres enregistrés')
@@ -149,6 +179,46 @@ export default function Parametres() {
           <button className="btn bg bsm" onClick={addUnite}>
             + Ajouter
           </button>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-head">
+          <span className="card-title">Droits d'accès par rôle</span>
+        </div>
+        <div className="param-hint" style={{ marginBottom: 10 }}>
+          La Direction a toujours accès à tout. Décoche pour masquer un onglet à
+          un rôle.
+        </div>
+        <div className="cal-scroll">
+          <table className="droits-table">
+            <thead>
+              <tr>
+                <th>Onglet</th>
+                <th className="droits-locked">Dir</th>
+                {ROLE_COLS.map((r) => (
+                  <th key={r.id}>{r.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {FEATURES.map((f) => (
+                <tr key={f.id}>
+                  <td>{f.label}</td>
+                  <td className="droits-locked">✓</td>
+                  {ROLE_COLS.map((r) => (
+                    <td key={r.id}>
+                      <input
+                        type="checkbox"
+                        checked={isAllowed(r.id, f.id)}
+                        onChange={() => toggleDroit(r.id, f.id)}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
