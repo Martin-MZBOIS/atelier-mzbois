@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { PHASE_PLANNING } from '../lib/statuts'
+import Autocomplete from '../components/Autocomplete'
 
 const PHASE_ORDER = ['etude', 'fabrication', 'pose']
 
-// Horaires entreprise par défaut selon le jour (vendredi = journée courte).
+// Horaires entreprise par défaut selon le jour.
+// Lun-Jeu : 07:00 → 16:30 (pause 12:30-13:30). Vendredi : 07:00 → 12:00.
 function defaultHours(dateStr) {
   const d = dateStr ? new Date(dateStr + 'T00:00:00') : null
   const isFriday = d && d.getDay() === 5
@@ -20,28 +22,36 @@ export default function PlanAffectationModal({
   salaries = [],
   salarie,
   prefill,
+  affectation,
   initialDate,
   onClose,
   onSaved,
 }) {
+  const isEdit = Boolean(affectation)
   const [form, setForm] = useState({
-    chantier_id: prefill?.chantier_id ?? '',
-    phase: prefill?.phase ?? 'fabrication',
-    sal_id: salarie?.id ?? '',
-    date_debut: initialDate ?? '',
-    date_fin: initialDate ?? '',
-    commentaire: '',
+    chantier_id: affectation?.chantier_id ?? prefill?.chantier_id ?? '',
+    phase: affectation?.phase ?? prefill?.phase ?? 'fabrication',
+    sal_id: affectation?.sal_id ?? salarie?.id ?? '',
+    date_debut: affectation?.date_debut ?? initialDate ?? '',
+    date_fin: affectation?.date_fin ?? initialDate ?? '',
+    commentaire: affectation?.commentaire ?? '',
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [chSearch, setChSearch] = useState('')
-  const [chOpen, setChOpen] = useState(false)
-  const [touteLaJournee, setTouteLaJournee] = useState(true)
-  const [heures, setHeures] = useState({ debut: '07:00', fin: '16:30' })
+  const [touteLaJournee, setTouteLaJournee] = useState(!(affectation?.heure_debut || affectation?.heure_fin))
+  const [heures, setHeures] = useState({
+    debut: affectation?.heure_debut?.slice(0, 5) ?? '07:00',
+    fin: affectation?.heure_fin?.slice(0, 5) ?? '16:30',
+  })
 
   function toggleJournee(checked) {
     setTouteLaJournee(checked)
     if (!checked) setHeures(defaultHours(form.date_debut))
+  }
+  // Met à jour la date de début et resynchronise les horaires du jour si besoin.
+  function setDateDebut(value) {
+    set('date_debut', value)
+    if (!touteLaJournee) setHeures(defaultHours(value))
   }
 
   const chantierFixed = Boolean(prefill?.chantier_id)
@@ -53,15 +63,6 @@ export default function PlanAffectationModal({
 
   const chById = Object.fromEntries(chantiers.map((c) => [c.id, c]))
   const selectedCh = chById[form.chantier_id]
-  const chQuery = chSearch.trim().toLowerCase()
-  const chSuggestions = chantiers
-    .filter(
-      (c) =>
-        !chQuery ||
-        (c.num ?? '').toLowerCase().includes(chQuery) ||
-        (c.nom ?? '').toLowerCase().includes(chQuery)
-    )
-    .slice(0, 8)
 
   async function handleSave() {
     if (!form.chantier_id) return setError('Le chantier est obligatoire.')
@@ -85,17 +86,24 @@ export default function PlanAffectationModal({
       heure_debut: touteLaJournee ? null : heures.debut || null,
       heure_fin: touteLaJournee ? null : heures.fin || null,
     }
+
+    async function run(payload) {
+      if (isEdit) return supabase.from('plan_affectations').update(payload).eq('id', affectation.id)
+      return supabase.from('plan_affectations').insert(payload)
+    }
     // Tente avec les horaires ; repli sans si les colonnes n'existent pas (migration 0011).
-    let { error: dbError } = await supabase.from('plan_affectations').insert(withHours)
+    let { error: dbError } = await run(withHours)
     if (dbError && /heure_/.test(dbError.message)) {
-      ;({ error: dbError } = await supabase.from('plan_affectations').insert(base))
+      ;({ error: dbError } = await run(base))
     }
     setSaving(false)
     if (dbError) return setError(dbError.message)
     onSaved()
   }
 
-  const title = salarieFixed
+  const title = isEdit
+    ? 'Modifier l’affectation'
+    : salarieFixed
     ? `Affecter — ${salarie.prenom} ${salarie.nom}`
     : 'Nouvelle affectation'
 
@@ -121,35 +129,14 @@ export default function PlanAffectationModal({
               </span>
             </div>
           ) : (
-            <div className="autocomplete">
-              <input
-                value={chSearch}
-                placeholder="🔍 Rechercher un chantier (n° ou mot)…"
-                onChange={(e) => {
-                  setChSearch(e.target.value)
-                  setChOpen(true)
-                }}
-                onFocus={() => setChOpen(true)}
-                onBlur={() => setTimeout(() => setChOpen(false), 150)}
-              />
-              {chOpen && chSuggestions.length > 0 && (
-                <div className="autocomplete-list">
-                  {chSuggestions.map((c) => (
-                    <div
-                      key={c.id}
-                      className="autocomplete-item"
-                      onMouseDown={() => {
-                        set('chantier_id', c.id)
-                        setChSearch('')
-                        setChOpen(false)
-                      }}
-                    >
-                      {c.num} · {c.nom}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Autocomplete
+              items={chantiers}
+              value={null}
+              onSelect={(c) => c && set('chantier_id', c.id)}
+              getLabel={(c) => `${c.num} · ${c.nom ?? ''}`.trim()}
+              getKey={(c) => c.id}
+              placeholder="🔍 Rechercher un chantier (n° ou mot)…"
+            />
           )}
         </div>
 
@@ -166,24 +153,26 @@ export default function PlanAffectationModal({
 
         <div className="fl">
           <label>Salarié *</label>
-          <select
-            value={form.sal_id}
-            onChange={(e) => set('sal_id', e.target.value)}
-            disabled={salarieFixed}
-          >
-            <option value="">—</option>
-            {(salarieFixed ? [salarie] : salaries).map((em) => (
-              <option key={em.id} value={em.id}>
-                {em.prenom} {em.nom}
-              </option>
-            ))}
-          </select>
+          {salarieFixed ? (
+            <div className="chip-row">
+              <span className="chip-select">{salarie.prenom} {salarie.nom}</span>
+            </div>
+          ) : (
+            <Autocomplete
+              items={salaries}
+              value={salaries.find((s) => s.id === form.sal_id) ?? null}
+              onSelect={(s) => set('sal_id', s?.id ?? '')}
+              getLabel={(s) => `${s.prenom} ${s.nom}`}
+              getKey={(s) => s.id}
+              placeholder="🔍 Rechercher un salarié…"
+            />
+          )}
         </div>
 
         <div className="fg">
           <div className="fl">
             <label>Début *</label>
-            <input type="date" value={form.date_debut} onChange={(e) => set('date_debut', e.target.value)} />
+            <input type="date" value={form.date_debut} onChange={(e) => setDateDebut(e.target.value)} />
           </div>
           <div className="fl">
             <label>Fin *</label>
@@ -229,7 +218,7 @@ export default function PlanAffectationModal({
 
         <div className="modal-actions">
           <button className="btn bp" disabled={saving} onClick={handleSave}>
-            {saving ? 'Enregistrement…' : 'Affecter'}
+            {saving ? 'Enregistrement…' : isEdit ? 'Enregistrer' : 'Affecter'}
           </button>
           <button className="btn bg" onClick={onClose}>
             Annuler
