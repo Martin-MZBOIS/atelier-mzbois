@@ -37,6 +37,17 @@ function daysSince(dateStr) {
   if (!dateStr) return 0
   return Math.floor((new Date() - new Date(dateStr)) / 86400000)
 }
+// Jours avant la prochaine occurrence (jour/mois) de la date ; 0 = aujourd'hui.
+function daysUntilAnniv(dateStr) {
+  if (!dateStr) return null
+  const d = new Date(dateStr)
+  if (Number.isNaN(d.getTime())) return null
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  let next = new Date(now.getFullYear(), d.getMonth(), d.getDate())
+  if (next < today) next = new Date(now.getFullYear() + 1, d.getMonth(), d.getDate())
+  return Math.round((next - today) / 86400000)
+}
 function taskAge(t, warn, late) {
   const d = daysSince(t.created_at)
   if (d >= late) return 'late'
@@ -91,14 +102,18 @@ export default function Dashboard() {
   const [taskView, setTaskView] = useState('pending') // 'pending' | 'done'
 
   async function loadAll() {
-    const [ouv, ach, tach, fil, fb, plan, emp, ch] = await Promise.all([
+    // Employés : tente avec date_naissance (0016), repli sans si absente.
+    let emp = await supabase.from('employes').select('id, prenom, nom, role, date_entree, date_naissance').order('nom')
+    if (emp.error && /date_naissance/.test(emp.error.message)) {
+      emp = await supabase.from('employes').select('id, prenom, nom, role, date_entree').order('nom')
+    }
+    const [ouv, ach, tach, fil, fb, plan, ch] = await Promise.all([
       supabase.from('ouvrages').select('id, nom, statut, dep, chantier:chantiers!chantier_id(id, num)'),
       supabase.from('achats').select('id, nom, st, mht, chantier:chantiers!chantier_id(id, num)'),
       supabase.from('taches').select('id, texte, done, created_at, source, echeance, chantier:chantiers!chantier_id(id, num), employe:employes!assigne_a(id, prenom)').order('created_at', { ascending: true }),
       supabase.from('fil_messages').select('id, texte, date, chantier:chantiers!chantier_id(id, num), auteur:utilisateurs!auteur_id(prenom, nom)'),
       supabase.from('feedbacks').select('id, description, statut, date, chantier:chantiers!chantier_id(id, num)'),
       supabase.from('plan_affectations').select('sal_id, chantier_id, date_debut, date_fin, chantier:chantiers!chantier_id(num)'),
-      supabase.from('employes').select('id, prenom, nom, role').order('nom'),
       supabase.from('chantiers').select('id, num').order('num'),
     ])
     const firstErr = [ouv, ach, tach, fil, fb, plan, emp, ch].find((r) => r.error)
@@ -303,6 +318,30 @@ export default function Dashboard() {
     const dStr = daysUntil(nextStrategie())
     if (dStr >= 0 && dStr <= 14)
       alerts.push({ ico: '📊', txt: `Réunion Stratégie dans ${dStr} jour${dStr > 1 ? 's' : ''} — préparez l'ordre du jour`, onClick: () => navigate('/copil') })
+
+    // Anniversaires salariés (perso J-7 ; entreprise jour J).
+    for (const e of data?.employes ?? []) {
+      const dNaiss = daysUntilAnniv(e.date_naissance)
+      if (dNaiss != null && dNaiss >= 0 && dNaiss <= 7)
+        alerts.push({
+          ico: '🎂',
+          txt:
+            dNaiss === 0
+              ? `Anniversaire de ${e.prenom} aujourd'hui !`
+              : `Anniversaire de ${e.prenom} dans ${dNaiss} jour${dNaiss > 1 ? 's' : ''}`,
+          onClick: () => navigate('/contacts'),
+        })
+      const dEnt = daysUntilAnniv(e.date_entree)
+      if (dEnt === 0 && e.date_entree) {
+        const ans = new Date().getFullYear() - new Date(e.date_entree).getFullYear()
+        if (ans > 0)
+          alerts.push({
+            ico: '🎉',
+            txt: `${e.prenom} fête ses ${ans} an${ans > 1 ? 's' : ''} chez MZ Bois !`,
+            onClick: () => navigate('/contacts'),
+          })
+      }
+    }
   }
 
   return (

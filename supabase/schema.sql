@@ -118,6 +118,7 @@ create table if not exists employes (
   poste       text,
   contrat     text,
   date_entree date,
+  date_naissance date, -- anniversaires (alertes dashboard)
   tel         text,
   email       text,
   cout_h      numeric(12, 2),
