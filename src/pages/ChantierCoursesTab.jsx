@@ -14,13 +14,19 @@ export default function ChantierCoursesTab() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [editCourse, setEditCourse] = useState(null)
 
   async function loadCourses() {
-    const { data, error: dbError } = await supabase
-      .from('courses')
-      .select('id, date, statut, qui_id, qui_type, de_id, vers_id, quoi, commentaire')
-      .eq('chantier_id', chantier.id)
-      .order('date', { ascending: true })
+    const full =
+      'id, date, heure_depart, type_course, etapes, ouvrage_ids, de_libelle, vers_libelle, ' +
+      'statut, qui_id, qui_type, de_id, vers_id, quoi, commentaire, chantier_id'
+    const core = 'id, date, statut, qui_id, qui_type, de_id, vers_id, quoi, commentaire, chantier_id'
+    let { data, error: dbError } = await supabase
+      .from('courses').select(full).eq('chantier_id', chantier.id).order('date', { ascending: true })
+    if (dbError && /(type_course|etapes|ouvrage_ids|de_libelle|vers_libelle|heure_depart)/.test(dbError.message)) {
+      ;({ data, error: dbError } = await supabase
+        .from('courses').select(core).eq('chantier_id', chantier.id).order('date', { ascending: true }))
+    }
     if (dbError) {
       setError(dbError.message)
       setCourses([])
@@ -123,15 +129,16 @@ export default function ChantierCoursesTab() {
         {courses.map((c) => {
           const st = resolve(STATUT_COURSE, c.statut)
           return (
-            <div key={c.id} className="course-card" style={{ borderLeftColor: st.color }}>
+            <div key={c.id} className="course-card course-card--click" style={{ borderLeftColor: st.color }} onClick={() => setEditCourse(c)} title="Modifier la course">
               <div className="course-top">
                 <div className="course-top-left">
                   <span className="course-date mono">{formatDate(c.date)}</span>
+                  {c.type_course && <span className="course-type-badge">{c.type_course === 'ramasse' ? '📥' : c.type_course === 'tournee' ? '🔄' : '🚚'}</span>}
                   <span className="aspill" style={{ color: st.color, backgroundColor: st.color + '22' }}>
                     {st.label}
                   </span>
                 </div>
-                <div className="course-top-right">
+                <div className="course-top-right" onClick={(e) => e.stopPropagation()}>
                   {c.qui_type === 'transporteur' && (
                     <a
                       className="btn bg bsm"
@@ -183,10 +190,26 @@ export default function ChantierCoursesTab() {
           chantiers={chantiers}
           employes={employes}
           transporteurs={transporteurs}
+          fournisseurs={fournisseurs}
           defaultChantierId={chantier.id}
           onClose={() => setShowModal(false)}
           onSaved={async () => {
             setShowModal(false)
+            await loadCourses()
+          }}
+        />
+      )}
+      {editCourse && (
+        <CourseModal
+          chantiers={chantiers}
+          employes={employes}
+          transporteurs={transporteurs}
+          fournisseurs={fournisseurs}
+          course={editCourse}
+          defaultChantierId={chantier.id}
+          onClose={() => setEditCourse(null)}
+          onSaved={async () => {
+            setEditCourse(null)
             await loadCourses()
           }}
         />

@@ -7,6 +7,12 @@ import CourseModal from './CourseModal'
 const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
 const CAL_STATUTS = ['programmee', 'urgente', 'en_cours']
 
+function typeIcon(t) {
+  if (t === 'ramasse') return '📥 Ramasse'
+  if (t === 'tournee') return '🔄 Tournée'
+  return '🚚 Livraison'
+}
+
 // Date locale AAAA-MM-JJ (évite le décalage UTC de toISOString en UTC+).
 function isoDay(d) {
   return (
@@ -38,15 +44,21 @@ export default function CoursesGlobal() {
   const [monthOffset, setMonthOffset] = useState(0)
   const [calMode, setCalMode] = useState('sem') // 'sem' | 'mois'
   const [showModal, setShowModal] = useState(false)
+  const [editCourse, setEditCourse] = useState(null)
+  const [newDate, setNewDate] = useState(null) // date pré-remplie (clic case calendrier)
 
   async function loadCourses() {
-    const { data, error: dbError } = await supabase
-      .from('courses')
-      .select(
-        'id, date, statut, qui_id, qui_type, de_id, vers_id, quoi, commentaire, ' +
-          'chantier:chantiers!chantier_id(num, nom)'
-      )
-      .order('date', { ascending: true })
+    const full =
+      'id, date, heure_depart, type_course, etapes, ouvrage_ids, de_libelle, vers_libelle, ' +
+      'statut, qui_id, qui_type, de_id, vers_id, quoi, commentaire, chantier_id, ' +
+      'chantier:chantiers!chantier_id(num, nom)'
+    const core =
+      'id, date, statut, qui_id, qui_type, de_id, vers_id, quoi, commentaire, chantier_id, ' +
+      'chantier:chantiers!chantier_id(num, nom)'
+    let { data, error: dbError } = await supabase.from('courses').select(full).order('date', { ascending: true })
+    if (dbError && /(type_course|etapes|ouvrage_ids|de_libelle|vers_libelle|heure_depart)/.test(dbError.message)) {
+      ;({ data, error: dbError } = await supabase.from('courses').select(core).order('date', { ascending: true }))
+    }
     if (dbError) {
       setError(dbError.message)
       setCourses([])
@@ -243,12 +255,17 @@ export default function CoursesGlobal() {
               return (
                 <div
                   key={c.id}
-                  className="course-card"
+                  className="course-card course-card--click"
                   style={{ borderLeftColor: st.color }}
+                  onClick={() => setEditCourse(c)}
+                  title="Modifier la course"
                 >
                   <div className="course-top">
                     <div className="course-top-left">
                       <span className="course-date mono">{formatDate(c.date)}</span>
+                      {c.type_course && (
+                        <span className="course-type-badge">{typeIcon(c.type_course)}</span>
+                      )}
                       <span
                         className="aspill"
                         style={{ color: st.color, backgroundColor: st.color + '22' }}
@@ -256,7 +273,7 @@ export default function CoursesGlobal() {
                         {st.label}
                       </span>
                     </div>
-                    <div className="course-top-right">
+                    <div className="course-top-right" onClick={(e) => e.stopPropagation()}>
                       {c.qui_type === 'transporteur' && (
                         <a
                           className="btn bg bsm"
@@ -287,20 +304,35 @@ export default function CoursesGlobal() {
                     </div>
                   </div>
 
-                  <div className="course-grid">
-                    <div>
-                      <div className="course-lbl">QUI</div>
-                      <div className="course-val">{quiName(c)}</div>
+                  {c.type_course === 'tournee' ? (
+                    <div className="course-grid">
+                      <div>
+                        <div className="course-lbl">QUI</div>
+                        <div className="course-val">{quiName(c)}</div>
+                      </div>
+                      <div style={{ gridColumn: 'span 2' }}>
+                        <div className="course-lbl">TOURNÉE ({(c.etapes ?? []).length} étapes)</div>
+                        <div className="course-val">
+                          {(c.etapes ?? []).map((e) => e.label).join(' → ') || '—'}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="course-lbl">DE</div>
-                      <div className="course-val">{lieuName(c.de_id)}</div>
+                  ) : (
+                    <div className="course-grid">
+                      <div>
+                        <div className="course-lbl">QUI</div>
+                        <div className="course-val">{quiName(c)}</div>
+                      </div>
+                      <div>
+                        <div className="course-lbl">DE</div>
+                        <div className="course-val">{c.de_libelle ?? lieuName(c.de_id)}</div>
+                      </div>
+                      <div>
+                        <div className="course-lbl">VERS</div>
+                        <div className="course-val">{c.vers_libelle ?? lieuName(c.vers_id)}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="course-lbl">VERS</div>
-                      <div className="course-val">{lieuName(c.vers_id)}</div>
-                    </div>
-                  </div>
+                  )}
 
                   <div className="course-foot">
                     {c.chantier && (
@@ -481,14 +513,31 @@ export default function CoursesGlobal() {
         </>
       )}
 
-      {showModal && (
+      {(showModal || newDate) && (
         <CourseModal
           chantiers={chantiers}
           employes={employes}
           transporteurs={transporteurs}
-          onClose={() => setShowModal(false)}
+          fournisseurs={fournisseurs}
+          defaultDate={newDate ?? undefined}
+          onClose={() => { setShowModal(false); setNewDate(null) }}
           onSaved={async () => {
             setShowModal(false)
+            setNewDate(null)
+            await loadCourses()
+          }}
+        />
+      )}
+      {editCourse && (
+        <CourseModal
+          chantiers={chantiers}
+          employes={employes}
+          transporteurs={transporteurs}
+          fournisseurs={fournisseurs}
+          course={editCourse}
+          onClose={() => setEditCourse(null)}
+          onSaved={async () => {
+            setEditCourse(null)
             await loadCourses()
           }}
         />
