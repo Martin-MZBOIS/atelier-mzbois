@@ -2472,10 +2472,20 @@ textarea.ni:focus {
   padding: 8px 12px;
   font-size: 13px;
   cursor: pointer;
+  border-left: 2px solid transparent;
 }
 .autocomplete-item:hover {
   background: var(--brun2);
   color: var(--brun);
+}
+/* Élément surligné au clavier (↑ ↓) */
+.autocomplete-item--hi {
+  background: #f5f0eb;
+  border-left-color: var(--brun);
+}
+.autocomplete-sub {
+  color: var(--g2);
+  font-size: 12px;
 }
 .checkbox-label {
   display: flex;
