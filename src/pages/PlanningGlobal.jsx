@@ -241,22 +241,30 @@ export default function PlanningGlobal() {
     <section className="page">
       <div className="page-head">
         <h2>Planning</h2>
-        <div className="view-toggle">
-          <button className={'vt' + (viewMode === 'sal' ? ' vt--on' : '')} onClick={() => changeViewMode('sal')}>
-            👷 Salariés
-          </button>
-          <button className={'vt' + (viewMode === 'ch' ? ' vt--on' : '')} onClick={() => changeViewMode('ch')}>
-            🏗 Chantiers
-          </button>
-        </div>
-        <div className="cal-nav" style={{ marginLeft: 'auto' }}>
-          <button className="btn bg bsm" onClick={() => setPeriodOffset((w) => w - 1)}>← Préc.</button>
-          <span className="cal-period" style={{ textTransform: 'capitalize' }}>{periodLabel}</span>
-          <button className="btn bg bsm" onClick={() => setPeriodOffset((w) => w + 1)}>Suiv. →</button>
-          <div className="view-toggle" style={{ marginLeft: 6 }}>
-            <button className={'vt' + (periodMode === 'sem' ? ' vt--on' : '')} onClick={() => changePeriodMode('sem')}>Semaine</button>
-            <button className={'vt' + (periodMode === 'mois' ? ' vt--on' : '')} onClick={() => changePeriodMode('mois')}>Mois</button>
-          </div>
+      </div>
+
+      <nav className="subtabs">
+        <button
+          className={'subtab' + (viewMode === 'sal' ? ' subtab--active' : '')}
+          onClick={() => changeViewMode('sal')}
+        >
+          👷 Salariés
+        </button>
+        <button
+          className={'subtab' + (viewMode === 'ch' ? ' subtab--active' : '')}
+          onClick={() => changeViewMode('ch')}
+        >
+          🏗 Chantiers
+        </button>
+      </nav>
+
+      <div className="cal-nav" style={{ marginBottom: 12 }}>
+        <button className="btn bg bsm" onClick={() => setPeriodOffset((w) => w - 1)}>← Préc.</button>
+        <span className="cal-period" style={{ textTransform: 'capitalize' }}>{periodLabel}</span>
+        <button className="btn bg bsm" onClick={() => setPeriodOffset((w) => w + 1)}>Suiv. →</button>
+        <div className="view-toggle" style={{ marginLeft: 6 }}>
+          <button className={'vt' + (periodMode === 'sem' ? ' vt--on' : '')} onClick={() => changePeriodMode('sem')}>Semaine</button>
+          <button className={'vt' + (periodMode === 'mois' ? ' vt--on' : '')} onClick={() => changePeriodMode('mois')}>Mois</button>
         </div>
       </div>
 

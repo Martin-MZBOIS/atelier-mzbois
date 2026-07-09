@@ -182,20 +182,6 @@ export default function CoursesGlobal() {
     <section className="page">
       <div className="page-head">
         <h2>Courses</h2>
-        <div className="view-toggle">
-          <button
-            className={'vt' + (view === 'liste' ? ' vt--on' : '')}
-            onClick={() => setView('liste')}
-          >
-            📋 Liste
-          </button>
-          <button
-            className={'vt' + (view === 'cal' ? ' vt--on' : '')}
-            onClick={() => setView('cal')}
-          >
-            📅 Calendrier
-          </button>
-        </div>
         <button
           className="btn bp bsm"
           style={{ marginLeft: 'auto' }}
@@ -204,6 +190,21 @@ export default function CoursesGlobal() {
           + Nouvelle course
         </button>
       </div>
+
+      <nav className="subtabs">
+        <button
+          className={'subtab' + (view === 'liste' ? ' subtab--active' : '')}
+          onClick={() => setView('liste')}
+        >
+          📋 Liste
+        </button>
+        <button
+          className={'subtab' + (view === 'cal' ? ' subtab--active' : '')}
+          onClick={() => setView('cal')}
+        >
+          📅 Calendrier
+        </button>
+      </nav>
 
       {error && (
         <div className="alert">
