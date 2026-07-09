@@ -10,6 +10,7 @@ export default function SocieteModal({ societe, defaultType, onClose, onSaved })
   const [form, setForm] = useState({
     nom: societe?.nom ?? '',
     adresse: societe?.adresse ?? '',
+    adresse_livraison: societe?.adresse_livraison ?? '',
     famille: societe?.famille ?? '',
     site_web: societe?.site_web ?? '',
     type: societe?.type ?? defaultType ?? 'fournisseur',
@@ -35,6 +36,7 @@ export default function SocieteModal({ societe, defaultType, onClose, onSaved })
       type: form.type,
     }
     const withSite = { ...base, site_web: form.site_web.trim() || null }
+    const full = { ...withSite, adresse_livraison: form.adresse_livraison.trim() || null }
 
     async function run(payload) {
       return isEdit
@@ -42,8 +44,11 @@ export default function SocieteModal({ societe, defaultType, onClose, onSaved })
         : supabase.from('fournisseurs').insert(payload).select('id').single()
     }
 
-    // Tente avec site_web ; repli sans si la colonne n'existe pas (migration 0010).
-    let { data, error: dbError } = await run(withSite)
+    // Repli progressif si des colonnes n'existent pas (site_web 0010, adresse_livraison 0015).
+    let { data, error: dbError } = await run(full)
+    if (dbError && /adresse_livraison/.test(dbError.message)) {
+      ;({ data, error: dbError } = await run(withSite))
+    }
     if (dbError && /site_web/.test(dbError.message)) {
       ;({ data, error: dbError } = await run(base))
     }
@@ -81,8 +86,17 @@ export default function SocieteModal({ societe, defaultType, onClose, onSaved })
         </div>
 
         <div className="fl">
-          <label>Adresse</label>
+          <label>Adresse siège social</label>
           <input value={form.adresse} onChange={(e) => set('adresse', e.target.value)} />
+        </div>
+
+        <div className="fl">
+          <label>Adresse de livraison (si différente)</label>
+          <input
+            value={form.adresse_livraison}
+            onChange={(e) => set('adresse_livraison', e.target.value)}
+            placeholder="Optionnel"
+          />
         </div>
 
         <div className="fl">

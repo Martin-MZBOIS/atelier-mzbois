@@ -32,11 +32,17 @@ export default function Contacts() {
 
   const loadSocietes = useCallback(async () => {
     const contactsSel = 'contacts:contacts!fournisseur_id(id, nom, role, tel, email)'
-    // Tente avec site_web ; repli sans si la colonne n'existe pas encore.
+    // Repli progressif si adresse_livraison (0015) ou site_web (0010) manquent.
     let { data, error: dbError } = await supabase
       .from('fournisseurs')
-      .select(`id, nom, adresse, famille, type, site_web, ${contactsSel}`)
+      .select(`id, nom, adresse, adresse_livraison, famille, type, site_web, ${contactsSel}`)
       .order('nom')
+    if (dbError && /adresse_livraison/.test(dbError.message)) {
+      ;({ data, error: dbError } = await supabase
+        .from('fournisseurs')
+        .select(`id, nom, adresse, famille, type, site_web, ${contactsSel}`)
+        .order('nom'))
+    }
     if (dbError && /site_web/.test(dbError.message)) {
       ;({ data, error: dbError } = await supabase
         .from('fournisseurs')
@@ -250,8 +256,14 @@ function SocieteDetail({ s, onEdit, onAddContact }) {
       <dl className="detail-fields">
         {s.adresse && (
           <div>
-            <dt>Adresse</dt>
+            <dt>Siège social</dt>
             <dd>{s.adresse}</dd>
+          </div>
+        )}
+        {s.adresse_livraison && (
+          <div>
+            <dt>Livraison</dt>
+            <dd>{s.adresse_livraison}</dd>
           </div>
         )}
         {s.famille && (

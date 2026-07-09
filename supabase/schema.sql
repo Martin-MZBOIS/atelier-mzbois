@@ -102,7 +102,8 @@ create table if not exists utilisateurs (
 create table if not exists fournisseurs (
   id       uuid primary key default gen_random_uuid(),
   nom      text not null,
-  adresse  text,
+  adresse  text, -- adresse du siège social
+  adresse_livraison text, -- adresse de livraison (si différente)
   famille  text, -- famille produit (panneaux, quincaillerie…)
   type     type_societe not null default 'fournisseur',
   site_web text
