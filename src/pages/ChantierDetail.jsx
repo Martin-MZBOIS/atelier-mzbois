@@ -71,7 +71,13 @@ export default function ChantierDetail() {
         <>
           <div className="detail-head">
             <div>
-              <div className="detail-client">{chantier.client ?? '—'}</div>
+              <div
+                className="detail-client detail-client--click"
+                onClick={() => setShowEdit(true)}
+                title="Modifier le chantier"
+              >
+                {chantier.client ?? '—'}
+              </div>
               <div className="detail-num">
                 № {chantier.num ?? '—'}
                 {chantier.nom ? ' · ' + chantier.nom : ''}
@@ -92,9 +98,6 @@ export default function ChantierDetail() {
                 )}
               </div>
             </div>
-            <button className="detail-edit" onClick={() => setShowEdit(true)}>
-              ✏ Modifier
-            </button>
           </div>
 
           <nav className="subtabs">

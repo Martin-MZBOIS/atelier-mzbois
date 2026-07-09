@@ -12,6 +12,7 @@ export default function ReunionTab() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [editReunion, setEditReunion] = useState(null)
 
   async function loadReunions() {
     const { data, error: dbError } = await supabase
@@ -96,7 +97,13 @@ export default function ReunionTab() {
         return (
           <div key={r.id} className="reunion">
             <div className="reunion-head">
-              <div className="reunion-title">📋 Réunion de chantiers du {formatDate(r.date)}</div>
+              <div
+                className="reunion-title reunion-title--click"
+                onClick={() => setEditReunion(r)}
+                title="Modifier le compte-rendu"
+              >
+                📋 Réunion de chantiers du {formatDate(r.date)}
+              </div>
               {r.statut && (
                 <span
                   className="aspill"
@@ -142,6 +149,18 @@ export default function ReunionTab() {
           onClose={() => setShowModal(false)}
           onSaved={async () => {
             setShowModal(false)
+            await loadReunions()
+          }}
+        />
+      )}
+      {editReunion && (
+        <ReunionModal
+          chantierId={chantier.id}
+          reunion={editReunion}
+          employes={employes}
+          onClose={() => setEditReunion(null)}
+          onSaved={async () => {
+            setEditReunion(null)
             await loadReunions()
           }}
         />

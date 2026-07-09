@@ -5,12 +5,19 @@ function today() {
   return new Date().toISOString().slice(0, 10)
 }
 
-// Modal de création d'un compte-rendu de réunion.
-// Les actions saisies créent aussi des tâches (source « reunion »).
-export default function ReunionModal({ chantierId, employes, onClose, onSaved }) {
-  const [date, setDate] = useState(today())
-  const [notes, setNotes] = useState('')
-  const [actions, setActions] = useState([{ texte: '', assigne_a: '' }])
+// Modal de création / édition d'un compte-rendu de réunion.
+// Les nouvelles actions créent aussi des tâches (source « reunion »).
+export default function ReunionModal({ chantierId, reunion, employes, onClose, onSaved }) {
+  const isEdit = !!reunion
+  const [date, setDate] = useState(reunion?.date ?? today())
+  const [notes, setNotes] = useState(reunion?.notes ?? '')
+  const [actions, setActions] = useState(
+    reunion?.reunion_actions?.length
+      ? reunion.reunion_actions.map((a) => ({ id: a.id, texte: a.texte, assigne_a: a.assigne_a ?? '' }))
+      : [{ texte: '', assigne_a: '' }]
+  )
+  // Ids des actions initiales — pour détecter les suppressions en édition.
+  const [initialIds] = useState((reunion?.reunion_actions ?? []).map((a) => a.id))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -30,54 +37,68 @@ export default function ReunionModal({ chantierId, employes, onClose, onSaved })
     setSaving(true)
     setError('')
 
-    // 1. Réunion
-    const { data: reunion, error: rErr } = await supabase
-      .from('reunions')
-      .insert({ chantier_id: chantierId, date, notes: notes.trim() || null })
-      .select('id')
-      .single()
-    if (rErr) {
-      setError(rErr.message)
-      setSaving(false)
-      return
+    // 1. Réunion (update si édition, insert sinon).
+    let reunionId = reunion?.id
+    if (isEdit) {
+      const { error: rErr } = await supabase
+        .from('reunions')
+        .update({ date, notes: notes.trim() || null })
+        .eq('id', reunionId)
+      if (rErr) return fail(rErr.message)
+    } else {
+      const { data, error: rErr } = await supabase
+        .from('reunions')
+        .insert({ chantier_id: chantierId, date, notes: notes.trim() || null })
+        .select('id')
+        .single()
+      if (rErr) return fail(rErr.message)
+      reunionId = data.id
     }
 
-    // 2. Actions + tâches associées
-    const validActions = actions.filter((a) => a.texte.trim())
-    if (validActions.length) {
-      const actionRows = validActions.map((a) => ({
-        reunion_id: reunion.id,
-        texte: a.texte.trim(),
-        assigne_a: a.assigne_a || null,
-        done: false,
-      }))
-      const { error: aErr } = await supabase
+    // 2. Actions : mise à jour des existantes, insertion des nouvelles, suppression des retirées.
+    const valid = actions.filter((a) => a.texte.trim())
+    const keptIds = valid.filter((a) => a.id).map((a) => a.id)
+    const removed = initialIds.filter((id) => !keptIds.includes(id))
+    if (removed.length) {
+      await supabase.from('reunion_actions').delete().in('id', removed)
+    }
+    for (const a of valid.filter((a) => a.id)) {
+      await supabase
         .from('reunion_actions')
-        .insert(actionRows)
-      if (aErr) {
-        setError('Réunion créée mais actions en échec : ' + aErr.message)
-        setSaving(false)
-        return
-      }
+        .update({ texte: a.texte.trim(), assigne_a: a.assigne_a || null })
+        .eq('id', a.id)
+    }
+    const news = valid.filter((a) => !a.id)
+    if (news.length) {
+      const { error: aErr } = await supabase.from('reunion_actions').insert(
+        news.map((a) => ({
+          reunion_id: reunionId,
+          texte: a.texte.trim(),
+          assigne_a: a.assigne_a || null,
+          done: false,
+        }))
+      )
+      if (aErr) return fail('Réunion enregistrée mais actions en échec : ' + aErr.message)
 
-      // Chaque action génère une tâche
-      const taskRows = validActions.map((a) => ({
-        texte: a.texte.trim(),
-        done: false,
-        chantier_id: chantierId,
-        assigne_a: a.assigne_a || null,
-        source: 'reunion',
-      }))
-      const { error: tErr } = await supabase.from('taches').insert(taskRows)
-      if (tErr) {
-        setError('Actions créées mais tâches en échec : ' + tErr.message)
-        setSaving(false)
-        return
-      }
+      const { error: tErr } = await supabase.from('taches').insert(
+        news.map((a) => ({
+          texte: a.texte.trim(),
+          done: false,
+          chantier_id: chantierId ?? reunion?.chantier_id ?? null,
+          assigne_a: a.assigne_a || null,
+          source: 'reunion',
+        }))
+      )
+      if (tErr) return fail('Actions créées mais tâches en échec : ' + tErr.message)
     }
 
     setSaving(false)
     onSaved()
+
+    function fail(msg) {
+      setError(msg)
+      setSaving(false)
+    }
   }
 
   return (
@@ -86,7 +107,7 @@ export default function ReunionModal({ chantierId, employes, onClose, onSaved })
         <button className="modal-close" onClick={onClose}>
           ×
         </button>
-        <div className="modal-title">Nouveau compte-rendu</div>
+        <div className="modal-title">{isEdit ? 'Modifier le compte-rendu' : 'Nouveau compte-rendu'}</div>
 
         <div className="fl">
           <label>Date</label>
@@ -143,7 +164,7 @@ export default function ReunionModal({ chantierId, employes, onClose, onSaved })
 
         <div className="modal-actions">
           <button className="btn bp" disabled={saving} onClick={handleSave}>
-            {saving ? 'Enregistrement…' : 'Créer le CR'}
+            {saving ? 'Enregistrement…' : isEdit ? 'Enregistrer' : 'Créer le CR'}
           </button>
           <button className="btn bg" onClick={onClose}>
             Annuler

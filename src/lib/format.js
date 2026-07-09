@@ -20,6 +20,23 @@ export function formatDateTime(value) {
   })
 }
 
+// Ancienneté « X ans et Y mois » à partir de la date d'entrée ; '' si vide.
+export function calcAnciennete(dateEntree) {
+  if (!dateEntree) return ''
+  const d = new Date(dateEntree)
+  if (Number.isNaN(d.getTime())) return ''
+  const now = new Date()
+  let mois = (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth())
+  if (now.getDate() < d.getDate()) mois -= 1
+  if (mois < 0) return ''
+  const ans = Math.floor(mois / 12)
+  const restMois = mois % 12
+  const pAns = ans > 0 ? `${ans} an${ans > 1 ? 's' : ''}` : ''
+  const pMois = restMois > 0 ? `${restMois} mois` : ''
+  if (pAns && pMois) return `${pAns} et ${pMois}`
+  return pAns || pMois || 'moins d’un mois'
+}
+
 // Format montant € (sans décimales) ; null si vide.
 export function formatEuro(value) {
   if (value == null || value === '') return null

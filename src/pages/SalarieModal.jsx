@@ -10,19 +10,21 @@ function num(v) {
   return Number.isNaN(n) ? null : n
 }
 
-// Création d'une fiche salarié complète.
-export default function SalarieModal({ onClose, onSaved }) {
+// Création ou édition d'une fiche salarié complète.
+export default function SalarieModal({ employe, onClose, onSaved }) {
+  const isEdit = !!employe
   const [form, setForm] = useState({
-    prenom: '',
-    nom: '',
-    role: 'Menuisier',
-    poste: '',
-    contrat: 'CDI',
-    date_entree: '',
-    tel: '',
-    email: '',
-    cout_h: '',
-    note: '',
+    prenom: employe?.prenom ?? '',
+    nom: employe?.nom ?? '',
+    role: employe?.role ?? 'Menuisier',
+    poste: employe?.poste ?? '',
+    contrat: employe?.contrat ?? 'CDI',
+    date_entree: employe?.date_entree ?? '',
+    date_naissance: employe?.date_naissance ?? '',
+    tel: employe?.tel ?? '',
+    email: employe?.email ?? '',
+    cout_h: employe?.cout_h ?? '',
+    note: employe?.note ?? '',
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -38,22 +40,32 @@ export default function SalarieModal({ onClose, onSaved }) {
     }
     setSaving(true)
     setError('')
-    const { data, error: dbError } = await supabase
-      .from('employes')
-      .insert({
-        prenom: form.prenom.trim(),
-        nom: form.nom.trim(),
-        role: form.role || null,
-        poste: form.poste.trim() || null,
-        contrat: form.contrat || null,
-        date_entree: form.date_entree || null,
-        tel: form.tel.trim() || null,
-        email: form.email.trim() || null,
-        cout_h: num(form.cout_h),
-        note: form.note.trim() || null,
-      })
-      .select('id')
-      .single()
+    const payload = {
+      prenom: form.prenom.trim(),
+      nom: form.nom.trim(),
+      role: form.role || null,
+      poste: form.poste.trim() || null,
+      contrat: form.contrat || null,
+      date_entree: form.date_entree || null,
+      date_naissance: form.date_naissance || null,
+      tel: form.tel.trim() || null,
+      email: form.email.trim() || null,
+      cout_h: num(form.cout_h),
+      note: form.note.trim() || null,
+    }
+
+    // Insert/update ; repli sans date_naissance si la colonne n'existe pas encore.
+    async function run(withNaissance) {
+      const body = withNaissance ? payload : (() => { const { date_naissance, ...rest } = payload; return rest })()
+      if (isEdit) {
+        return supabase.from('employes').update(body).eq('id', employe.id).select('id').single()
+      }
+      return supabase.from('employes').insert(body).select('id').single()
+    }
+    let { data, error: dbError } = await run(true)
+    if (dbError && /date_naissance/.test(dbError.message)) {
+      ;({ data, error: dbError } = await run(false))
+    }
     setSaving(false)
     if (dbError) {
       setError(dbError.message)
@@ -68,7 +80,7 @@ export default function SalarieModal({ onClose, onSaved }) {
         <button className="modal-close" onClick={onClose}>
           ×
         </button>
-        <div className="modal-title">Nouveau salarié</div>
+        <div className="modal-title">{isEdit ? 'Modifier le salarié' : 'Nouveau salarié'}</div>
 
         <div className="fg">
           <div className="fl">
@@ -104,10 +116,14 @@ export default function SalarieModal({ onClose, onSaved }) {
           </div>
         </div>
 
-        <div className="fg">
+        <div className="fg3">
           <div className="fl">
             <label>Date d'entrée</label>
             <input type="date" value={form.date_entree} onChange={(e) => set('date_entree', e.target.value)} />
+          </div>
+          <div className="fl">
+            <label>Date de naissance</label>
+            <input type="date" value={form.date_naissance} onChange={(e) => set('date_naissance', e.target.value)} />
           </div>
           <div className="fl">
             <label>Coût horaire (€/h)</label>
@@ -135,7 +151,7 @@ export default function SalarieModal({ onClose, onSaved }) {
 
         <div className="modal-actions">
           <button className="btn bp" disabled={saving} onClick={handleSave}>
-            {saving ? 'Enregistrement…' : 'Créer'}
+            {saving ? 'Enregistrement…' : isEdit ? 'Enregistrer' : 'Créer'}
           </button>
           <button className="btn bg" onClick={onClose}>
             Annuler

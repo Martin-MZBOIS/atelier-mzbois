@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
-import { formatDate, formatEuro } from '../lib/format'
+import { formatDate, formatEuro, calcAnciennete } from '../lib/format'
 import { TYPE_SOCIETE, resolve } from '../lib/statuts'
 import SocieteModal from './SocieteModal'
 import ContactPersonModal from './ContactPersonModal'
@@ -28,7 +28,7 @@ export default function Contacts() {
   const [selectedId, setSelectedId] = useState(null)
   const [societeModal, setSocieteModal] = useState(null) // { societe } | null
   const [addContactFor, setAddContactFor] = useState(null)
-  const [showSalarieModal, setShowSalarieModal] = useState(false)
+  const [salarieModal, setSalarieModal] = useState(null) // {} (nouveau) | { employe } | null
 
   const loadSocietes = useCallback(async () => {
     const contactsSel = 'contacts:contacts!fournisseur_id(id, nom, role, tel, email)'
@@ -108,7 +108,7 @@ export default function Contacts() {
           <button
             className="btn bp bsm"
             style={{ marginLeft: 'auto' }}
-            onClick={() => setShowSalarieModal(true)}
+            onClick={() => setSalarieModal({})}
           >
             + Nouveau salarié
           </button>
@@ -178,7 +178,11 @@ export default function Contacts() {
                 Sélectionne un élément pour voir sa fiche.
               </div>
             ) : isSalaries ? (
-              <EmployeDetail e={selected.raw} onUpdated={loadEmployes} />
+              <EmployeDetail
+                e={selected.raw}
+                onUpdated={loadEmployes}
+                onEdit={() => setSalarieModal({ employe: selected.raw })}
+              />
             ) : (
               <SocieteDetail
                 s={selected.raw}
@@ -212,11 +216,12 @@ export default function Contacts() {
           }}
         />
       )}
-      {showSalarieModal && (
+      {salarieModal && (
         <SalarieModal
-          onClose={() => setShowSalarieModal(false)}
+          employe={salarieModal.employe}
+          onClose={() => setSalarieModal(null)}
           onSaved={async (newId) => {
-            setShowSalarieModal(false)
+            setSalarieModal(null)
             await loadEmployes()
             setSelectedId(newId)
           }}
@@ -232,16 +237,15 @@ function SocieteDetail({ s, onEdit, onAddContact }) {
   return (
     <div className="detail-panel">
       <div className="detail-panel-head">
-        <h3>{s.nom}</h3>
+        <h3 className="detail-name--click" onClick={onEdit} title="Modifier la fiche">
+          {s.nom}
+        </h3>
         <span
           className="aspill"
           style={{ color: t.color, backgroundColor: t.color + '22' }}
         >
           {t.label}
         </span>
-        <button className="btn bg bxs" style={{ marginLeft: 'auto' }} onClick={onEdit}>
-          ✏ Modifier
-        </button>
       </div>
       <dl className="detail-fields">
         {s.adresse && (
@@ -299,10 +303,11 @@ function SocieteDetail({ s, onEdit, onAddContact }) {
   )
 }
 
-function EmployeDetail({ e, onUpdated }) {
+function EmployeDetail({ e, onUpdated, onEdit }) {
   const couleur = e.couleur || '#846a57'
   const initials = ((e.prenom?.[0] ?? '') + (e.nom?.[0] ?? '')).toUpperCase()
   const [colorError, setColorError] = useState('')
+  const anciennete = calcAnciennete(e.date_entree)
 
   async function changeColor(value) {
     const { error: dbError } = await supabase
@@ -323,7 +328,7 @@ function EmployeDetail({ e, onUpdated }) {
         <span className="emp-avatar" style={{ background: couleur }}>
           {initials}
         </span>
-        <h3>
+        <h3 className="detail-name--click" onClick={onEdit} title="Modifier le salarié">
           {e.prenom} {e.nom}
         </h3>
         {e.role && <span className="typbdg typ-div">{e.role}</span>}
@@ -366,7 +371,16 @@ function EmployeDetail({ e, onUpdated }) {
         {e.date_entree && (
           <div>
             <dt>Entrée</dt>
-            <dd>{formatDate(e.date_entree)}</dd>
+            <dd>
+              {formatDate(e.date_entree)}
+              {anciennete && <span className="emp-anc"> · {anciennete}</span>}
+            </dd>
+          </div>
+        )}
+        {e.date_naissance && (
+          <div>
+            <dt>Naissance</dt>
+            <dd>{formatDate(e.date_naissance)}</dd>
           </div>
         )}
         {e.tel && (

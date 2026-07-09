@@ -312,9 +312,6 @@ export default function OuvragesTab() {
                   </option>
                 ))}
               </select>
-              <button className="btn bg bxs" onClick={() => setEditing(o)}>
-                ✏ Détail
-              </button>
             </div>
           </div>
         )

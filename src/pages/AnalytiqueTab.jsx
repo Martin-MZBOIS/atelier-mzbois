@@ -142,11 +142,14 @@ export default function AnalytiqueTab() {
   return (
     <div className="card">
       <div className="card-head">
-        <span className="card-title">📊 Analytique</span>
+        <span
+          className="card-title card-title--click"
+          onClick={() => setShowEdit(true)}
+          title="Modifier l'analytique"
+        >
+          📊 Analytique
+        </span>
         <div className="card-actions">
-          <button className="btn bg bsm" onClick={() => setShowEdit(true)}>
-            ✏ Modifier
-          </button>
           <label className="btn bg bsm" style={{ cursor: 'pointer' }}>
             📂 Import CSV
             <input type="file" accept=".csv" style={{ display: 'none' }} onChange={handleCsv} />
