@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { useAuthStore } from '../store'
 import { formatDate } from '../lib/format'
 import { STATUT_COURSE, STATUT_COURSE_ORDER, resolve } from '../lib/statuts'
 import CourseModal from './CourseModal'
@@ -32,6 +33,7 @@ function ddmm(d) {
 }
 
 export default function CoursesGlobal() {
+  const user = useAuthStore((s) => s.user)
   const [courses, setCourses] = useState([])
   const [chantiers, setChantiers] = useState([])
   const [employes, setEmployes] = useState([])
@@ -50,13 +52,14 @@ export default function CoursesGlobal() {
   async function loadCourses() {
     const full =
       'id, date, heure_depart, type_course, etapes, ouvrage_ids, de_libelle, vers_libelle, ' +
+      'cout_ht, chantier_impute_id, ' +
       'statut, qui_id, qui_type, de_id, vers_id, quoi, commentaire, chantier_id, ' +
       'chantier:chantiers!chantier_id(num, nom)'
     const core =
       'id, date, statut, qui_id, qui_type, de_id, vers_id, quoi, commentaire, chantier_id, ' +
       'chantier:chantiers!chantier_id(num, nom)'
     let { data, error: dbError } = await supabase.from('courses').select(full).order('date', { ascending: true })
-    if (dbError && /(type_course|etapes|ouvrage_ids|de_libelle|vers_libelle|heure_depart)/.test(dbError.message)) {
+    if (dbError && /(type_course|etapes|ouvrage_ids|de_libelle|vers_libelle|heure_depart|cout_ht|chantier_impute_id)/.test(dbError.message)) {
       ;({ data, error: dbError } = await supabase.from('courses').select(core).order('date', { ascending: true }))
     }
     if (dbError) {
@@ -538,6 +541,7 @@ export default function CoursesGlobal() {
           employes={employes}
           transporteurs={transporteurs}
           fournisseurs={fournisseurs}
+          user={user}
           defaultDate={newDate ?? undefined}
           onClose={() => { setShowModal(false); setNewDate(null) }}
           onSaved={async () => {
@@ -553,6 +557,7 @@ export default function CoursesGlobal() {
           employes={employes}
           transporteurs={transporteurs}
           fournisseurs={fournisseurs}
+          user={user}
           course={editCourse}
           onClose={() => setEditCourse(null)}
           onSaved={async () => {

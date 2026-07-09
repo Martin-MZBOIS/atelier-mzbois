@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { STATUT_COURSE, STATUT_COURSE_ORDER } from '../lib/statuts'
 import Autocomplete from '../components/Autocomplete'
+import { logModifs } from '../lib/historique'
 
 const MZBOIS = { id: 'mzbois', label: 'MZ Bois (atelier)' }
 
@@ -22,12 +23,14 @@ export default function CourseModal({
   transporteurs = [],
   fournisseurs = [],
   course,
+  user,
   defaultChantierId,
   defaultDate,
   onClose,
   onSaved,
 }) {
   const isEdit = Boolean(course)
+  const isAdmin = user?.role === 'admin'
 
   const [type, setType] = useState(course?.type_course ?? 'livraison')
   const [quiKind, setQuiKind] = useState(course?.qui_type === 'transporteur' ? 'externe' : 'interne')
@@ -50,6 +53,10 @@ export default function CourseModal({
   // Étapes de tournée : [{ label, ouvrage_id }].
   const [etapes, setEtapes] = useState(course?.etapes ?? [])
   const [dragIdx, setDragIdx] = useState(null)
+
+  // Champs Admin (0022).
+  const [coutHt, setCoutHt] = useState(course?.cout_ht ?? '')
+  const [chantierImpute, setChantierImpute] = useState(course?.chantier_impute_id ?? '')
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -141,6 +148,10 @@ export default function CourseModal({
       commentaire: form.commentaire.trim() || null,
       ouvrage_ids: ouvrageIds.length ? ouvrageIds : null,
     }
+    if (isAdmin) {
+      base.cout_ht = coutHt === '' ? null : Number(coutHt)
+      base.chantier_impute_id = chantierImpute || null
+    }
     if (type === 'tournee') {
       base.etapes = etapes.filter((e) => e.label.trim())
       base.de_id = null
@@ -177,7 +188,7 @@ export default function CourseModal({
     }
     if (
       dbError &&
-      /(type_course|etapes|ouvrage_ids|de_libelle|vers_libelle)/.test(dbError.message)
+      /(type_course|etapes|ouvrage_ids|de_libelle|vers_libelle|cout_ht|chantier_impute_id)/.test(dbError.message)
     ) {
       ;({ error: dbError } = await run({ ...core, heure_depart: form.heure_depart || null }))
       if (dbError && /heure_depart/.test(dbError.message)) {
@@ -189,6 +200,18 @@ export default function CourseModal({
       setError(dbError.message)
       return
     }
+
+    // Traçabilité des modifications Admin (coût, imputation).
+    if (isAdmin) {
+      await logModifs(
+        {
+          'coût course (HT)': [course?.cout_ht, base.cout_ht],
+          'chantier imputé': [course?.chantier_impute_id, base.chantier_impute_id],
+        },
+        { table: 'courses', chantierId: base.chantier_id, user }
+      )
+    }
+
     onSaved()
   }
 
@@ -364,6 +387,27 @@ export default function CourseModal({
           <label>Commentaire</label>
           <input value={form.commentaire} onChange={(e) => set('commentaire', e.target.value)} />
         </div>
+
+        {isAdmin && (
+          <>
+            <div className="sl" style={{ marginTop: 8 }}>🗂 Admin — coût &amp; imputation</div>
+            <div className="fg">
+              <div className="fl">
+                <label>Coût HT (€)</label>
+                <input type="number" step="0.01" value={coutHt} onChange={(e) => setCoutHt(e.target.value)} />
+              </div>
+              <div className="fl">
+                <label>Chantier imputé</label>
+                <select value={chantierImpute} onChange={(e) => setChantierImpute(e.target.value)}>
+                  <option value="">— (même que lié)</option>
+                  {chantiers.map((c) => (
+                    <option key={c.id} value={c.id}>{c.num} · {c.nom}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </>
+        )}
 
         {error && <div className="alert">{error}</div>}
 

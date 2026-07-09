@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuthStore } from '../store'
 import { formatDate } from '../lib/format'
 import { STATUT_COURSE, STATUT_COURSE_ORDER, resolve } from '../lib/statuts'
 import CourseModal from './CourseModal'
 
 export default function ChantierCoursesTab() {
   const { chantier } = useOutletContext()
+  const user = useAuthStore((s) => s.user)
   const [courses, setCourses] = useState([])
   const [employes, setEmployes] = useState([])
   const [fournisseurs, setFournisseurs] = useState([])
@@ -19,11 +21,12 @@ export default function ChantierCoursesTab() {
   async function loadCourses() {
     const full =
       'id, date, heure_depart, type_course, etapes, ouvrage_ids, de_libelle, vers_libelle, ' +
+      'cout_ht, chantier_impute_id, ' +
       'statut, qui_id, qui_type, de_id, vers_id, quoi, commentaire, chantier_id'
     const core = 'id, date, statut, qui_id, qui_type, de_id, vers_id, quoi, commentaire, chantier_id'
     let { data, error: dbError } = await supabase
       .from('courses').select(full).eq('chantier_id', chantier.id).order('date', { ascending: true })
-    if (dbError && /(type_course|etapes|ouvrage_ids|de_libelle|vers_libelle|heure_depart)/.test(dbError.message)) {
+    if (dbError && /(type_course|etapes|ouvrage_ids|de_libelle|vers_libelle|heure_depart|cout_ht|chantier_impute_id)/.test(dbError.message)) {
       ;({ data, error: dbError } = await supabase
         .from('courses').select(core).eq('chantier_id', chantier.id).order('date', { ascending: true }))
     }
@@ -191,6 +194,7 @@ export default function ChantierCoursesTab() {
           employes={employes}
           transporteurs={transporteurs}
           fournisseurs={fournisseurs}
+          user={user}
           defaultChantierId={chantier.id}
           onClose={() => setShowModal(false)}
           onSaved={async () => {
@@ -205,6 +209,7 @@ export default function ChantierCoursesTab() {
           employes={employes}
           transporteurs={transporteurs}
           fournisseurs={fournisseurs}
+          user={user}
           course={editCourse}
           defaultChantierId={chantier.id}
           onClose={() => setEditCourse(null)}

@@ -251,7 +251,14 @@ create table if not exists courses (
   chantier_id uuid references chantiers (id) on delete set null,
   ouvrage     text,
   quoi        text,
-  commentaire text
+  commentaire text,
+  type_course text not null default 'livraison', -- livraison | ramasse | tournee (0021)
+  etapes      jsonb, -- tournée : [{ label, ouvrage_id }] (0021)
+  ouvrage_ids uuid[], -- ouvrages liés (0021)
+  de_libelle  text, -- libellé lieu départ (0021)
+  vers_libelle text, -- libellé lieu arrivée (0021)
+  cout_ht     numeric(12, 2), -- coût HT saisi par Admin (0022)
+  chantier_impute_id uuid references chantiers (id) on delete set null -- imputation (0022)
 );
 comment on column courses.qui_id is 'Acteur de la course (référence polymorphe selon qui_type)';
 comment on column courses.qui_type is 'Type d''acteur (employe / fournisseur / externe…)';
