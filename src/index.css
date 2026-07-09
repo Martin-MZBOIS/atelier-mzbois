@@ -2153,12 +2153,13 @@ textarea.ni:focus {
 
 .plan-block {
   color: #333;
-  border-radius: 3px;
+  border-radius: 0;
   padding: 4px 6px;
   height: 100%;
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
+  cursor: pointer;
 }
 .plan-block--draggable {
   cursor: grab;
@@ -2210,6 +2211,33 @@ textarea.ni:focus {
 }
 .plan-table--month .plan-cell {
   padding: 2px;
+}
+
+/* Menu contextuel (clic droit sur un bloc planning) */
+.ctx-menu {
+  position: fixed;
+  z-index: 1200;
+  background: var(--w);
+  border: 0.5px solid var(--g3);
+  box-shadow: 0 6px 20px rgba(26, 20, 18, 0.18);
+  padding: 4px;
+}
+.ctx-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 7px 12px;
+  cursor: pointer;
+  color: var(--acier);
+  white-space: nowrap;
+}
+.ctx-menu-item:hover {
+  background: var(--rd2);
+  color: var(--rd);
 }
 
 /* Vue Chantiers (Gantt) */

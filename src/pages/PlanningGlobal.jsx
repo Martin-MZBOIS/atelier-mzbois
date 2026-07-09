@@ -36,11 +36,16 @@ export default function PlanningGlobal() {
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState({}) // chantiers dépliés (vue chantiers)
   const [newAff, setNewAff] = useState(null)
+  const [editAff, setEditAff] = useState(null) // affectation en cours d'édition
+  const [menu, setMenu] = useState(null) // menu contextuel { aff, x, y }
 
   const loadAffectations = useCallback(async () => {
-    const { data, error: dbError } = await supabase
-      .from('plan_affectations')
-      .select('id, chantier_id, phase, sal_id, date_debut, date_fin, commentaire')
+    const full = 'id, chantier_id, phase, sal_id, date_debut, date_fin, commentaire, heure_debut, heure_fin'
+    const core = 'id, chantier_id, phase, sal_id, date_debut, date_fin, commentaire'
+    let { data, error: dbError } = await supabase.from('plan_affectations').select(full)
+    if (dbError && /heure_/.test(dbError.message)) {
+      ;({ data, error: dbError } = await supabase.from('plan_affectations').select(core))
+    }
     if (dbError) setError(dbError.message)
     else setAffectations(data ?? [])
   }, [])
@@ -195,6 +200,47 @@ export default function PlanningGlobal() {
   }, [chantiers, search])
 
   // Fusionne les affectations multi-jours d'un salarié en colspan.
+  // Supprime une affectation (menu contextuel).
+  async function deleteAff(aff) {
+    setMenu(null)
+    const { error: dbError } = await supabase.from('plan_affectations').delete().eq('id', aff.id)
+    if (dbError) setError(dbError.message)
+    await loadAffectations()
+  }
+
+  // Ferme le menu contextuel au clic ailleurs.
+  useEffect(() => {
+    if (!menu) return
+    const close = () => setMenu(null)
+    document.addEventListener('click', close)
+    return () => document.removeEventListener('click', close)
+  }, [menu])
+
+  function buildRowFromAffs(affs) {
+    const cells = []
+    let di = 0
+    while (di < days.length) {
+      const iso = isoDay(days[di])
+      const aff = affs.find(
+        (a) => a.date_debut && a.date_fin && a.date_debut <= iso && a.date_fin >= iso
+      )
+      if (aff) {
+        let span = 0
+        for (let j = di; j < days.length; j++) {
+          const dj = isoDay(days[j])
+          if (dj >= aff.date_debut && dj <= aff.date_fin) span++
+          else break
+        }
+        cells.push({ type: 'aff', aff, span, key: aff.id })
+        di += span
+      } else {
+        cells.push({ type: 'empty', key: 'e' + di, day: days[di] })
+        di += 1
+      }
+    }
+    return cells
+  }
+
   function buildRow(emp) {
     const cells = []
     let di = 0
@@ -345,6 +391,12 @@ export default function PlanningGlobal() {
                             className="plan-block plan-block--draggable"
                             draggable
                             onDragStart={(e) => onDragStartBlock(e, aff)}
+                            onClick={() => setEditAff(aff)}
+                            onContextMenu={(e) => {
+                              e.preventDefault()
+                              setMenu({ aff, x: e.clientX, y: e.clientY })
+                            }}
+                            title="Cliquer pour modifier · clic droit pour supprimer"
                             style={{
                               background: chantierColor[aff.chantier_id],
                               borderLeft: `4px solid ${emp.couleur ?? 'transparent'}`,
@@ -411,20 +463,45 @@ export default function PlanningGlobal() {
                                 </div>
                                 {salNames && <div className="plan-phase-sal">{salNames}</div>}
                               </td>
-                              {days.map((d, i) => {
-                                const iso = isoDay(d)
-                                const we = d.getDay() === 0 || d.getDay() === 6
-                                const isT = iso === todayIso
-                                const hasA = pAffs.some((a) => a.date_debut <= iso && a.date_fin >= iso)
+                              {buildRowFromAffs(pAffs).map((cell) => {
+                                if (cell.type === 'empty') {
+                                  const iso = isoDay(cell.day)
+                                  const we = cell.day.getDay() === 0 || cell.day.getDay() === 6
+                                  const isT = iso === todayIso
+                                  return (
+                                    <td
+                                      key={cell.key}
+                                      className={'plan-cell plan-cell--empty' + (isT ? ' plan-cell--today' : we ? ' plan-cell--we' : '')}
+                                      title="Affecter"
+                                      onClick={() => setNewAff({ chantierId: c.id, phase: ph.slug, date: iso })}
+                                    />
+                                  )
+                                }
+                                const { aff, span } = cell
+                                const emp = empMap[aff.sal_id]
                                 return (
-                                  <td
-                                    key={i}
-                                    className={'plan-cell plan-cell--empty' + (isT ? ' plan-cell--today' : we ? ' plan-cell--we' : '')}
-                                    onClick={() => setNewAff({ chantierId: c.id, phase: ph.slug })}
-                                  >
-                                    {hasA && (
-                                      <div className="plan-phase-bar" style={{ background: ph.color, opacity: 0.3 }} />
-                                    )}
+                                  <td key={cell.key} colSpan={span} className="plan-cell" title={aff.commentaire ?? ''}>
+                                    <div
+                                      className="plan-block"
+                                      onClick={() => setEditAff(aff)}
+                                      onContextMenu={(e) => {
+                                        e.preventDefault()
+                                        setMenu({ aff, x: e.clientX, y: e.clientY })
+                                      }}
+                                      title="Cliquer pour modifier · clic droit pour supprimer"
+                                      style={{ background: ph.color + '55', borderLeft: `4px solid ${ph.color}` }}
+                                    >
+                                      <div className="plan-block-num">{emp?.prenom ?? '?'}</div>
+                                      {span > 1 && <div className="plan-block-sub">{span}j</div>}
+                                      <div
+                                        className="plan-block-resize"
+                                        title="Étendre"
+                                        onClick={(e) => e.stopPropagation()}
+                                        onMouseDown={(e) => onResizeStart(e, aff)}
+                                      >
+                                        ⟩
+                                      </div>
+                                    </div>
                                   </td>
                                 )
                               })}
@@ -452,6 +529,27 @@ export default function PlanningGlobal() {
             await loadAffectations()
           }}
         />
+      )}
+
+      {editAff && (
+        <PlanAffectationModal
+          chantiers={chantiers}
+          salaries={employes}
+          affectation={editAff}
+          onClose={() => setEditAff(null)}
+          onSaved={async () => {
+            setEditAff(null)
+            await loadAffectations()
+          }}
+        />
+      )}
+
+      {menu && (
+        <div className="ctx-menu" style={{ top: menu.y, left: menu.x }}>
+          <button className="ctx-menu-item" onClick={() => deleteAff(menu.aff)}>
+            🗑 Supprimer l’affectation
+          </button>
+        </div>
       )}
     </section>
   )
