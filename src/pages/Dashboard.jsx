@@ -107,6 +107,14 @@ export default function Dashboard() {
     if (emp.error && /date_naissance/.test(emp.error.message)) {
       emp = await supabase.from('employes').select('id, prenom, nom, role, date_entree').order('nom')
     }
+    // Messages d'assistance non lus (0017) — best-effort, ignoré si absent.
+    let assist = await supabase
+      .from('assistance_messages')
+      .select('id, type, texte, categorie, lu, cree_le')
+      .eq('lu', false)
+      .order('cree_le', { ascending: false })
+    if (assist.error) assist = { data: [] }
+
     const [ouv, ach, tach, fil, fb, plan, ch] = await Promise.all([
       supabase.from('ouvrages').select('id, nom, statut, dep, chantier:chantiers!chantier_id(id, num)'),
       supabase.from('achats').select('id, nom, st, mht, chantier:chantiers!chantier_id(id, num)'),
@@ -130,6 +138,7 @@ export default function Dashboard() {
       affectations: plan.data ?? [],
       employes: emp.data ?? [],
       chantiers: ch.data ?? [],
+      assistance: assist.data ?? [],
     }
   }
 
@@ -312,6 +321,9 @@ export default function Dashboard() {
   if (achatsSansMontant.length)
     alerts.push({ ico: '💶', txt: `${achatsSansMontant.length} achat${achatsSansMontant.length > 1 ? 's' : ''} sans montant à compléter (avant l'analytique)`, onClick: () => navigate('/achats') })
   if (user?.role === 'dir') {
+    const nbAssist = (data?.assistance ?? []).length
+    if (nbAssist)
+      alerts.push({ ico: '💬', txt: `${nbAssist} message${nbAssist > 1 ? 's' : ''} d'assistance (question/suggestion) à consulter`, onClick: () => navigate('/assistance') })
     const dHc = daysUntil(nextHommesCles())
     if (dHc >= 0 && dHc <= 7)
       alerts.push({ ico: '⚠️', txt: `Réunion Hommes clés dans ${dHc} jour${dHc > 1 ? 's' : ''} — préparez l'ordre du jour`, onClick: () => navigate('/copil') })

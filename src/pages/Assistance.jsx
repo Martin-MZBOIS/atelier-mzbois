@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { createContext, useContext, useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { useAuthStore } from '../store'
 
 // Onglets d'aide : Général (tous les onglets) + une section par rôle.
 const SECTIONS = [
@@ -9,7 +11,23 @@ const SECTIONS = [
   { id: 'prod', label: 'Resp. PROD' },
 ]
 
+const SearchCtx = createContext('')
+
+// Extrait le texte brut d'un arbre de nœuds React (pour la recherche).
+function nodeText(node) {
+  if (node == null || node === false) return ''
+  if (typeof node === 'string' || typeof node === 'number') return String(node)
+  if (Array.isArray(node)) return node.map(nodeText).join(' ')
+  if (node.props) return nodeText(node.props.children)
+  return ''
+}
+
 function Bloc({ titre, children }) {
+  const q = useContext(SearchCtx)
+  if (q) {
+    const hay = (titre + ' ' + nodeText(children)).toLowerCase()
+    if (!hay.includes(q)) return null
+  }
   return (
     <div className="help-bloc">
       <h3 className="help-bloc-title">{titre}</h3>
@@ -248,14 +266,94 @@ function Prod() {
   )
 }
 
+const CATEGORIES = ['Chantiers', 'Achats', 'Planning', 'Courses', 'Autre']
+
+function MessageForm({ type }) {
+  const user = useAuthStore((s) => s.user)
+  const [texte, setTexte] = useState('')
+  const [categorie, setCategorie] = useState('Chantiers')
+  const [sending, setSending] = useState(false)
+  const [done, setDone] = useState(false)
+  const [error, setError] = useState('')
+
+  async function send() {
+    if (!texte.trim()) return
+    setSending(true)
+    setError('')
+    const payload = {
+      type,
+      texte: texte.trim(),
+      categorie: type === 'question' ? categorie : null,
+      auteur_id: user?.id ?? null,
+    }
+    const { error: dbError } = await supabase.from('assistance_messages').insert(payload)
+    setSending(false)
+    if (dbError) {
+      setError(
+        /assistance_messages/.test(dbError.message)
+          ? 'Exécute la migration 0017_assistance_messages.sql.'
+          : dbError.message
+      )
+      return
+    }
+    setTexte('')
+    setDone(true)
+    setTimeout(() => setDone(false), 4000)
+  }
+
+  return (
+    <div className="help-bloc">
+      <h3 className="help-bloc-title">
+        {type === 'question' ? '❓ Poser une question' : '💡 Suggérer une amélioration'}
+      </h3>
+      <div className="help-bloc-body">
+        {type === 'question' && (
+          <div className="fl">
+            <label>Catégorie</label>
+            <select value={categorie} onChange={(e) => setCategorie(e.target.value)}>
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        <textarea
+          className="ni"
+          rows="3"
+          placeholder={type === 'question' ? 'Votre question…' : 'Votre idée d’amélioration…'}
+          value={texte}
+          onChange={(e) => setTexte(e.target.value)}
+        />
+        {error && <div className="alert" style={{ marginTop: 8 }}>{error}</div>}
+        <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button className="btn bp bsm" disabled={sending || !texte.trim()} onClick={send}>
+            {sending ? 'Envoi…' : 'Envoyer'}
+          </button>
+          {done && <span className="param-msg">✓ Envoyé au Dirigeant</span>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Assistance() {
   const [section, setSection] = useState('general')
+  const [search, setSearch] = useState('')
+  const q = search.trim().toLowerCase()
 
   return (
     <section className="page">
       <div className="page-head">
         <h2>Assistance</h2>
       </div>
+
+      <input
+        className="plan-search"
+        style={{ width: 320 }}
+        placeholder="🔍 Rechercher dans l’aide…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
       <nav className="subtabs">
         {SECTIONS.map((s) => (
@@ -270,11 +368,17 @@ export default function Assistance() {
       </nav>
 
       <div className="help-content">
-        {section === 'general' && <General />}
-        {section === 'dir' && <Dir />}
-        {section === 'be' && <Be />}
-        {section === 'prog' && <Prog />}
-        {section === 'prod' && <Prod />}
+        <SearchCtx.Provider value={q}>
+          {section === 'general' && <General />}
+          {section === 'dir' && <Dir />}
+          {section === 'be' && <Be />}
+          {section === 'prog' && <Prog />}
+          {section === 'prod' && <Prod />}
+        </SearchCtx.Provider>
+
+        {/* Formulaires question / suggestion — toujours visibles. */}
+        <MessageForm type="question" />
+        <MessageForm type="suggestion" />
       </div>
     </section>
   )
