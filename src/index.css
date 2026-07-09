@@ -2414,6 +2414,43 @@ textarea.ni:focus {
   margin-bottom: 10px;
 }
 
+/* Composition d'un ouvrage modèle (articles composants) */
+.compo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.compo-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--g6);
+  border: 0.5px solid var(--g4);
+}
+.compo-nom {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.compo-qty {
+  width: 70px;
+  padding: 5px 8px;
+  border: 0.5px solid var(--g4);
+  border-radius: 0;
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+}
+.compo-qty:focus {
+  border-color: var(--brun);
+}
+
 /* Multi-select autocomplete (chips + suggestions) */
 .chip-row {
   display: flex;

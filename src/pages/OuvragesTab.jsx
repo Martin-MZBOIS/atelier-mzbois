@@ -129,20 +129,58 @@ export default function OuvragesTab() {
   }
 
   async function applyModel(model) {
-    const { error: dbError } = await supabase.from('ouvrages').insert({
-      chantier_id: chantier.id,
-      nom: model.nom,
-      notes: model.description ?? null,
-      statut: 'a_faire_be',
-      qty: 1,
-      pose: false,
-      fact_def: false,
-    })
+    const { data: ouvrage, error: dbError } = await supabase
+      .from('ouvrages')
+      .insert({
+        chantier_id: chantier.id,
+        nom: model.nom,
+        notes: model.description ?? null,
+        statut: 'a_faire_be',
+        qty: 1,
+        pose: false,
+        fact_def: false,
+      })
+      .select('id')
+      .single()
     setShowModels(false)
     if (dbError) {
       setError(dbError.message)
       return
     }
+
+    // Composition du modèle → propose de créer les achats correspondants (0018).
+    const { data: compo, error: cErr } = await supabase
+      .from('modele_articles')
+      .select('quantite, statut_defaut, article:articles!article_id(nom, typ, prix)')
+      .eq('modele_id', model.id)
+    if (!cErr && compo && compo.length) {
+      const ok = window.confirm(
+        `Ce modèle contient ${compo.length} article(s). Créer les achats correspondants sur ce chantier ?`
+      )
+      if (ok) {
+        const rows = compo.map((c) => {
+          const qty = Number(c.quantite) || 1
+          const prix = c.article?.prix != null ? Number(c.article.prix) : null
+          return {
+            chantier_id: chantier.id,
+            nom: c.article?.nom ?? 'Article',
+            typ: c.article?.typ ?? null,
+            qty,
+            st: c.statut_defaut || 'a_commander',
+            prix_u: prix,
+            mht: prix != null ? prix * qty : null,
+          }
+        })
+        const { data: inserted, error: aErr } = await supabase.from('achats').insert(rows).select('id')
+        // Rattache les achats créés à l'ouvrage (best-effort).
+        if (!aErr && inserted && ouvrage) {
+          await supabase
+            .from('achats_ouvrages')
+            .insert(inserted.map((a) => ({ achat_id: a.id, ouvrage_id: ouvrage.id })))
+        }
+      }
+    }
+
     await loadOuvrages()
   }
 

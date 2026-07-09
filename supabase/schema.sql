@@ -361,6 +361,16 @@ create table if not exists ouvrage_modeles (
   typs        typ_achat[] not null default '{}'
 );
 
+-- Composition d'un ouvrage modèle en articles de bibliothèque (migration 0018)
+create table if not exists modele_articles (
+  id            uuid primary key default gen_random_uuid(),
+  modele_id     uuid not null references ouvrage_modeles(id) on delete cascade,
+  article_id    uuid not null references articles(id) on delete cascade,
+  quantite      numeric(12, 2) not null default 1,
+  statut_defaut text not null default 'a_commander',
+  unique (modele_id, article_id)
+);
+
 -- COPIL (comités de pilotage)
 create table if not exists copil_reunions (
   id            uuid primary key default gen_random_uuid(),
