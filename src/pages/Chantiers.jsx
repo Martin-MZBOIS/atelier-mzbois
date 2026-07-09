@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuthStore } from '../store'
 import { formatDate } from '../lib/format'
 
 const DONE = ['termine', 'facture']
@@ -25,6 +26,7 @@ const FILTERS = [
 
 export default function Chantiers() {
   const navigate = useNavigate()
+  const user = useAuthStore((s) => s.user)
   const [chantiers, setChantiers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -37,14 +39,17 @@ export default function Chantiers() {
     async function load() {
       setLoading(true)
       setError('')
-      const { data, error: dbError } = await supabase
+      let query = supabase
         .from('chantiers')
         .select(
-          'id, num, client, nom, dep_approx, avec_pose, created_at, ' +
+          'id, num, ca_id, client, nom, dep_approx, avec_pose, created_at, ' +
             'ca:utilisateurs!ca_id(prenom, nom), ' +
             'ouvrages(statut)'
         )
         .order('num', { ascending: true })
+      // Le Chargé d'affaire ne voit que ses chantiers.
+      if (user?.role === 'ca' && user?.id) query = query.eq('ca_id', user.id)
+      const { data, error: dbError } = await query
       if (!active) return
       if (dbError) {
         setError(dbError.message)

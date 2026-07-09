@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSettings } from '../store/settings'
+import { useSettings, ROLE_DEFAULT_DENY } from '../store/settings'
 import { useAuthStore } from '../store'
 
 // Onglets pouvant être activés/désactivés par rôle.
@@ -17,7 +17,9 @@ const FEATURES = [
 const ROLE_COLS = [
   { id: 'be', label: 'BE' },
   { id: 'prog', label: 'Prog' },
-  { id: 'prod', label: 'Prod' },
+  { id: 'prod', label: 'Resp. PROD' },
+  { id: 'ca', label: 'CA' },
+  { id: 'admin', label: 'Admin' },
 ]
 
 export default function Parametres() {
@@ -67,7 +69,10 @@ export default function Parametres() {
     setUnites((prev) => prev.filter((x) => x !== u))
   }
   function isAllowed(roleId, featureId) {
-    return droits[roleId]?.[featureId] !== false
+    const explicit = droits[roleId]?.[featureId]
+    if (explicit === true) return true
+    if (explicit === false) return false
+    return !(ROLE_DEFAULT_DENY[roleId] ?? []).includes(featureId)
   }
   function toggleDroit(roleId, featureId) {
     setDroits((prev) => {

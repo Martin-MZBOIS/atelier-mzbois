@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { logModifs } from '../lib/historique'
 
 function num(v) {
   if (v === '' || v == null) return null
@@ -8,7 +9,7 @@ function num(v) {
 }
 
 // Édition complète d'un ouvrage.
-export default function OuvrageEditModal({ ouvrage, employes, onClose, onSaved }) {
+export default function OuvrageEditModal({ ouvrage, employes, user, chantierId, onClose, onSaved }) {
   const [form, setForm] = useState({
     nom: ouvrage.nom ?? '',
     qty: ouvrage.qty ?? 1,
@@ -54,11 +55,24 @@ export default function OuvrageEditModal({ ouvrage, employes, onClose, onSaved }
         notes: form.notes.trim() || null,
       })
       .eq('id', ouvrage.id)
-    setSaving(false)
     if (dbError) {
+      setSaving(false)
       setError(dbError.message)
       return
     }
+
+    // Traçabilité : si un Admin modifie la situation (%) ou la facturation.
+    if (user?.role === 'admin') {
+      await logModifs(
+        {
+          'situation %': [ouvrage.sit_pct, num(form.sit_pct)],
+          facturation: [ouvrage.fact_def ? 'Facturé' : 'Non facturé', form.fact_def ? 'Facturé' : 'Non facturé'],
+        },
+        { table: 'ouvrages', chantierId, user }
+      )
+    }
+
+    setSaving(false)
     onSaved()
   }
 

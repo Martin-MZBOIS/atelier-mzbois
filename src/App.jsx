@@ -12,6 +12,7 @@ import ChantierCoursesTab from './pages/ChantierCoursesTab'
 import FilTab from './pages/FilTab'
 import ReunionTab from './pages/ReunionTab'
 import FeedbacksTab from './pages/FeedbacksTab'
+import HistoriqueTab from './pages/HistoriqueTab'
 import AchatsGlobal from './pages/AchatsGlobal'
 import CoursesGlobal from './pages/CoursesGlobal'
 import PlanningGlobal from './pages/PlanningGlobal'
@@ -44,6 +45,7 @@ function App() {
           <Route path="reunion" element={<ReunionTab />} />
           <Route path="feedbacks" element={<FeedbacksTab />} />
           <Route path="analytique" element={<AnalytiqueTab />} />
+          <Route path="historique" element={<HistoriqueTab />} />
         </Route>
         <Route path="/achats" element={<AchatsGlobal />} />
         <Route path="/planning" element={<PlanningGlobal />} />

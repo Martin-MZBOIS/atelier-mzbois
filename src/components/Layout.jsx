@@ -48,7 +48,6 @@ const CHAPTERS = [
   {
     num: '05',
     title: 'Admin',
-    dirOnly: true,
     items: [
       { to: '/parametres', id: 'parametres', label: 'Paramètres', icon: 'settings', dirOnly: true },
       { to: '/assistance', id: 'assistance', label: 'Assistance', icon: 'help' },

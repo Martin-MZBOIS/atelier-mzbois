@@ -4,6 +4,8 @@ export const ROLES = {
   be: { key: 'be', label: 'Resp. BE', short: 'BE', icon: '✏' },
   prog: { key: 'prog', label: 'Programmeur', short: 'PROG', icon: '⌨' },
   prod: { key: 'prod', label: 'Resp. PROD', short: 'PROD', icon: '⚙' },
+  ca: { key: 'ca', label: "Chargé d'affaire", short: 'CA', icon: '📐' },
+  admin: { key: 'admin', label: 'Admin', short: 'ADMIN', icon: '🗂' },
 }
 
-export const ROLE_ORDER = ['dir', 'be', 'prog', 'prod']
+export const ROLE_ORDER = ['dir', 'be', 'prog', 'prod', 'ca', 'admin']

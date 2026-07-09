@@ -10,6 +10,13 @@ export const DEFAULT_SETTINGS = {
   droits: {},
 }
 
+// Onglets masqués par défaut pour certains rôles (le Dirigeant peut réactiver
+// via la matrice des droits ; une valeur explicite `true` prime).
+export const ROLE_DEFAULT_DENY = {
+  ca: ['planning', 'copil'],
+  admin: ['planning', 'copil'],
+}
+
 // Store de configuration globale (chargé une fois après login).
 export const useSettings = create((set, get) => ({
   ...DEFAULT_SETTINGS,
@@ -41,10 +48,14 @@ export const useSettings = create((set, get) => ({
     return error
   },
 
-  // Accès d'un rôle à un onglet (dir = tout ; défaut = autorisé).
+  // Accès d'un rôle à un onglet (dir = tout ; défaut = autorisé sauf règles
+  // de rôle ; une valeur explicite dans la matrice des droits prime).
   canAccess: (role, tabId) => {
     if (role === 'dir') return true
     const droits = get().droits ?? {}
-    return droits[role]?.[tabId] !== false
+    const explicit = droits[role]?.[tabId]
+    if (explicit === true) return true
+    if (explicit === false) return false
+    return !(ROLE_DEFAULT_DENY[role] ?? []).includes(tabId)
   },
 }))

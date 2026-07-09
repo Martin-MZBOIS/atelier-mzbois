@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuthStore } from '../store'
 import { formatDate } from '../lib/format'
 import {
   STATUT_OUVRAGE,
@@ -30,6 +31,7 @@ function num(v) {
 
 export default function OuvragesTab() {
   const { chantier } = useOutletContext()
+  const user = useAuthStore((s) => s.user)
   const [ouvrages, setOuvrages] = useState([])
   const [employes, setEmployes] = useState([])
   const [fournisseurs, setFournisseurs] = useState([])
@@ -380,6 +382,8 @@ export default function OuvragesTab() {
         <OuvrageEditModal
           ouvrage={editing}
           employes={employes}
+          user={user}
+          chantierId={chantier.id}
           onClose={() => setEditing(null)}
           onSaved={async () => {
             setEditing(null)

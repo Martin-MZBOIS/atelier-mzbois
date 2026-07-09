@@ -25,7 +25,7 @@ create extension if not exists pgcrypto;
 do $$
 begin
   if not exists (select 1 from pg_type where typname = 'user_role') then
-    create type user_role as enum ('dir', 'be', 'prog', 'prod');
+    create type user_role as enum ('dir', 'be', 'prog', 'prod', 'ca', 'admin');
   end if;
 
   if not exists (select 1 from pg_type where typname = 'statut_ouvrage') then
@@ -96,6 +96,18 @@ create table if not exists utilisateurs (
   prenom     text not null,
   nom        text not null,
   created_at timestamptz not null default now()
+);
+
+-- Journal des modifications Admin (traçabilité — migration 0020)
+create table if not exists historique_modifications (
+  id              uuid primary key default gen_random_uuid(),
+  table_name      text not null,
+  champ           text not null,
+  ancienne_valeur text,
+  nouvelle_valeur text,
+  chantier_id     uuid references chantiers(id) on delete cascade,
+  modifie_par     uuid references utilisateurs(id) on delete set null,
+  modifie_le      timestamptz not null default now()
 );
 
 -- Sociétés (fournisseurs, clients, sous-traitants, transporteurs)

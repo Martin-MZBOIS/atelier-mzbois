@@ -18,10 +18,17 @@ export default function ChantierDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const role = useAuthStore((s) => s.user?.role)
-  const subtabs =
-    role === 'dir'
-      ? [...SUBTABS, { to: 'analytique', label: '📊 Analytique' }]
-      : SUBTABS
+  // Admin : pas de Fil (masqué). Dir : + Analytique + Historique des modifications.
+  const subtabs = (() => {
+    let tabs = role === 'admin' ? SUBTABS.filter((t) => t.to !== 'fil') : SUBTABS
+    if (role === 'dir')
+      tabs = [
+        ...tabs,
+        { to: 'analytique', label: '📊 Analytique' },
+        { to: 'historique', label: '🗂 Historique' },
+      ]
+    return tabs
+  })()
   const [chantier, setChantier] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
