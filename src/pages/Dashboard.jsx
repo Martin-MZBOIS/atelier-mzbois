@@ -13,6 +13,7 @@ import {
 } from '../lib/statuts'
 import TaskModal from './TaskModal'
 import TaskEditModal from './TaskEditModal'
+import DashboardIdees from './DashboardIdees'
 
 const CHANTIER_COLORS = [
   '#FEE2E2', '#DBEAFE', '#D1FAE5', '#EDE9FE', '#FEF3C7', '#FCE7F3', '#E0F2FE',
@@ -404,6 +405,13 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Boîte à idées COPIL — rôles BE et Resp. PROD */}
+      {(user?.role === 'be' || user?.role === 'prod') && (
+        <div className="dash-grid" style={{ marginBottom: 14 }}>
+          <DashboardIdees />
+        </div>
+      )}
 
       <div className="dash-grid">
         {/* Mes tâches */}
