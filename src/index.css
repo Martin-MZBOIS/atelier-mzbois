@@ -2467,10 +2467,10 @@ textarea.ni:focus {
   left: 0;
   right: 0;
   background: var(--w);
-  border: 1px solid var(--brun);
+  border: 0.5px solid var(--brun);
   border-top: none;
-  border-radius: 0 0 3px 3px;
-  max-height: 180px;
+  border-radius: 0;
+  max-height: 160px;
   overflow-y: auto;
   z-index: 10;
   box-shadow: 0 4px 12px rgba(132, 106, 87, 0.15);

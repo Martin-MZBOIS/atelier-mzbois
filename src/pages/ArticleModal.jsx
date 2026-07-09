@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSettings } from '../store/settings'
 import { TYP_ACHAT, TYP_ACHAT_ORDER } from '../lib/statuts'
+import Autocomplete from '../components/Autocomplete'
 
 function num(v) {
   if (v === '' || v == null) return null
@@ -13,12 +14,17 @@ function num(v) {
 export default function ArticleModal({ article, fournisseurs, onClose, onSaved }) {
   const isEdit = Boolean(article)
   const unites = useSettings((s) => s.unites)
+  // Unité : réel <select> alimenté par les paramètres + option « Autre » (champ libre).
+  const initUnite = article?.unite ?? ''
+  const initIsAutre = initUnite !== '' && !unites.includes(initUnite)
+  const [uniteChoice, setUniteChoice] = useState(initIsAutre ? '__autre__' : initUnite)
+  const [uniteAutre, setUniteAutre] = useState(initIsAutre ? initUnite : '')
+
   const [form, setForm] = useState({
     nom: article?.nom ?? '',
     description: article?.description ?? '',
     typ: article?.typ ?? 'panneau',
     prix: article?.prix ?? '',
-    unite: article?.unite ?? '',
   })
   const [fids, setFids] = useState(
     () =>
@@ -28,26 +34,29 @@ export default function ArticleModal({ article, fournisseurs, onClose, onSaved }
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [fournSearch, setFournSearch] = useState('')
-  const [fournOpen, setFournOpen] = useState(false)
 
   function set(key, value) {
     setForm((f) => ({ ...f, [key]: value }))
   }
   function addFid(id) {
     setFids((prev) => (prev.includes(id) ? prev : [...prev, id]))
-    setFournSearch('')
-    setFournOpen(false)
   }
   function removeFid(id) {
     setFids((prev) => prev.filter((x) => x !== id))
   }
 
+  // Sous-traitance → cherche parmi les sous-traitants, sinon parmi les fournisseurs.
+  const isSousTraitance = form.typ === 'sous_traitance'
+  const wantType = isSousTraitance ? 'sous_traitant' : 'fournisseur'
   const fournById = Object.fromEntries(fournisseurs.map((f) => [f.id, f]))
-  const q = fournSearch.trim().toLowerCase()
-  const suggestions = fournisseurs
-    .filter((f) => !fids.includes(f.id) && (!q || f.nom.toLowerCase().includes(q)))
-    .slice(0, 8)
+  const suggestions = useMemo(
+    () =>
+      fournisseurs.filter(
+        (f) => (f.type ?? 'fournisseur') === wantType && !fids.includes(f.id)
+      ),
+    [fournisseurs, wantType, fids]
+  )
+  const uniteFinal = uniteChoice === '__autre__' ? uniteAutre.trim() : uniteChoice
 
   async function handleSave() {
     if (!form.nom.trim()) {
@@ -61,7 +70,7 @@ export default function ArticleModal({ article, fournisseurs, onClose, onSaved }
       description: form.description.trim() || null,
       typ: form.typ || null,
       prix: num(form.prix),
-      unite: form.unite.trim() || null,
+      unite: uniteFinal || null,
     }
 
     let articleId = article?.id
@@ -134,21 +143,26 @@ export default function ArticleModal({ article, fournisseurs, onClose, onSaved }
           </div>
           <div className="fl">
             <label>Unité</label>
-            <input
-              list="unites-list"
-              value={form.unite}
-              onChange={(e) => set('unite', e.target.value)}
-              placeholder="panneau, ml, m²…"
-            />
-            <datalist id="unites-list">
+            <select value={uniteChoice} onChange={(e) => setUniteChoice(e.target.value)}>
+              <option value="">—</option>
               {unites.map((u) => (
-                <option key={u} value={u} />
+                <option key={u} value={u}>{u}</option>
               ))}
-            </datalist>
+              <option value="__autre__">Autre…</option>
+            </select>
+            {uniteChoice === '__autre__' && (
+              <input
+                style={{ marginTop: 6 }}
+                value={uniteAutre}
+                onChange={(e) => setUniteAutre(e.target.value)}
+                placeholder="Saisir une unité…"
+                autoFocus
+              />
+            )}
           </div>
         </div>
 
-        <div className="sl">Fournisseurs</div>
+        <div className="sl">{isSousTraitance ? 'Sous-traitant' : 'Fournisseurs'}</div>
         {fids.length > 0 && (
           <div className="chip-row">
             {fids.map((id) => (
@@ -161,30 +175,16 @@ export default function ArticleModal({ article, fournisseurs, onClose, onSaved }
             ))}
           </div>
         )}
-        <div className="autocomplete">
-          <input
-            value={fournSearch}
-            placeholder="🔍 Ajouter un fournisseur…"
-            onChange={(e) => {
-              setFournSearch(e.target.value)
-              setFournOpen(true)
-            }}
-            onFocus={() => setFournOpen(true)}
-            onBlur={() => setTimeout(() => setFournOpen(false), 150)}
+        <div className="autocomplete-scroll">
+          <Autocomplete
+            items={suggestions}
+            value={null}
+            onSelect={(f) => f && addFid(f.id)}
+            getLabel={(f) => f.nom}
+            getKey={(f) => f.id}
+            clearOnSelect
+            placeholder={isSousTraitance ? '🔍 Ajouter un sous-traitant…' : '🔍 Ajouter un fournisseur…'}
           />
-          {fournOpen && suggestions.length > 0 && (
-            <div className="autocomplete-list">
-              {suggestions.map((f) => (
-                <div
-                  key={f.id}
-                  className="autocomplete-item"
-                  onMouseDown={() => addFid(f.id)}
-                >
-                  {f.nom}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         {error && <div className="alert">{error}</div>}

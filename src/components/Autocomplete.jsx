@@ -17,6 +17,7 @@ export default function Autocomplete({
   placeholder = '',
   autoFocus = false,
   allowClear = true,
+  clearOnSelect = false,
 }) {
   const [query, setQuery] = useState(value ? getLabel(value) : '')
   const [open, setOpen] = useState(false)
@@ -52,7 +53,7 @@ export default function Autocomplete({
 
   function choose(item) {
     onSelect?.(item)
-    setQuery(item ? getLabel(item) : '')
+    setQuery(clearOnSelect ? '' : item ? getLabel(item) : '')
     setOpen(false)
   }
 

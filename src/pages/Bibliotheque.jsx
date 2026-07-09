@@ -64,7 +64,11 @@ export default function Bibliotheque() {
       const [, , fo] = await Promise.all([
         loadArticles(),
         loadModeles(),
-        supabase.from('fournisseurs').select('id, nom').eq('type', 'fournisseur').order('nom'),
+        supabase
+          .from('fournisseurs')
+          .select('id, nom, type')
+          .in('type', ['fournisseur', 'sous_traitant'])
+          .order('nom'),
       ])
       if (!active) return
       setFournisseurs(fo.data ?? [])
