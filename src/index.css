@@ -1642,9 +1642,12 @@ textarea.ni:focus {
 .cal-course {
   border-left: 2px solid;
   padding: 3px 5px;
-  border-radius: 3px;
+  border-radius: 0;
   margin-bottom: 3px;
   cursor: pointer;
+}
+.cal-course:hover {
+  filter: brightness(0.97);
 }
 .cal-course-qui {
   font-size: 10px;
@@ -1653,6 +1656,24 @@ textarea.ni:focus {
 .cal-course-quoi {
   font-size: 10px;
   color: var(--noir);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-course-meta {
+  display: flex;
+  gap: 6px;
+  font-size: 9px;
+  color: var(--g1);
+  margin-top: 1px;
+}
+.cal-cell--click {
+  cursor: pointer;
+}
+.cal-cell--click:hover {
+  background: var(--brun2);
+  outline: 1px dashed var(--brun);
+  outline-offset: -1px;
 }
 
 /* Calendrier mensuel */

@@ -190,6 +190,47 @@ export default function CoursesGlobal() {
 
   const todayIso = isoDay(new Date())
 
+  // Bloc course dans le calendrier (semaine + mois).
+  function CalCourse({ c }) {
+    const st = resolve(STATUT_COURSE, c.statut)
+    const heure = c.heure_depart ? c.heure_depart.slice(0, 5) : null
+    const style = { background: st.color + '22', borderLeftColor: st.color, color: st.color }
+    return (
+      <div
+        className="cal-course"
+        style={style}
+        onClick={(e) => {
+          e.stopPropagation()
+          setEditCourse(c)
+        }}
+        title="Modifier la course"
+      >
+        {c.type_course === 'tournee' ? (
+          <>
+            <div className="cal-course-qui">🔄 Tournée — {(c.etapes ?? []).length} étapes</div>
+            <div className="cal-course-quoi">
+              {quiName(c)}
+              {heure ? ' · ' + heure : ''}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="cal-course-qui">
+              {c.type_course === 'ramasse' ? '📥' : '🚚'} {quiName(c)}
+            </div>
+            <div className="cal-course-quoi">
+              {(c.de_libelle ?? lieuName(c.de_id))} → {(c.vers_libelle ?? lieuName(c.vers_id))}
+            </div>
+            <div className="cal-course-meta">
+              {c.chantier?.num && <span className="mono">{c.chantier.num}</span>}
+              {heure && <span>🕘 {heure}</span>}
+            </div>
+          </>
+        )}
+      </div>
+    )
+  }
+
   return (
     <section className="page">
       <div className="page-head">
@@ -416,22 +457,15 @@ export default function CoursesGlobal() {
                             key={di}
                             className={
                               'cal-cell cal-month-cell' +
-                              (!cell.inMonth ? ' cal-cell--out' : isT ? ' cal-cell--today' : we ? ' cal-cell--we' : '')
+                              (!cell.inMonth ? ' cal-cell--out' : isT ? ' cal-cell--today' : we ? ' cal-cell--we' : '') +
+                              (cell.inMonth ? ' cal-cell--click' : '')
                             }
+                            onClick={cell.inMonth ? () => setNewDate(iso) : undefined}
                           >
                             <div className="cal-month-daynum">{cell.date.getDate()}</div>
-                            {dayCourses.map((c) => {
-                              const st = resolve(STATUT_COURSE, c.statut)
-                              return (
-                                <div
-                                  key={c.id}
-                                  className="cal-course"
-                                  style={{ background: st.color + '22', borderLeftColor: st.color, color: st.color }}
-                                >
-                                  <div className="cal-course-qui">{quiName(c)}</div>
-                                </div>
-                              )
-                            })}
+                            {dayCourses.map((c) => (
+                              <CalCourse key={c.id} c={c} />
+                            ))}
                           </td>
                         )
                       })}
@@ -479,29 +513,14 @@ export default function CoursesGlobal() {
                       <td
                         key={i}
                         className={
-                          'cal-cell' +
+                          'cal-cell cal-cell--click' +
                           (isT ? ' cal-cell--today' : we ? ' cal-cell--we' : '')
                         }
+                        onClick={() => setNewDate(iso)}
                       >
-                        {dayCourses.map((c) => {
-                          const st = resolve(STATUT_COURSE, c.statut)
-                          return (
-                            <div
-                              key={c.id}
-                              className="cal-course"
-                              style={{
-                                background: st.color + '22',
-                                borderLeftColor: st.color,
-                                color: st.color,
-                              }}
-                            >
-                              <div className="cal-course-qui">{quiName(c)}</div>
-                              <div className="cal-course-quoi">
-                                {(c.quoi ?? '').slice(0, 25)}
-                              </div>
-                            </div>
-                          )
-                        })}
+                        {dayCourses.map((c) => (
+                          <CalCourse key={c.id} c={c} />
+                        ))}
                       </td>
                     )
                   })}
