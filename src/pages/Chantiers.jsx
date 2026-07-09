@@ -30,6 +30,7 @@ export default function Chantiers() {
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('tous')
+  const [sortDir, setSortDir] = useState('desc') // 'desc' = plus récent en haut
 
   useEffect(() => {
     let active = true
@@ -67,6 +68,12 @@ export default function Chantiers() {
     return c
   }, [chantiers])
 
+  // Numéro trié sur les 3 premiers chiffres du code (ex : "228-LEFEBVRE" → 228).
+  function numKey(c) {
+    const m = String(c.num ?? '').match(/\d{1,3}/)
+    return m ? parseInt(m[0], 10) : -1
+  }
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     const activeFilter = FILTERS.find((f) => f.id === filter) ?? FILTERS[0]
@@ -79,9 +86,14 @@ export default function Chantiers() {
           (c.client ?? '').toLowerCase().includes(q)
         )
       })
-      // Épingle le chantier STOCK en tête de liste.
-      .sort((a, b) => (a.num === 'STOCK' ? -1 : b.num === 'STOCK' ? 1 : 0))
-  }, [chantiers, search, filter])
+      .sort((a, b) => {
+        // Épingle le chantier STOCK en tête, puis tri par numéro.
+        if (a.num === 'STOCK') return -1
+        if (b.num === 'STOCK') return 1
+        const diff = numKey(a) - numKey(b)
+        return sortDir === 'desc' ? -diff : diff
+      })
+  }, [chantiers, search, filter, sortDir])
 
   return (
     <section className="page">
@@ -94,13 +106,22 @@ export default function Chantiers() {
 
       {!loading && !error && (
         <>
-          <input
-            className="plan-search"
-            style={{ width: 260 }}
-            placeholder="🔍 Rechercher (n° ou client)…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <div className="chantiers-toolbar">
+            <input
+              className="plan-search"
+              style={{ width: 260, marginBottom: 0 }}
+              placeholder="🔍 Rechercher (n° ou client)…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <button
+              className="btn bg bsm"
+              onClick={() => setSortDir((d) => (d === 'desc' ? 'asc' : 'desc'))}
+              title="Trier par numéro de chantier"
+            >
+              {sortDir === 'desc' ? '↓ Décroissant' : '↑ Croissant'}
+            </button>
+          </div>
           <div className="course-filters">
             {FILTERS.map((f) => (
               <button

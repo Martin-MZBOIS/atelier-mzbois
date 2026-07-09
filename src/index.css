@@ -1916,6 +1916,13 @@ textarea.ni:focus {
   letter-spacing: 0.04em;
 }
 
+.chantiers-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
 .plan-search {
   padding: 7px 12px;
   border-radius: 3px;
