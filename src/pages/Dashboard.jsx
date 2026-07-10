@@ -410,7 +410,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Boîte à idées COPIL — rôles BE et Resp. PROD */}
+      {/* Boîte à idées COPIL — rôles BE et Resp. Prod */}
       {(user?.role === 'be' || user?.role === 'prod') && (
         <div className="dash-grid" style={{ marginBottom: 14 }}>
           <DashboardIdees />

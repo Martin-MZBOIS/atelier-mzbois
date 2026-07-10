@@ -11,7 +11,7 @@ const SUJET_STATUT = {
   traite: { label: 'Traité', color: '#5a7a5a' },
 }
 
-// Bloc « Boîte à idées » du tableau de bord (rôles BE et Resp. PROD).
+// Bloc « Boîte à idées » du tableau de bord (rôles BE et Resp. Prod).
 // Permet de soumettre / voir les derniers sujets sans passer par COPIL.
 export default function DashboardIdees() {
   const navigate = useNavigate()

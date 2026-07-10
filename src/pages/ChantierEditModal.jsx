@@ -81,7 +81,7 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
 
         <div className="fg">
           <div className="fl">
-            <label>Chargé d'affaires</label>
+            <label>Chargé d'affaire</label>
             <select value={form.ca_id} onChange={(e) => set('ca_id', e.target.value)}>
               <option value="">—</option>
               {utilisateurs.map((u) => (

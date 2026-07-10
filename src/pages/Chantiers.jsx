@@ -197,7 +197,7 @@ export default function Chantiers() {
                 <th>N°</th>
                 <th>Nom</th>
                 <th>Client</th>
-                <th>Chargé d'affaires</th>
+                <th>Chargé d'affaire</th>
                 <th>Départ approx.</th>
                 <th>Pose</th>
                 <th className="num">Ouvrages</th>

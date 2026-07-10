@@ -17,7 +17,7 @@ const FEATURES = [
 const ROLE_COLS = [
   { id: 'be', label: 'BE' },
   { id: 'prog', label: 'Prog' },
-  { id: 'prod', label: 'Resp. PROD' },
+  { id: 'prod', label: 'Resp. Prod' },
   { id: 'ca', label: 'CA' },
   { id: 'admin', label: 'Admin' },
 ]

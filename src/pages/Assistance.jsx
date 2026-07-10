@@ -8,7 +8,7 @@ const SECTIONS = [
   { id: 'dir', label: 'Dirigeant' },
   { id: 'be', label: 'Bureau d’études' },
   { id: 'prog', label: 'Programmeur' },
-  { id: 'prod', label: 'Resp. PROD' },
+  { id: 'prod', label: 'Resp. Prod' },
 ]
 
 const SearchCtx = createContext('')
@@ -138,7 +138,7 @@ function General() {
         Répertoire par onglets&nbsp;: <strong>Fournisseurs</strong>,{' '}
         <strong>Clients</strong>, <strong>Sous-traitants</strong> et{' '}
         <strong>Salariés</strong> (visible seulement pour Direction et
-        Resp. PROD). <em>+ Nouveau</em> crée une fiche société, <em>+ Nouveau
+        Resp. Prod). <em>+ Nouveau</em> crée une fiche société, <em>+ Nouveau
         contact</em> ajoute une personne à une fiche.
       </Bloc>
     </>
@@ -240,7 +240,7 @@ function Prod() {
   return (
     <>
       <p className="help-intro">
-        En tant que <strong>Resp. PROD</strong>, tu fabriques, remontes les
+        En tant que <strong>Resp. Prod</strong>, tu fabriques, remontes les
         problèmes et gères la logistique.
       </p>
       <Bloc titre="Ton quotidien">
