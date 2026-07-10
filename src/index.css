@@ -2155,6 +2155,20 @@ textarea.ni:focus {
   font-family: 'DM Mono', ui-monospace, monospace;
 }
 
+/* Saisie en ligne (tableau de bord Admin) */
+.admin-inp {
+  flex-shrink: 0;
+  width: 90px;
+  border: 0.5px solid var(--g4);
+  border-radius: 0;
+  padding: 5px 8px;
+  font-size: 12px;
+}
+.admin-inp:focus {
+  outline: none;
+  border-color: var(--brun);
+}
+
 /* Analytique rapide (tableau de bord Chargé d'affaire) */
 .ca-ana {
   padding: 9px 0;

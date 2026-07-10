@@ -5,6 +5,7 @@ import DashboardBe from './dashboard/DashboardBe'
 import DashboardProg from './dashboard/DashboardProg'
 import DashboardProd from './dashboard/DashboardProd'
 import DashboardCa from './dashboard/DashboardCa'
+import DashboardAdmin from './dashboard/DashboardAdmin'
 
 // Chaque rôle a son propre tableau de bord : il n'affiche que ce dont ce rôle
 // a besoin. Les rôles dont le tableau dédié n'est pas encore livré retombent
@@ -15,6 +16,7 @@ const PAR_ROLE = {
   prog: DashboardProg,
   prod: DashboardProd,
   ca: DashboardCa,
+  admin: DashboardAdmin,
 }
 
 export default function Dashboard() {
