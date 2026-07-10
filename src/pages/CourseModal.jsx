@@ -65,6 +65,20 @@ export default function CourseModal({
     setForm((f) => ({ ...f, [key]: value }))
   }
 
+  // Changement de type : bascule Livraison ↔ Ramasse en inversant
+  // automatiquement Départ et Arrivée (MZ Bois change de côté, l'adresse
+  // saisie passe de l'autre côté).
+  function changeType(newType) {
+    if (
+      (type === 'livraison' && newType === 'ramasse') ||
+      (type === 'ramasse' && newType === 'livraison')
+    ) {
+      setDeLieu(versLieu)
+      setVersLieu(deLieu)
+    }
+    setType(newType)
+  }
+
   // Applique les valeurs MZ Bois par défaut selon le type (si non déjà définies).
   useEffect(() => {
     if (type === 'livraison' && !deLieu) setDeLieu(MZBOIS)
@@ -107,6 +121,53 @@ export default function CourseModal({
     [chantiers]
   )
   const selectedChantier = chantierOptions.find((c) => c.id === chantierId) ?? null
+
+  // --- Mail coursier externe (pré-rempli) ---
+  const TYPE_LABELS = { livraison: 'Livraison', ramasse: 'Ramasse', tournee: 'Tournée' }
+  const selectedTransporteur = transporteurs.find((t) => t.id === form.qui_id) ?? null
+  const coursierEmail = selectedTransporteur?.contacts?.[0]?.email ?? ''
+
+  function ddmmyyyy(iso) {
+    if (!iso) return ''
+    const [y, m, d] = iso.split('-')
+    return `${d}/${m}/${y}`
+  }
+
+  function mailtoCoursier() {
+    const chantierCode = chantiers.find((c) => c.id === chantierId)?.num ?? ''
+    const dateStr = ddmmyyyy(form.date)
+    const typeStr = TYPE_LABELS[type] ?? type
+    const depart = type === 'tournee' ? etapes[0]?.label ?? '' : deLieu?.label ?? ''
+    const arrivee =
+      type === 'tournee' ? etapes[etapes.length - 1]?.label ?? '' : versLieu?.label ?? ''
+    const subject = `Course du ${dateStr} — ${typeStr}${chantierCode ? ' — ' + chantierCode : ''}`
+    const lignes = [
+      'Bonjour,',
+      '',
+      'Nous faisons appel à vos services pour la course suivante :',
+      '',
+      `Date : ${dateStr}${form.heure_depart ? ' à ' + form.heure_depart : ''}`,
+      `Type : ${typeStr}`,
+    ]
+    if (type === 'tournee') {
+      lignes.push('Étapes : ' + etapes.map((e) => e.label).filter(Boolean).join(' → '))
+    } else {
+      lignes.push(`De : ${depart}`, `Vers : ${arrivee}`)
+    }
+    if (chantierCode) lignes.push(`Chantier : ${chantierCode}`)
+    if (form.quoi.trim()) lignes.push(`Objet : ${form.quoi.trim()}`)
+    if (form.commentaire.trim()) lignes.push('', form.commentaire.trim())
+    lignes.push('', 'Merci de confirmer la prise en charge.', '', 'Cordialement,', 'MZ Bois & Compagnie')
+    const body = lignes.join('\n')
+    return (
+      'mailto:' +
+      encodeURIComponent(coursierEmail) +
+      '?subject=' +
+      encodeURIComponent(subject) +
+      '&body=' +
+      encodeURIComponent(body)
+    )
+  }
 
   function toggleOuvrage(id) {
     setOuvrageIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -232,7 +293,7 @@ export default function CourseModal({
                 key={t.id}
                 type="button"
                 className={'type-btn' + (type === t.id ? ' type-btn--on' : '')}
-                onClick={() => setType(t.id)}
+                onClick={() => changeType(t.id)}
                 title={t.hint}
               >
                 {t.label}
@@ -349,6 +410,18 @@ export default function CourseModal({
               <option key={p.id} value={p.id}>{p.prenom ? `${p.prenom} ${p.nom}` : p.nom}</option>
             ))}
           </select>
+          {quiKind === 'externe' && form.qui_id && (
+            <a
+              className="btn bg bsm"
+              style={{ marginTop: 6, display: 'inline-block' }}
+              href={mailtoCoursier()}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={coursierEmail ? 'Envoyer un mail pré-rempli au coursier' : 'Aucun email renseigné pour ce coursier'}
+            >
+              📧 Mail coursier
+            </a>
+          )}
         </div>
 
         {/* Chantier (autocomplete) + ouvrages */}
