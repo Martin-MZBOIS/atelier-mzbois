@@ -34,6 +34,8 @@ export default function Parametres() {
   })
   const [unites, setUnites] = useState(settings.unites)
   const [newUnite, setNewUnite] = useState('')
+  const [specialites, setSpecialites] = useState(settings.specialites ?? [])
+  const [newSpec, setNewSpec] = useState('')
   const [droits, setDroits] = useState(settings.droits)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
@@ -46,8 +48,9 @@ export default function Parametres() {
       alerte_rouge: settings.alerte_rouge,
     })
     setUnites(settings.unites)
+    setSpecialites(settings.specialites ?? [])
     setDroits(settings.droits ?? {})
-  }, [settings.loaded, settings.cout_horaire, settings.alerte_orange, settings.alerte_rouge, settings.unites, settings.droits])
+  }, [settings.loaded, settings.cout_horaire, settings.alerte_orange, settings.alerte_rouge, settings.unites, settings.specialites, settings.droits])
 
   if (role !== 'dir') {
     return (
@@ -68,6 +71,14 @@ export default function Parametres() {
   function removeUnite(u) {
     setUnites((prev) => prev.filter((x) => x !== u))
   }
+  function addSpec() {
+    const s = newSpec.trim()
+    if (s && !specialites.includes(s)) setSpecialites((prev) => [...prev, s])
+    setNewSpec('')
+  }
+  function removeSpec(s) {
+    setSpecialites((prev) => prev.filter((x) => x !== s))
+  }
   function isAllowed(roleId, featureId) {
     const explicit = droits[roleId]?.[featureId]
     if (explicit === true) return true
@@ -85,13 +96,20 @@ export default function Parametres() {
   async function handleSave() {
     setSaving(true)
     setMsg('')
-    const err = await save({
+    const patch = {
       cout_horaire: Number(form.cout_horaire) || 0,
       alerte_orange: parseInt(form.alerte_orange, 10) || 0,
       alerte_rouge: parseInt(form.alerte_rouge, 10) || 0,
       unites,
+      specialites,
       droits,
-    })
+    }
+    let err = await save(patch)
+    // Repli si la colonne specialites (migration 0023) n'existe pas encore.
+    if (err && /specialites/.test(err.message)) {
+      const { specialites: _omit, ...rest } = patch
+      err = await save(rest)
+    }
     setSaving(false)
     setMsg(err ? 'Échec : ' + err.message : '✓ Paramètres enregistrés')
   }
@@ -183,6 +201,33 @@ export default function Parametres() {
             onKeyDown={(e) => e.key === 'Enter' && addUnite()}
           />
           <button className="btn bg bsm" onClick={addUnite}>
+            + Ajouter
+          </button>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-head">
+          <span className="card-title">Spécialités des sous-traitants</span>
+        </div>
+        <div className="chip-row">
+          {specialites.map((s) => (
+            <span key={s} className="chip-select">
+              {s}
+              <button type="button" className="chip-x" onClick={() => removeSpec(s)}>
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        <div className="param-add">
+          <input
+            value={newSpec}
+            placeholder="Nouvelle spécialité…"
+            onChange={(e) => setNewSpec(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addSpec()}
+          />
+          <button className="btn bg bsm" onClick={addSpec}>
             + Ajouter
           </button>
         </div>

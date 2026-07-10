@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
+import { useSettings } from '../store/settings'
 import { formatDate, formatEuro, calcAnciennete } from '../lib/format'
 import { TYPE_SOCIETE, resolve } from '../lib/statuts'
 import SocieteModal from './SocieteModal'
@@ -16,9 +17,17 @@ const SOC_TABS = [
   { id: 'sous_traitant', label: 'Sous-traitants' },
 ]
 
+// Palette stable pour les badges de spécialité (par position dans la liste).
+const SPEC_COLORS = ['#846a57', '#4a6b8a', '#5a7a5a', '#8a7040', '#6b5a8a', '#8b3a3a', '#3d7a7a']
+export function specColor(specialitesOptions, sp) {
+  const i = specialitesOptions.indexOf(sp)
+  return SPEC_COLORS[(i < 0 ? 0 : i) % SPEC_COLORS.length]
+}
+
 export default function Contacts() {
   const user = useAuthStore((s) => s.user)
   const canSeeSalaries = ['dir', 'prod'].includes(user?.role)
+  const specialitesOptions = useSettings((s) => s.specialites) ?? []
 
   const [societes, setSocietes] = useState([])
   const [employes, setEmployes] = useState([])
@@ -30,14 +39,23 @@ export default function Contacts() {
   const [societeModal, setSocieteModal] = useState(null) // { societe } | null
   const [addContactFor, setAddContactFor] = useState(null)
   const [salarieModal, setSalarieModal] = useState(null) // {} (nouveau) | { employe } | null
+  const [specFilter, setSpecFilter] = useState(null) // filtre spécialité (sous-traitants)
 
   const loadSocietes = useCallback(async () => {
     const contactsSel = 'contacts:contacts!fournisseur_id(id, nom, role, tel, email)'
-    // Repli progressif si adresse_livraison (0015) ou site_web (0010) manquent.
+    const specSel = 'specialites:soustraitant_specialites(specialite)'
+    // Repli progressif si specialites (0023), adresse_livraison (0015)
+    // ou site_web (0010) n'existent pas encore.
     let { data, error: dbError } = await supabase
       .from('fournisseurs')
-      .select(`id, nom, adresse, adresse_livraison, famille, type, site_web, ${contactsSel}`)
+      .select(`id, nom, adresse, adresse_livraison, famille, type, site_web, ${contactsSel}, ${specSel}`)
       .order('nom')
+    if (dbError && /soustraitant_specialites|specialite/.test(dbError.message)) {
+      ;({ data, error: dbError } = await supabase
+        .from('fournisseurs')
+        .select(`id, nom, adresse, adresse_livraison, famille, type, site_web, ${contactsSel}`)
+        .order('nom'))
+    }
     if (dbError && /adresse_livraison/.test(dbError.message)) {
       ;({ data, error: dbError } = await supabase
         .from('fournisseurs')
@@ -76,6 +94,9 @@ export default function Contacts() {
 
   const isSalaries = tab === 'salaries'
 
+  // Spécialités d'un sous-traitant sous forme de tableau de chaînes.
+  const specNames = (s) => (s?.specialites ?? []).map((x) => x.specialite)
+
   // Liste selon l'onglet actif.
   const list = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -86,14 +107,16 @@ export default function Contacts() {
     }
     return societes
       .filter((s) => s.type === tab)
+      .filter((s) => tab !== 'sous_traitant' || !specFilter || specNames(s).includes(specFilter))
       .map((s) => ({ id: s.id, label: s.nom, sub: s.famille, raw: s }))
       .filter((it) => !q || it.label.toLowerCase().includes(q))
-  }, [societes, employes, tab, search, isSalaries])
+  }, [societes, employes, tab, search, isSalaries, specFilter])
 
   const selected = list.find((it) => it.id === selectedId) ?? null
 
   function switchTab(id) {
     setTab(id)
+    setSpecFilter(null)
     setSelectedId(null)
     setSearch('')
   }
@@ -160,21 +183,56 @@ export default function Contacts() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+            {tab === 'sous_traitant' && specialitesOptions.length > 0 && (
+              <div className="spec-filter">
+                <button
+                  className={'spec-chip spec-chip--sm' + (!specFilter ? ' spec-chip--on' : '')}
+                  onClick={() => setSpecFilter(null)}
+                >
+                  Toutes
+                </button>
+                {specialitesOptions.map((sp) => (
+                  <button
+                    key={sp}
+                    className={'spec-chip spec-chip--sm' + (specFilter === sp ? ' spec-chip--on' : '')}
+                    onClick={() => setSpecFilter(specFilter === sp ? null : sp)}
+                  >
+                    {sp}
+                  </button>
+                ))}
+              </div>
+            )}
             {list.length === 0 ? (
               <div className="empty">Aucun élément</div>
             ) : (
-              list.map((it) => (
-                <div
-                  key={it.id}
-                  className={
-                    'contact-item' + (selectedId === it.id ? ' contact-item--on' : '')
-                  }
-                  onClick={() => setSelectedId(it.id)}
-                >
-                  <div className="contact-item-name">{it.label}</div>
-                  {it.sub && <div className="contact-item-sub">{it.sub}</div>}
-                </div>
-              ))
+              list.map((it) => {
+                const specs = tab === 'sous_traitant' ? specNames(it.raw) : []
+                return (
+                  <div
+                    key={it.id}
+                    className={
+                      'contact-item' + (selectedId === it.id ? ' contact-item--on' : '')
+                    }
+                    onClick={() => setSelectedId(it.id)}
+                  >
+                    <div className="contact-item-name">{it.label}</div>
+                    {it.sub && <div className="contact-item-sub">{it.sub}</div>}
+                    {specs.length > 0 && (
+                      <div className="spec-badges">
+                        {specs.map((sp) => (
+                          <span
+                            key={sp}
+                            className="spec-badge"
+                            style={{ color: specColor(specialitesOptions, sp), borderColor: specColor(specialitesOptions, sp) }}
+                          >
+                            {sp}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
             )}
           </div>
 
@@ -241,6 +299,8 @@ export default function Contacts() {
 function SocieteDetail({ s, onEdit, onAddContact }) {
   const t = resolve(TYPE_SOCIETE, s.type)
   const contacts = s.contacts ?? []
+  const specialitesOptions = useSettings((st) => st.specialites) ?? []
+  const specs = (s.specialites ?? []).map((x) => x.specialite)
   return (
     <div className="detail-panel">
       <div className="detail-panel-head">
@@ -254,6 +314,19 @@ function SocieteDetail({ s, onEdit, onAddContact }) {
           {t.label}
         </span>
       </div>
+      {specs.length > 0 && (
+        <div className="spec-badges" style={{ marginBottom: 10 }}>
+          {specs.map((sp) => (
+            <span
+              key={sp}
+              className="spec-badge"
+              style={{ color: specColor(specialitesOptions, sp), borderColor: specColor(specialitesOptions, sp) }}
+            >
+              {sp}
+            </span>
+          ))}
+        </div>
+      )}
       <dl className="detail-fields">
         {s.adresse && (
           <div>

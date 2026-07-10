@@ -7,6 +7,15 @@ export const DEFAULT_SETTINGS = {
   alerte_orange: 3,
   alerte_rouge: 7,
   unites: ['panneau', 'ml', 'm²', 'pièce', 'rouleau'],
+  specialites: [
+    'Métallier',
+    'Tapissier',
+    'Peintre',
+    'Menuisier',
+    'Poseur',
+    'Miroitier',
+    'Transformateur plastique',
+  ],
   droits: {},
 }
 

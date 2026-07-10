@@ -267,6 +267,53 @@ body {
   opacity: 0.7;
 }
 
+/* Spécialités sous-traitants : sélecteur (modal) + filtre + badges */
+.spec-picker,
+.spec-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.spec-filter {
+  margin-bottom: 8px;
+}
+.spec-chip {
+  border: 0.5px solid var(--g4);
+  background: var(--w);
+  border-radius: 0;
+  padding: 5px 9px;
+  font-size: 11px;
+  color: var(--g2);
+  cursor: pointer;
+}
+.spec-chip--sm {
+  padding: 3px 7px;
+  font-size: 10px;
+}
+.spec-chip:hover {
+  color: var(--g1);
+}
+.spec-chip--on {
+  background: var(--brun);
+  border-color: var(--brun);
+  color: #fff;
+}
+.spec-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.spec-badge {
+  border: 1px solid;
+  border-radius: 0;
+  padding: 1px 6px;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: #fff;
+}
+
 /* Cloche de notifications (sidebar) */
 .notif {
   position: relative;

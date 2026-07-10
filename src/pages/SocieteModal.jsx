@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { useSettings } from '../store/settings'
 import { TYPE_SOCIETE } from '../lib/statuts'
 
 const TYPE_ORDER = ['fournisseur', 'client', 'sous_traitant', 'transporteur']
@@ -7,6 +8,7 @@ const TYPE_ORDER = ['fournisseur', 'client', 'sous_traitant', 'transporteur']
 // Création / édition d'une fiche société (fournisseur / client / sous-traitant / transporteur).
 export default function SocieteModal({ societe, defaultType, onClose, onSaved }) {
   const isEdit = Boolean(societe)
+  const specialitesOptions = useSettings((s) => s.specialites) ?? []
   const [form, setForm] = useState({
     nom: societe?.nom ?? '',
     adresse: societe?.adresse ?? '',
@@ -15,11 +17,36 @@ export default function SocieteModal({ societe, defaultType, onClose, onSaved })
     site_web: societe?.site_web ?? '',
     type: societe?.type ?? defaultType ?? 'fournisseur',
   })
+  const [specs, setSpecs] = useState([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
+  // Charge les spécialités existantes d'un sous-traitant en édition.
+  useEffect(() => {
+    if (!societe?.id) return
+    supabase
+      .from('soustraitant_specialites')
+      .select('specialite')
+      .eq('fournisseur_id', societe.id)
+      .then(({ data }) => data && setSpecs(data.map((r) => r.specialite)))
+  }, [societe?.id])
+
   function set(key, value) {
     setForm((f) => ({ ...f, [key]: value }))
+  }
+
+  function toggleSpec(sp) {
+    setSpecs((prev) => (prev.includes(sp) ? prev.filter((s) => s !== sp) : [...prev, sp]))
+  }
+
+  // Remplace les spécialités du sous-traitant (best-effort, ignoré si table absente).
+  async function syncSpecialites(fournisseurId) {
+    await supabase.from('soustraitant_specialites').delete().eq('fournisseur_id', fournisseurId)
+    if (specs.length) {
+      await supabase
+        .from('soustraitant_specialites')
+        .insert(specs.map((specialite) => ({ fournisseur_id: fournisseurId, specialite })))
+    }
   }
 
   async function handleSave() {
@@ -52,11 +79,20 @@ export default function SocieteModal({ societe, defaultType, onClose, onSaved })
     if (dbError && /site_web/.test(dbError.message)) {
       ;({ data, error: dbError } = await run(base))
     }
-    setSaving(false)
     if (dbError) {
+      setSaving(false)
       setError(dbError.message)
       return
     }
+    // Synchronise les spécialités uniquement pour les sous-traitants.
+    if (form.type === 'sous_traitant') {
+      try {
+        await syncSpecialites(data.id)
+      } catch {
+        /* table absente (migration 0023 non passée) : on ignore */
+      }
+    }
+    setSaving(false)
     onSaved(data.id)
   }
 
@@ -108,6 +144,27 @@ export default function SocieteModal({ societe, defaultType, onClose, onSaved })
           <label>Site web</label>
           <input value={form.site_web} onChange={(e) => set('site_web', e.target.value)} placeholder="https://…" />
         </div>
+
+        {form.type === 'sous_traitant' && (
+          <div className="fl">
+            <label>Spécialités</label>
+            <div className="spec-picker">
+              {specialitesOptions.map((sp) => (
+                <button
+                  key={sp}
+                  type="button"
+                  className={'spec-chip' + (specs.includes(sp) ? ' spec-chip--on' : '')}
+                  onClick={() => toggleSpec(sp)}
+                >
+                  {sp}
+                </button>
+              ))}
+              {specialitesOptions.length === 0 && (
+                <span className="muted">Aucune spécialité paramétrée.</span>
+              )}
+            </div>
+          </div>
+        )}
 
         {error && <div className="alert">{error}</div>}
 
