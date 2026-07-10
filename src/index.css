@@ -2155,6 +2155,28 @@ textarea.ni:focus {
   font-family: 'DM Mono', ui-monospace, monospace;
 }
 
+/* Analytique rapide (tableau de bord Chargé d'affaire) */
+.ca-ana {
+  padding: 9px 0;
+  border-bottom: 0.5px solid var(--g5);
+}
+.ca-ana:last-child {
+  border-bottom: none;
+}
+.ca-ana-num {
+  font-size: 11px;
+  color: var(--brun);
+  margin-bottom: 5px;
+}
+.ca-ana-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+  color: var(--g2);
+  margin: 4px 0 2px;
+}
+
 /* Réunions COPIL (bloc compact du tableau de bord) */
 .copil-mini {
   display: flex;
