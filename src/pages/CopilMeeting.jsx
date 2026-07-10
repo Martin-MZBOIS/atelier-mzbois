@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
 import { formatDate } from '../lib/format'
-import { formatLong, toIso } from '../lib/copil'
+import { daysUntil, formatLong, toIso } from '../lib/copil'
 import SujetModal from './SujetModal'
 import CopilReunionModal from './CopilReunionModal'
+import TrameGuide from '../components/TrameGuide'
 
 const SUJET_STATUT = {
   boite: { label: 'En attente', color: '#8a7040' },
@@ -111,6 +112,19 @@ export default function CopilMeeting({ type, freqLabel, nextDate, canSubmit, odj
       <div className="copil-next">
         <div className="copil-next-lbl">Prochaine réunion</div>
         <div className="copil-next-date">{formatLong(nextD)}</div>
+        <div className="copil-next-countdown">
+          {(() => {
+            const d = daysUntil(nextD)
+            if (d < 0) return 'Réunion passée'
+            if (d === 0) return "Aujourd'hui"
+            return `dans ${d} jour${d > 1 ? 's' : ''}`
+          })()}
+        </div>
+        {isDir && !planifiee && (
+          <button className="btn bp bsm" style={{ marginTop: 8 }} onClick={createOdj}>
+            Préparer l'ordre du jour →
+          </button>
+        )}
       </div>
 
       {/* A) Boîte à idées */}
@@ -192,16 +206,9 @@ export default function CopilMeeting({ type, freqLabel, nextDate, canSubmit, odj
               </div>
             )}
 
-            {odjTemplate && odjTemplate.length > 0 && (
-              <div className="copil-template">
-                <div className="sl">Trame type</div>
-                <ul className="help-list">
-                  {odjTemplate.map((t) => (
-                    <li key={t}>{t}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <div className="copil-template">
+              <TrameGuide type={type} />
+            </div>
 
             {isDir ? (
               <>
