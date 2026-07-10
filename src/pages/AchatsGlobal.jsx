@@ -9,6 +9,8 @@ import {
 } from '../lib/statuts'
 import AchatModal from './AchatModal'
 
+const PAGE_SIZE = 50
+
 // Filtres rapides : regroupent des statuts (slugs).
 const QUICK_FILTERS = [
   { id: 'tous', label: 'Tous', color: '#2c2420', match: () => true },
@@ -56,6 +58,7 @@ export default function AchatsGlobal() {
   const [typ, setTyp] = useState('tous')
   const [search, setSearch] = useState('')
   const [modal, setModal] = useState(null)
+  const [visible, setVisible] = useState(PAGE_SIZE)
 
   async function loadAchats() {
     const { data, error: dbError } = await supabase
@@ -117,6 +120,12 @@ export default function AchatsGlobal() {
           (a.chantier?.nom ?? '').toLowerCase().includes(q))
     )
   }, [achats, quick, typ, search])
+
+  useEffect(() => {
+    setVisible(PAGE_SIZE)
+  }, [quick, typ, search])
+
+  const shown = filtered.slice(0, visible)
 
   return (
     <section className="page">
@@ -206,7 +215,7 @@ export default function AchatsGlobal() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((a) => {
+              {shown.map((a) => {
                 const t = a.typ ? TYP_ACHAT[a.typ] : null
                 return (
                   <tr
@@ -239,6 +248,13 @@ export default function AchatsGlobal() {
               )}
             </tbody>
           </table>
+          {filtered.length > visible && (
+            <div className="load-more">
+              <button className="btn bg bsm" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+                Charger plus ({filtered.length - visible} restants)
+              </button>
+            </div>
+          )}
         </div>
       )}
 

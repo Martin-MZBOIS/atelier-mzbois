@@ -4,6 +4,8 @@ import { TYP_ACHAT, TYP_ACHAT_ORDER, resolve } from '../lib/statuts'
 import ArticleModal from './ArticleModal'
 import ModeleModal from './ModeleModal'
 
+const PAGE_SIZE = 30
+
 // Prix unitaire € avec décimales (0 à 2), sans arrondi à l'entier.
 function formatPrix(value) {
   if (value == null) return '—'
@@ -31,6 +33,7 @@ export default function Bibliotheque() {
   const [search, setSearch] = useState('')
   const [articleModal, setArticleModal] = useState(null) // { article } | null
   const [modeleModal, setModeleModal] = useState(null) // { modele } | null
+  const [visible, setVisible] = useState(PAGE_SIZE)
 
   const loadModeles = useCallback(async () => {
     const { data } = await supabase
@@ -91,6 +94,12 @@ export default function Bibliotheque() {
           (a.description ?? '').toLowerCase().includes(q))
     )
   }, [articles, typFilt, search])
+
+  useEffect(() => {
+    setVisible(PAGE_SIZE)
+  }, [typFilt, search, tab])
+
+  const shownArticles = filtered.slice(0, visible)
 
   const filteredModeles = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -188,7 +197,7 @@ export default function Bibliotheque() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((a) => {
+                {shownArticles.map((a) => {
                   const fs = (a.article_fournisseurs ?? [])
                     .map((af) => af.fournisseur?.nom)
                     .filter(Boolean)
@@ -215,6 +224,13 @@ export default function Bibliotheque() {
               </tbody>
             </table>
           </div>
+          {filtered.length > visible && (
+            <div className="load-more">
+              <button className="btn bg bsm" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+                Charger plus ({filtered.length - visible} restants)
+              </button>
+            </div>
+          )}
         </>
       )}
 

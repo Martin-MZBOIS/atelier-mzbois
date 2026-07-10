@@ -7,6 +7,7 @@ import CourseModal from './CourseModal'
 
 const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
 const CAL_STATUTS = ['programmee', 'urgente', 'en_cours']
+const PAGE_SIZE = 30
 
 function typeIcon(t) {
   if (t === 'ramasse') return '📥 Ramasse'
@@ -48,6 +49,7 @@ export default function CoursesGlobal() {
   const [showModal, setShowModal] = useState(false)
   const [editCourse, setEditCourse] = useState(null)
   const [newDate, setNewDate] = useState(null) // date pré-remplie (clic case calendrier)
+  const [visible, setVisible] = useState(PAGE_SIZE)
 
   async function loadCourses() {
     const full =
@@ -152,6 +154,12 @@ export default function CoursesGlobal() {
     () => (filter === 'tous' ? courses : courses.filter((c) => c.statut === filter)),
     [courses, filter]
   )
+
+  useEffect(() => {
+    setVisible(PAGE_SIZE)
+  }, [filter])
+
+  const shown = useMemo(() => filtered.slice(0, visible), [filtered, visible])
 
   // Semaine courante (lundi) + offset
   const week = useMemo(() => {
@@ -294,7 +302,7 @@ export default function CoursesGlobal() {
           </div>
 
           <div className="course-list">
-            {filtered.map((c) => {
+            {shown.map((c) => {
               const st = resolve(STATUT_COURSE, c.statut)
               return (
                 <div
@@ -396,6 +404,13 @@ export default function CoursesGlobal() {
               <div className="empty">Aucune course</div>
             )}
           </div>
+          {filtered.length > visible && (
+            <div className="load-more">
+              <button className="btn bg bsm" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+                Charger plus ({filtered.length - visible} restants)
+              </button>
+            </div>
+          )}
         </>
       )}
 

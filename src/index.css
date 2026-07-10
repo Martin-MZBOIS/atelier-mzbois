@@ -2201,6 +2201,13 @@ textarea.ni:focus {
   opacity: 0.5;
 }
 
+/* Pagination "Charger plus" en bas des listes */
+.load-more {
+  display: flex;
+  justify-content: center;
+  padding: 14px 0 4px;
+}
+
 /* Empilement de plusieurs affectations le même jour (pistes) */
 .plan-cell--stacked {
   height: auto;

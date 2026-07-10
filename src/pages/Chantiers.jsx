@@ -5,6 +5,7 @@ import { useAuthStore } from '../store'
 import { formatDate } from '../lib/format'
 
 const DONE = ['termine', 'facture']
+const PAGE_SIZE = 20
 
 // État d'un chantier dérivé de ses ouvrages.
 function chantierFlags(c) {
@@ -33,6 +34,7 @@ export default function Chantiers() {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('tous')
   const [sortDir, setSortDir] = useState('desc') // 'desc' = plus récent en haut
+  const [visible, setVisible] = useState(PAGE_SIZE)
 
   useEffect(() => {
     let active = true
@@ -99,6 +101,13 @@ export default function Chantiers() {
         return sortDir === 'desc' ? -diff : diff
       })
   }, [chantiers, search, filter, sortDir])
+
+  // Réinitialise la pagination quand la vue filtrée change.
+  useEffect(() => {
+    setVisible(PAGE_SIZE)
+  }, [search, filter, sortDir])
+
+  const shown = filtered.slice(0, visible)
 
   return (
     <section className="page">
@@ -173,7 +182,7 @@ export default function Chantiers() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((c) => {
+              {shown.map((c) => {
                 const ca = c.ca
                 const nbOuvrages = (c.ouvrages ?? []).length
                 const isStock = c.num === 'STOCK'
@@ -206,6 +215,13 @@ export default function Chantiers() {
               )}
             </tbody>
           </table>
+          {filtered.length > visible && (
+            <div className="load-more">
+              <button className="btn bg bsm" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+                Charger plus ({filtered.length - visible} restants)
+              </button>
+            </div>
+          )}
         </div>
       )}
     </section>
