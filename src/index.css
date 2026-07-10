@@ -2201,6 +2201,13 @@ textarea.ni:focus {
   opacity: 0.5;
 }
 
+/* Fallback de chargement d'une route (code splitting) */
+.route-loading {
+  padding: 40px 24px;
+  color: var(--g2);
+  font-size: 13px;
+}
+
 /* Pagination "Charger plus" en bas des listes */
 .load-more {
   display: flex;
