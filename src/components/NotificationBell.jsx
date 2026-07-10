@@ -3,110 +3,178 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { useAuthStore } from '../store'
+import { useMonEmploye } from '../lib/useMonEmploye'
+import { daysSince, daysUntil, daysUntilAnniv, isoDay } from '../lib/dashboard'
 
-// Cloche de notifications (sidebar) : agrège les alertes selon le rôle et
-// les regroupe par type. Compteur = nombre total d'éléments en attente.
+// Cloche de notifications (sidebar).
+//
+// Une NOTIFICATION informe d'un évènement qui me concerne ; elle n'appelle pas
+// forcément une action de ma part. À distinguer des ALERTES du tableau de bord,
+// qui signalent une action à faire et disparaissent une fois celle-ci faite.
+//
+// Ne notifient volontairement JAMAIS : les nouveaux messages du fil d'actualité,
+// les changements de statut, et les achats / courses des autres.
 export default function NotificationBell() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
-  const uid = user?.id
-  const role = user?.role
+  const isDir = user?.role === 'dir'
+  const { employeId } = useMonEmploye()
+
   const [groups, setGroups] = useState([])
   const [open, setOpen] = useState(false)
   const wrapRef = useRef(null)
 
   const load = useCallback(async () => {
-    if (!uid) return
     const next = []
 
-    // Mes tâches non terminées (tous rôles).
-    const tach = await supabase
-      .from('taches')
-      .select('id, texte, chantier:chantiers!chantier_id(id, num)')
-      .eq('assigne_a', uid)
-      .eq('done', false)
-    if (!tach.error && tach.data?.length) {
-      next.push({
-        key: 'taches',
-        icon: '✅',
-        label: 'Mes tâches',
-        items: tach.data.map((t) => ({
-          id: t.id,
-          text: t.texte,
-          sub: t.chantier?.num,
-          path: '/dashboard#taches',
-        })),
-      })
-    }
-
-    // Réservé au Dirigeant : feedbacks remontés + messages d'assistance non lus.
-    if (role === 'dir') {
-      const fb = await supabase
-        .from('feedbacks')
-        .select('id, description, chantier:chantiers!chantier_id(id, num)')
-        .eq('statut', 'remonte')
-      if (!fb.error && fb.data?.length) {
-        next.push({
-          key: 'feedbacks',
-          icon: '🔧',
-          label: 'Feedbacks remontés',
-          items: fb.data.map((f) => ({
-            id: f.id,
-            text: f.description,
-            sub: f.chantier?.num,
-            path: f.chantier?.id ? `/chantiers/${f.chantier.id}/feedbacks` : '/dashboard',
-          })),
-        })
-      }
-      const ass = await supabase
-        .from('assistance_messages')
-        .select('id, type, texte')
-        .eq('lu', false)
-      if (!ass.error && ass.data?.length) {
-        next.push({
-          key: 'assistance',
-          icon: '💬',
-          label: 'Assistance',
-          items: ass.data.map((a) => ({
-            id: a.id,
-            text: a.texte,
-            sub: a.type,
-            path: '/assistance',
-          })),
-        })
-      }
-      // Signalements en attente (P12) — best-effort si la table existe.
+    if (isDir) {
+      // ----- Dirigeant -----
       const sig = await supabase
         .from('signalements')
         .select('id, type, description')
         .eq('statut', 'en_attente')
-      if (!sig.error && sig.data?.length) {
+      if (!sig.error && sig.data?.length)
         next.push({
-          key: 'signalements',
-          icon: '🐞',
-          label: 'Signalements',
+          key: 'signalements', icon: '🐞', label: 'Signalements Assistance',
           items: sig.data.map((s) => ({
-            id: s.id,
-            text: s.description,
+            id: s.id, text: s.description,
             sub: s.type === 'idee' ? 'idée' : 'problème',
             path: '/assistance',
           })),
         })
+
+      const idees = await supabase
+        .from('copil_sujets')
+        .select('id, titre, type')
+        .eq('statut', 'boite')
+      if (!idees.error && idees.data?.length)
+        next.push({
+          key: 'idees', icon: '💡', label: 'Boîte à idées COPIL',
+          items: idees.data.map((s) => ({
+            id: s.id, text: s.titre, sub: s.type, path: `/copil?o=${s.type}`,
+          })),
+        })
+
+      // Action COPIL non faite alors que la date de réunion est passée.
+      const actions = await supabase
+        .from('copil_actions')
+        .select('id, texte, reunion:copil_reunions!reunion_id(date, type)')
+        .eq('done', false)
+      if (!actions.error) {
+        const enRetard = (actions.data ?? []).filter(
+          (a) => a.reunion?.date && daysUntil(a.reunion.date) < 0
+        )
+        if (enRetard.length)
+          next.push({
+            key: 'copil-retard', icon: '⏳', label: 'Actions COPIL en retard',
+            items: enRetard.map((a) => ({
+              id: a.id, text: a.texte, sub: a.reunion?.type,
+              path: `/copil?o=${a.reunion?.type ?? 'chantiers'}`,
+            })),
+          })
       }
+
+      const fb = await supabase
+        .from('feedbacks')
+        .select('id, description, date, chantier:chantiers!chantier_id(id, num)')
+        .neq('statut', 'resolu')
+      if (!fb.error) {
+        const vieux = (fb.data ?? []).filter((f) => daysSince(f.date) > 7)
+        if (vieux.length)
+          next.push({
+            key: 'feedbacks', icon: '🔧', label: 'Feedbacks non traités (> 7 jours)',
+            items: vieux.map((f) => ({
+              id: f.id, text: f.description, sub: f.chantier?.num,
+              path: f.chantier?.id ? `/chantiers/${f.chantier.id}/feedbacks` : '/dashboard',
+            })),
+          })
+      }
+
+      // Anniversaires : personnel 7 jours avant, entreprise le jour J.
+      let emp = await supabase.from('employes').select('id, prenom, date_naissance, date_entree')
+      if (emp.error) emp = { data: [] }
+      const annivs = []
+      for (const e of emp.data ?? []) {
+        const dn = daysUntilAnniv(e.date_naissance)
+        if (dn != null && dn >= 0 && dn <= 7)
+          annivs.push({
+            id: 'n' + e.id,
+            text:
+              dn === 0
+                ? `Anniversaire de ${e.prenom} aujourd'hui !`
+                : `Anniversaire de ${e.prenom} dans ${dn} jour${dn > 1 ? 's' : ''}`,
+            path: '/contacts',
+          })
+        const de = daysUntilAnniv(e.date_entree)
+        if (de === 0 && e.date_entree) {
+          const ans = new Date().getFullYear() - new Date(e.date_entree).getFullYear()
+          if (ans > 0)
+            annivs.push({
+              id: 'e' + e.id,
+              text: `${e.prenom} fête ses ${ans} an${ans > 1 ? 's' : ''} chez MZ Bois !`,
+              path: '/contacts',
+            })
+        }
+      }
+      if (annivs.length)
+        next.push({ key: 'anniv', icon: '🎂', label: 'Anniversaires', items: annivs })
+    } else if (employeId) {
+      // ----- Collaborateurs -----
+      const tach = await supabase
+        .from('taches')
+        .select('id, texte, echeance, chantier:chantiers!chantier_id(num)')
+        .eq('assigne_a', employeId)
+        .eq('done', false)
+      if (!tach.error && tach.data?.length) {
+        next.push({
+          key: 'taches', icon: '✅', label: 'Tâches qui vous sont assignées',
+          items: tach.data.map((t) => ({
+            id: t.id, text: t.texte, sub: t.chantier?.num, path: '/dashboard',
+          })),
+        })
+        // Échéance proche : aujourd'hui ou demain.
+        const today = isoDay()
+        const proches = tach.data.filter(
+          (t) => t.echeance && t.echeance >= today && daysUntil(t.echeance) <= 1
+        )
+        if (proches.length)
+          next.push({
+            key: 'echeance', icon: '⏰', label: 'Échéance proche',
+            items: proches.map((t) => ({
+              id: 'e' + t.id, text: t.texte,
+              sub: daysUntil(t.echeance) <= 0 ? "aujourd'hui" : 'demain',
+              path: '/dashboard',
+            })),
+          })
+      }
+
+      const actions = await supabase
+        .from('copil_actions')
+        .select('id, texte, reunion:copil_reunions!reunion_id(type)')
+        .eq('assigne_a', employeId)
+        .eq('done', false)
+      if (!actions.error && actions.data?.length)
+        next.push({
+          key: 'copil', icon: '📋', label: 'Actions COPIL assignées',
+          items: actions.data.map((a) => ({
+            id: a.id, text: a.texte, sub: a.reunion?.type,
+            path: `/copil?o=${a.reunion?.type ?? 'chantiers'}`,
+          })),
+        })
     }
 
     setGroups(next)
-  }, [uid, role])
+  }, [isDir, employeId])
 
   useEffect(() => {
     load()
   }, [load])
 
-  // Mise à jour en direct quand une source change.
-  useRealtime('taches', load)
-  useRealtime('feedbacks', load, { enabled: role === 'dir' })
-  useRealtime('assistance_messages', load, { enabled: role === 'dir' })
-  useRealtime('signalements', load, { enabled: role === 'dir' })
+  // Temps réel sur les sources les plus mouvantes.
+  useRealtime('taches', load, { enabled: !isDir })
+  useRealtime('signalements', load, { enabled: isDir })
+  useRealtime('feedbacks', load, { enabled: isDir })
+  useRealtime('copil_sujets', load, { enabled: isDir })
 
   useEffect(() => {
     function onClick(e) {
@@ -125,11 +193,7 @@ export default function NotificationBell() {
 
   return (
     <div className="notif" ref={wrapRef}>
-      <button
-        className="notif-btn"
-        onClick={() => setOpen((o) => !o)}
-        title="Notifications"
-      >
+      <button className="notif-btn" onClick={() => setOpen((o) => !o)} title="Notifications">
         🔔
         {total > 0 && <span className="notif-badge">{total > 99 ? '99+' : total}</span>}
       </button>

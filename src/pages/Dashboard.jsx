@@ -1,5 +1,4 @@
 import { useAuthStore } from '../store'
-import DashboardLegacy from './DashboardLegacy'
 import DashboardDir from './dashboard/DashboardDir'
 import DashboardBe from './dashboard/DashboardBe'
 import DashboardProg from './dashboard/DashboardProg'
@@ -8,8 +7,7 @@ import DashboardCa from './dashboard/DashboardCa'
 import DashboardAdmin from './dashboard/DashboardAdmin'
 
 // Chaque rôle a son propre tableau de bord : il n'affiche que ce dont ce rôle
-// a besoin. Les rôles dont le tableau dédié n'est pas encore livré retombent
-// sur l'ancien tableau de bord unique.
+// a besoin.
 const PAR_ROLE = {
   dir: DashboardDir,
   be: DashboardBe,
@@ -21,6 +19,7 @@ const PAR_ROLE = {
 
 export default function Dashboard() {
   const role = useAuthStore((s) => s.user?.role)
-  const Vue = PAR_ROLE[role] ?? DashboardLegacy
+  const Vue = PAR_ROLE[role]
+  if (!Vue) return <section className="page"><p className="muted">Aucun tableau de bord pour ce rôle.</p></section>
   return <Vue />
 }
