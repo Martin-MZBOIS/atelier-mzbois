@@ -5,6 +5,7 @@ import { useSettings } from '../store/settings'
 import { ROLES } from '../lib/roles'
 import Icon from './Icon'
 import GlobalSearch from './GlobalSearch'
+import NotificationBell from './NotificationBell'
 
 // Élément de navigation : id = clé des droits d'accès.
 // to = route ; certains items COPIL partagent /copil avec un paramètre ?o=.
@@ -136,6 +137,7 @@ export default function Layout() {
             <div className="sidebar-title">MZ Bois &amp; Compagnie</div>
             <div className="sidebar-subtitle">Atelier</div>
           </div>
+          <NotificationBell />
         </div>
 
         <GlobalSearch />
