@@ -43,6 +43,7 @@ export default function CoursesGlobal() {
   const [error, setError] = useState('')
   const [view, setView] = useState('liste')
   const [filter, setFilter] = useState('tous')
+  const [coursier, setCoursier] = useState('tous')
   const [weekOffset, setWeekOffset] = useState(0)
   const [monthOffset, setMonthOffset] = useState(0)
   const [calMode, setCalMode] = useState('sem') // 'sem' | 'mois'
@@ -150,14 +151,28 @@ export default function CoursesGlobal() {
     }
   }
 
+  // Options du filtre coursier : employés + coursiers externes (transporteurs).
+  const coursierOptions = useMemo(
+    () => [
+      ...employes.map((e) => ({ id: e.id, label: `${e.prenom} ${e.nom}` })),
+      ...transporteurs.map((t) => ({ id: t.id, label: t.nom })),
+    ],
+    [employes, transporteurs]
+  )
+
   const filtered = useMemo(
-    () => (filter === 'tous' ? courses : courses.filter((c) => c.statut === filter)),
-    [courses, filter]
+    () =>
+      courses.filter(
+        (c) =>
+          (filter === 'tous' || c.statut === filter) &&
+          (coursier === 'tous' || c.qui_id === coursier)
+      ),
+    [courses, filter, coursier]
   )
 
   useEffect(() => {
     setVisible(PAGE_SIZE)
-  }, [filter])
+  }, [filter, coursier])
 
   const shown = useMemo(() => filtered.slice(0, visible), [filtered, visible])
 
@@ -279,7 +294,18 @@ export default function CoursesGlobal() {
 
       {!loading && view === 'liste' && (
         <>
-          <div className="course-filters">
+          <div className="course-filters" style={{ alignItems: 'center' }}>
+            <select
+              className="ss"
+              value={coursier}
+              onChange={(e) => setCoursier(e.target.value)}
+              title="Filtrer par coursier"
+            >
+              <option value="tous">Tous les coursiers</option>
+              {coursierOptions.map((o) => (
+                <option key={o.id} value={o.id}>{o.label}</option>
+              ))}
+            </select>
             {['tous', ...STATUT_COURSE_ORDER].map((slug) => {
               const on = filter === slug
               const meta = slug === 'tous' ? null : STATUT_COURSE[slug]
