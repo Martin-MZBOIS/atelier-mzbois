@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
+import { useDataCache } from '../store/cache'
 import { formatDate } from '../lib/format'
 
 const DONE = ['termine', 'facture']
@@ -28,8 +29,11 @@ const FILTERS = [
 export default function Chantiers() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
-  const [chantiers, setChantiers] = useState([])
-  const [loading, setLoading] = useState(true)
+  const cacheKey = `chantiers:${user?.role === 'ca' ? user.id : 'all'}`
+  const cached = useDataCache((s) => s.cache[cacheKey])
+  const setCache = useDataCache((s) => s.set)
+  const [chantiers, setChantiers] = useState(cached ?? [])
+  const [loading, setLoading] = useState(!cached)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('tous')
@@ -39,7 +43,9 @@ export default function Chantiers() {
   useEffect(() => {
     let active = true
     async function load() {
-      setLoading(true)
+      // Cache stale-while-revalidate : si des données sont déjà en mémoire on
+      // les affiche sans spinner et on revalide en arrière-plan.
+      if (!cached) setLoading(true)
       setError('')
       let query = supabase
         .from('chantiers')
@@ -55,9 +61,10 @@ export default function Chantiers() {
       if (!active) return
       if (dbError) {
         setError(dbError.message)
-        setChantiers([])
+        if (!cached) setChantiers([])
       } else {
         setChantiers(data ?? [])
+        setCache(cacheKey, data ?? [])
       }
       setLoading(false)
     }
@@ -65,7 +72,8 @@ export default function Chantiers() {
     return () => {
       active = false
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cacheKey])
 
   const counts = useMemo(() => {
     const c = {}
