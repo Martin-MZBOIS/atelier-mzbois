@@ -206,10 +206,6 @@ export default function CopilMeeting({ type, freqLabel, nextDate, canSubmit, odj
               </div>
             )}
 
-            <div className="copil-template">
-              <TrameGuide type={type} />
-            </div>
-
             {isDir ? (
               <>
                 <div className="fl" style={{ marginTop: 10 }}>
@@ -239,7 +235,12 @@ export default function CopilMeeting({ type, freqLabel, nextDate, canSubmit, odj
         )}
       </div>
 
-      {/* C) Historique */}
+      {/* C) Trame de réunion (guide, toujours visible) */}
+      <div className="card">
+        <TrameGuide type={type} />
+      </div>
+
+      {/* D) Historique */}
       <div className="card">
         <div className="card-head">
           <span className="card-title">📚 Historique des réunions</span>

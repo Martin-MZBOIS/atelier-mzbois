@@ -21,12 +21,17 @@ function thisMonday() {
 }
 
 // Statut d'un chantier déduit de sa dernière réunion et de ses actions.
+// « Bloqué » est réservé aux actions réellement en retard (non faites alors que
+// la réunion date de plus d'une semaine) ; l'absence de réunion n'est pas un
+// blocage, seulement un point d'attention.
 function chantierStatut(reunion, age) {
-  if (!reunion || age > RECENT_DAYS) return { label: 'Bloqué', color: '#8b3a3a' }
+  if (!reunion) return { label: 'Attention', color: '#8a7040' }
   const actions = reunion.reunion_actions ?? []
   const undone = actions.filter((a) => !a.done).length
-  if (undone === 0) return { label: 'On track', color: '#5a7a5a' }
-  return { label: 'Attention', color: '#8a7040' }
+  const stale = age > RECENT_DAYS
+  if (undone > 0 && stale) return { label: 'Bloqué', color: '#8b3a3a' }
+  if (undone > 0 || stale) return { label: 'Attention', color: '#8a7040' }
+  return { label: 'On track', color: '#5a7a5a' }
 }
 
 // Onglet COPIL « Réunion de chantiers » — synthèse agrégée par chantier.
@@ -123,6 +128,9 @@ export default function CopilChantiers() {
                   >
                     {statut.label}
                   </span>
+                  {staleChantier && (
+                    <span className="copil-stale">⚠ sans réunion récente</span>
+                  )}
                 </div>
                 <button
                   className="btn bg bsm"

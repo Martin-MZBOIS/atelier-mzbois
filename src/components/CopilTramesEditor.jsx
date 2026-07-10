@@ -8,25 +8,43 @@ const TYPES = [
   { id: 'strategie', label: 'Stratégie' },
 ]
 
+// Trame stockée ({ titre, points[] }) → forme éditable ({ titre, pointsText }).
+function toEditable(sections) {
+  return (sections ?? []).map((s) => ({
+    titre: s.titre ?? '',
+    pointsText: (s.points ?? []).join('\n'),
+  }))
+}
+// Forme éditable → trame stockée.
+function fromEditable(sections) {
+  return sections.map((s) => ({
+    titre: s.titre,
+    points: s.pointsText.split('\n').map((p) => p.trim()).filter(Boolean),
+  }))
+}
+
 // Éditeur des trames de réunion COPIL (Paramètres, Dirigeant).
 // Lit/écrit copil_trames (migration 0024) avec repli sur les trames par défaut.
 export default function CopilTramesEditor() {
   const [type, setType] = useState('reunion_chantiers')
-  const [sections, setSections] = useState(DEFAULT_TRAMES.reunion_chantiers)
+  // `pointsText` : les points édités sous forme de texte (une ligne = un point).
+  // Champs contrôlés : sinon le contenu des textareas resterait celui de la
+  // trame précédente au changement d'onglet (nœuds DOM réutilisés par React).
+  const [sections, setSections] = useState(() => toEditable(DEFAULT_TRAMES.reunion_chantiers))
   const [msg, setMsg] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     let active = true
     setMsg('')
-    setSections(DEFAULT_TRAMES[type] ?? [])
+    setSections(toEditable(DEFAULT_TRAMES[type] ?? []))
     supabase
       .from('copil_trames')
       .select('sections')
       .eq('type', type)
       .maybeSingle()
       .then(({ data }) => {
-        if (active && data?.sections?.length) setSections(data.sections)
+        if (active && data?.sections?.length) setSections(toEditable(data.sections))
       })
     return () => {
       active = false
@@ -36,9 +54,8 @@ export default function CopilTramesEditor() {
   function setSectionTitre(i, titre) {
     setSections((prev) => prev.map((s, idx) => (idx === i ? { ...s, titre } : s)))
   }
-  function setSectionPoints(i, text) {
-    const points = text.split('\n').map((p) => p.trim()).filter(Boolean)
-    setSections((prev) => prev.map((s, idx) => (idx === i ? { ...s, points } : s)))
+  function setSectionPoints(i, pointsText) {
+    setSections((prev) => prev.map((s, idx) => (idx === i ? { ...s, pointsText } : s)))
   }
   function move(i, dir) {
     setSections((prev) => {
@@ -50,13 +67,13 @@ export default function CopilTramesEditor() {
     })
   }
   function addSection() {
-    setSections((prev) => [...prev, { titre: 'Nouvelle section', points: [] }])
+    setSections((prev) => [...prev, { titre: 'Nouvelle section', pointsText: '' }])
   }
   function removeSection(i) {
     setSections((prev) => prev.filter((_, idx) => idx !== i))
   }
   function reset() {
-    setSections(DEFAULT_TRAMES[type] ?? [])
+    setSections(toEditable(DEFAULT_TRAMES[type] ?? []))
   }
 
   async function save() {
@@ -64,7 +81,10 @@ export default function CopilTramesEditor() {
     setMsg('')
     const { error } = await supabase
       .from('copil_trames')
-      .upsert({ type, sections, modifie_le: new Date().toISOString() }, { onConflict: 'type' })
+      .upsert(
+        { type, sections: fromEditable(sections), modifie_le: new Date().toISOString() },
+        { onConflict: 'type' }
+      )
     setSaving(false)
     if (error) {
       setMsg(
@@ -115,9 +135,9 @@ export default function CopilTramesEditor() {
           </div>
           <textarea
             className="ni"
-            rows={Math.max(2, (s.points ?? []).length)}
-            defaultValue={(s.points ?? []).join('\n')}
-            onBlur={(e) => setSectionPoints(i, e.target.value)}
+            rows={Math.max(2, s.pointsText.split('\n').length)}
+            value={s.pointsText}
+            onChange={(e) => setSectionPoints(i, e.target.value)}
             placeholder="Un point par ligne…"
           />
         </div>
