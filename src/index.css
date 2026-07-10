@@ -2082,6 +2082,111 @@ textarea.ni:focus {
   font-size: 11px;
   opacity: 0.6;
 }
+/* Alerte de vigilance (orange) — à traiter, mais pas encore critique. */
+.dash-alert--orange {
+  color: #8a7040;
+}
+.dash-alert--orange:hover {
+  background: rgba(138, 112, 64, 0.1);
+}
+
+/* KPIs (tuiles chiffrées) */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.kpi {
+  border: 0.5px solid var(--g4);
+  border-top: 2px solid var(--g4);
+  border-radius: 0;
+  padding: 12px 10px;
+  text-align: center;
+  background: var(--w);
+}
+.kpi-val {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.kpi-lbl {
+  margin-top: 4px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #b7afa8;
+}
+
+/* Ligne générique de tableau de bord (course, réception, ouvrage…) */
+.dash-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-bottom: 0.5px solid var(--g5);
+  cursor: pointer;
+}
+.dash-line:hover {
+  background: #faf8f6;
+}
+.dash-line--static {
+  cursor: default;
+}
+.dash-line-body {
+  flex: 1;
+  min-width: 0;
+}
+.dash-line-lbl {
+  font-size: 12px;
+  color: var(--g1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dash-line-sub {
+  font-size: 10px;
+  color: var(--g2);
+  margin-top: 2px;
+}
+.dash-line-val {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'DM Mono', ui-monospace, monospace;
+}
+
+/* Réunions COPIL (bloc compact du tableau de bord) */
+.copil-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 0.5px solid var(--g5);
+}
+.copil-mini:last-child {
+  border-bottom: none;
+}
+.copil-mini-body {
+  flex: 1;
+  min-width: 0;
+}
+.copil-mini-lbl {
+  font-size: 12px;
+  font-weight: 600;
+}
+.copil-mini-date {
+  font-size: 10px;
+  color: var(--g2);
+}
+.copil-mini-count {
+  flex-shrink: 0;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brun);
+  background: var(--brun2);
+  padding: 2px 7px;
+}
 
 .meteo-card {
   background: linear-gradient(135deg, var(--acier), #4a3828);
