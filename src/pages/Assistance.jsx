@@ -1,6 +1,7 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
+import { formatDate } from '../lib/format'
 
 // Onglets d'aide : Général (tous les onglets) + une section par rôle.
 const SECTIONS = [
@@ -266,87 +267,23 @@ function Prod() {
   )
 }
 
-const CATEGORIES = ['Chantiers', 'Achats', 'Planning', 'Courses', 'Autre']
-
-function MessageForm({ type }) {
-  const user = useAuthStore((s) => s.user)
-  const [texte, setTexte] = useState('')
-  const [categorie, setCategorie] = useState('Chantiers')
-  const [sending, setSending] = useState(false)
-  const [done, setDone] = useState(false)
-  const [error, setError] = useState('')
-
-  async function send() {
-    if (!texte.trim()) return
-    setSending(true)
-    setError('')
-    const payload = {
-      type,
-      texte: texte.trim(),
-      categorie: type === 'question' ? categorie : null,
-      auteur_id: user?.id ?? null,
-    }
-    const { error: dbError } = await supabase.from('assistance_messages').insert(payload)
-    setSending(false)
-    if (dbError) {
-      setError(
-        /assistance_messages/.test(dbError.message)
-          ? 'Exécute la migration 0017_assistance_messages.sql.'
-          : dbError.message
-      )
-      return
-    }
-    setTexte('')
-    setDone(true)
-    setTimeout(() => setDone(false), 4000)
-  }
-
-  return (
-    <div className="help-bloc">
-      <h3 className="help-bloc-title">
-        {type === 'question' ? '❓ Poser une question' : '💡 Suggérer une amélioration'}
-      </h3>
-      <div className="help-bloc-body">
-        {type === 'question' && (
-          <div className="fl">
-            <label>Catégorie</label>
-            <select value={categorie} onChange={(e) => setCategorie(e.target.value)}>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-        )}
-        <textarea
-          className="ni"
-          rows="3"
-          placeholder={type === 'question' ? 'Votre question…' : 'Votre idée d’amélioration…'}
-          value={texte}
-          onChange={(e) => setTexte(e.target.value)}
-        />
-        {error && <div className="alert" style={{ marginTop: 8 }}>{error}</div>}
-        <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button className="btn bp bsm" disabled={sending || !texte.trim()} onClick={send}>
-            {sending ? 'Envoi…' : 'Envoyer'}
-          </button>
-          {done && <span className="param-msg">✓ Envoyé au Dirigeant</span>}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default function Assistance() {
+// --- 1) Aide contextuelle : rubriques filtrées par rôle -----------------------
+function AideSection({ role }) {
   const [section, setSection] = useState('general')
   const [search, setSearch] = useState('')
   const q = search.trim().toLowerCase()
 
-  return (
-    <section className="page">
-      <div className="page-head">
-        <h2>Assistance</h2>
-      </div>
+  // Chaque utilisateur ne voit que l'aide qui le concerne ; le Dirigeant voit tout.
+  const visible =
+    role === 'dir' ? SECTIONS : SECTIONS.filter((s) => s.id === 'general' || s.id === role)
 
+  useEffect(() => {
+    if (!visible.some((s) => s.id === section)) setSection('general')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role])
+
+  return (
+    <>
       <input
         className="plan-search"
         style={{ width: 320 }}
@@ -355,17 +292,19 @@ export default function Assistance() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <nav className="subtabs">
-        {SECTIONS.map((s) => (
-          <button
-            key={s.id}
-            className={'subtab' + (section === s.id ? ' subtab--active' : '')}
-            onClick={() => setSection(s.id)}
-          >
-            {s.label}
-          </button>
-        ))}
-      </nav>
+      {visible.length > 1 && (
+        <nav className="subtabs">
+          {visible.map((s) => (
+            <button
+              key={s.id}
+              className={'subtab' + (section === s.id ? ' subtab--active' : '')}
+              onClick={() => setSection(s.id)}
+            >
+              {s.label}
+            </button>
+          ))}
+        </nav>
+      )}
 
       <div className="help-content">
         <SearchCtx.Provider value={q}>
@@ -375,11 +314,318 @@ export default function Assistance() {
           {section === 'prog' && <Prog />}
           {section === 'prod' && <Prod />}
         </SearchCtx.Provider>
-
-        {/* Formulaires question / suggestion — toujours visibles. */}
-        <MessageForm type="question" />
-        <MessageForm type="suggestion" />
       </div>
+    </>
+  )
+}
+
+// --- 2) Signaler : problème / idée d'amélioration -----------------------------
+const SIGNAL_TYPES = [
+  { id: 'probleme', label: '🐞 Problème' },
+  { id: 'idee', label: '💡 Idée d’amélioration' },
+]
+const SIGNAL_STATUT = {
+  en_attente: { label: 'En attente', color: '#8a7040' },
+  traite: { label: 'Traité', color: '#5a7a5a' },
+}
+
+function SignalerSection({ user }) {
+  const isDir = user?.role === 'dir'
+  const [type, setType] = useState('probleme')
+  const [description, setDescription] = useState('')
+  const [captureUrl, setCaptureUrl] = useState('')
+  const [items, setItems] = useState([])
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
+  const [done, setDone] = useState(false)
+  const [reponses, setReponses] = useState({})
+
+  async function load() {
+    let query = supabase
+      .from('signalements')
+      .select('id, type, description, capture_url, date, statut, reponse, soumis_par')
+      .order('date', { ascending: false })
+    // Chaque utilisateur voit uniquement ses propres signalements.
+    if (!isDir && user?.id) query = query.eq('soumis_par', user.id)
+    const { data, error: dbError } = await query
+    if (dbError) {
+      setError(
+        /signalements/.test(dbError.message)
+          ? 'Exécute la migration 0025_signalements_nouveautes.sql.'
+          : dbError.message
+      )
+      return
+    }
+    setError('')
+    setItems(data ?? [])
+  }
+
+  useEffect(() => {
+    load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, isDir])
+
+  async function send() {
+    if (!description.trim()) return
+    setSending(true)
+    const { error: dbError } = await supabase.from('signalements').insert({
+      type,
+      description: description.trim(),
+      capture_url: captureUrl.trim() || null,
+      soumis_par: user?.id ?? null,
+    })
+    setSending(false)
+    if (dbError) {
+      setError(
+        /signalements/.test(dbError.message)
+          ? 'Exécute la migration 0025_signalements_nouveautes.sql.'
+          : dbError.message
+      )
+      return
+    }
+    setDescription('')
+    setCaptureUrl('')
+    setDone(true)
+    setTimeout(() => setDone(false), 4000)
+    await load()
+  }
+
+  async function repondre(id) {
+    const reponse = (reponses[id] ?? '').trim()
+    if (!reponse) return
+    await supabase.from('signalements').update({ reponse, statut: 'traite' }).eq('id', id)
+    setReponses((r) => ({ ...r, [id]: '' }))
+    await load()
+  }
+
+  return (
+    <div className="help-content">
+      <div className="help-bloc">
+        <h3 className="help-bloc-title">Signaler</h3>
+        <div className="help-bloc-body">
+          <div className="fl">
+            <label>Type</label>
+            <div className="type-toggle">
+              {SIGNAL_TYPES.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  className={'type-btn' + (type === t.id ? ' type-btn--on' : '')}
+                  onClick={() => setType(t.id)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <textarea
+            className="ni"
+            rows="3"
+            placeholder="Décrivez le problème ou votre idée…"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <div className="fl" style={{ marginTop: 8 }}>
+            <label>Lien capture d’écran (optionnel)</label>
+            <input
+              value={captureUrl}
+              onChange={(e) => setCaptureUrl(e.target.value)}
+              placeholder="https://…"
+            />
+          </div>
+          {error && <div className="alert" style={{ marginTop: 8 }}>{error}</div>}
+          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button className="btn bp bsm" disabled={sending || !description.trim()} onClick={send}>
+              {sending ? 'Envoi…' : 'Envoyer'}
+            </button>
+            {done && <span className="param-msg">✓ Envoyé au Dirigeant</span>}
+          </div>
+        </div>
+      </div>
+
+      <div className="help-bloc">
+        <h3 className="help-bloc-title">
+          {isDir ? 'Tous les signalements' : 'Mes signalements'}
+        </h3>
+        <div className="help-bloc-body">
+          {items.length === 0 ? (
+            <div className="empty">Aucun signalement.</div>
+          ) : (
+            items.map((s) => {
+              const st = SIGNAL_STATUT[s.statut] ?? SIGNAL_STATUT.en_attente
+              return (
+                <div key={s.id} className="signalement">
+                  <div className="signalement-head">
+                    <span>{s.type === 'idee' ? '💡' : '🐞'}</span>
+                    <span className="signalement-date">{formatDate(s.date)}</span>
+                    <span
+                      className="aspill"
+                      style={{ color: st.color, backgroundColor: st.color + '22' }}
+                    >
+                      {st.label}
+                    </span>
+                  </div>
+                  <div className="signalement-desc">{s.description}</div>
+                  {s.capture_url && (
+                    <a
+                      className="address-link"
+                      href={s.capture_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Voir la capture ↗
+                    </a>
+                  )}
+                  {s.reponse && (
+                    <div className="signalement-reponse">
+                      <strong>Réponse :</strong> {s.reponse}
+                    </div>
+                  )}
+                  {isDir && s.statut !== 'traite' && (
+                    <div className="param-add" style={{ marginTop: 6 }}>
+                      <input
+                        placeholder="Répondre…"
+                        value={reponses[s.id] ?? ''}
+                        onChange={(e) => setReponses((r) => ({ ...r, [s.id]: e.target.value }))}
+                        onKeyDown={(e) => e.key === 'Enter' && repondre(s.id)}
+                      />
+                      <button className="btn bp bsm" onClick={() => repondre(s.id)}>
+                        Répondre
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// --- 3) Nouveautés : journal des modifications de l'app -----------------------
+function isRecent(dateStr) {
+  if (!dateStr) return false
+  return (new Date() - new Date(dateStr)) / 86400000 <= 7
+}
+
+function NouveautesSection({ user }) {
+  const isDir = user?.role === 'dir'
+  const [items, setItems] = useState([])
+  const [error, setError] = useState('')
+  const [titre, setTitre] = useState('')
+  const [description, setDescription] = useState('')
+
+  async function load() {
+    const { data, error: dbError } = await supabase
+      .from('app_nouveautes')
+      .select('id, date, titre, description, visible_roles')
+      .order('date', { ascending: false })
+    if (dbError) {
+      setError(
+        /app_nouveautes/.test(dbError.message)
+          ? 'Exécute la migration 0025_signalements_nouveautes.sql.'
+          : dbError.message
+      )
+      return
+    }
+    setError('')
+    setItems(data ?? [])
+  }
+
+  useEffect(() => {
+    load()
+  }, [])
+
+  async function add() {
+    if (!titre.trim()) return
+    await supabase
+      .from('app_nouveautes')
+      .insert({ titre: titre.trim(), description: description.trim() || null })
+    setTitre('')
+    setDescription('')
+    await load()
+  }
+
+  // visible_roles null = visible par tous.
+  const visibles = items.filter(
+    (n) => !n.visible_roles?.length || n.visible_roles.includes(user?.role)
+  )
+
+  return (
+    <div className="help-content">
+      {isDir && (
+        <div className="help-bloc">
+          <h3 className="help-bloc-title">Ajouter une nouveauté</h3>
+          <div className="help-bloc-body">
+            <div className="fl">
+              <label>Titre</label>
+              <input value={titre} onChange={(e) => setTitre(e.target.value)} />
+            </div>
+            <div className="fl">
+              <label>Description</label>
+              <input value={description} onChange={(e) => setDescription(e.target.value)} />
+            </div>
+            <button className="btn bp bsm" style={{ marginTop: 8 }} onClick={add}>
+              Publier
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="help-bloc">
+        <h3 className="help-bloc-title">Nouveautés</h3>
+        <div className="help-bloc-body">
+          {error && <div className="alert">{error}</div>}
+          {!error && visibles.length === 0 && <div className="empty">Aucune nouveauté.</div>}
+          {visibles.map((n) => (
+            <div key={n.id} className="nouveaute">
+              <div className="nouveaute-head">
+                <span className="nouveaute-date mono">{formatDate(n.date)}</span>
+                <span className="nouveaute-titre">{n.titre}</span>
+                {isRecent(n.date) && <span className="nouveaute-badge">Nouveau</span>}
+              </div>
+              {n.description && <div className="nouveaute-desc">{n.description}</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const TABS = [
+  { id: 'aide', label: 'Aide' },
+  { id: 'signaler', label: 'Signaler' },
+  { id: 'nouveautes', label: 'Nouveautés' },
+]
+
+export default function Assistance() {
+  const user = useAuthStore((s) => s.user)
+  const [tab, setTab] = useState('aide')
+
+  return (
+    <section className="page">
+      <div className="page-head">
+        <h2>Assistance</h2>
+      </div>
+
+      <nav className="subtabs">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            className={'subtab' + (tab === t.id ? ' subtab--active' : '')}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
+      {tab === 'aide' && <AideSection role={user?.role} />}
+      {tab === 'signaler' && <SignalerSection user={user} />}
+      {tab === 'nouveautes' && <NouveautesSection user={user} />}
     </section>
   )
 }

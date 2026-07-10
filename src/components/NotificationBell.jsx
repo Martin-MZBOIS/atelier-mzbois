@@ -75,6 +75,24 @@ export default function NotificationBell() {
           })),
         })
       }
+      // Signalements en attente (P12) — best-effort si la table existe.
+      const sig = await supabase
+        .from('signalements')
+        .select('id, type, description')
+        .eq('statut', 'en_attente')
+      if (!sig.error && sig.data?.length) {
+        next.push({
+          key: 'signalements',
+          icon: '🐞',
+          label: 'Signalements',
+          items: sig.data.map((s) => ({
+            id: s.id,
+            text: s.description,
+            sub: s.type === 'idee' ? 'idée' : 'problème',
+            path: '/assistance',
+          })),
+        })
+      }
     }
 
     setGroups(next)
@@ -88,6 +106,7 @@ export default function NotificationBell() {
   useRealtime('taches', load)
   useRealtime('feedbacks', load, { enabled: role === 'dir' })
   useRealtime('assistance_messages', load, { enabled: role === 'dir' })
+  useRealtime('signalements', load, { enabled: role === 'dir' })
 
   useEffect(() => {
     function onClick(e) {
