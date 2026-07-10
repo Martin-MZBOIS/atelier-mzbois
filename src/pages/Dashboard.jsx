@@ -3,6 +3,7 @@ import DashboardLegacy from './DashboardLegacy'
 import DashboardDir from './dashboard/DashboardDir'
 import DashboardBe from './dashboard/DashboardBe'
 import DashboardProg from './dashboard/DashboardProg'
+import DashboardProd from './dashboard/DashboardProd'
 
 // Chaque rôle a son propre tableau de bord : il n'affiche que ce dont ce rôle
 // a besoin. Les rôles dont le tableau dédié n'est pas encore livré retombent
@@ -11,6 +12,7 @@ const PAR_ROLE = {
   dir: DashboardDir,
   be: DashboardBe,
   prog: DashboardProg,
+  prod: DashboardProd,
 }
 
 export default function Dashboard() {
