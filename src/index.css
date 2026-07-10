@@ -253,6 +253,20 @@ body {
   margin-top: 2px;
 }
 
+/* Lien d'adresse cliquable → itinéraire Google Maps */
+.address-link {
+  color: var(--brun);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--brun);
+}
+.address-link:hover {
+  color: var(--brun4);
+}
+.address-link-ico {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
 /* Cloche de notifications (sidebar) */
 .notif {
   position: relative;

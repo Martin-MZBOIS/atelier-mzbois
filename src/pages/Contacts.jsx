@@ -6,6 +6,7 @@ import { TYPE_SOCIETE, resolve } from '../lib/statuts'
 import SocieteModal from './SocieteModal'
 import ContactPersonModal from './ContactPersonModal'
 import SalarieModal from './SalarieModal'
+import AddressLink from '../components/AddressLink'
 
 // Sous-onglets : les 3 premiers filtrent `fournisseurs` par type ;
 // « Salariés » (employes) n'est visible que pour dir et prod.
@@ -257,13 +258,13 @@ function SocieteDetail({ s, onEdit, onAddContact }) {
         {s.adresse && (
           <div>
             <dt>Siège social</dt>
-            <dd>{s.adresse}</dd>
+            <dd><AddressLink address={s.adresse} /></dd>
           </div>
         )}
         {s.adresse_livraison && (
           <div>
             <dt>Livraison</dt>
-            <dd>{s.adresse_livraison}</dd>
+            <dd><AddressLink address={s.adresse_livraison} /></dd>
           </div>
         )}
         {s.famille && (
