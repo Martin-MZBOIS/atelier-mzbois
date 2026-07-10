@@ -253,6 +253,28 @@ body {
   margin-top: 2px;
 }
 
+/* Trame de réunion (guide COPIL) */
+.trame-guide {
+  font-size: 12px;
+}
+.trame-list {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+.trame-list > li {
+  margin-bottom: 6px;
+}
+.trame-titre {
+  font-weight: 600;
+  color: var(--g1);
+}
+.trame-points {
+  margin: 2px 0 0;
+  padding-left: 16px;
+  color: var(--g2);
+  list-style: '→ ';
+}
+
 /* Lien d'adresse cliquable → itinéraire Google Maps */
 .address-link {
   color: var(--brun);

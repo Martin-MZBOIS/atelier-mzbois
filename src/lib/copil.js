@@ -1,3 +1,26 @@
+// Trames de réunion par défaut (utilisées si la table copil_trames — migration
+// 0024 — n'est pas encore renseignée). Chaque section : { titre, points[] }.
+export const DEFAULT_TRAMES = {
+  reunion_chantiers: [
+    { titre: 'Revue des actions de la semaine passée', points: ['Liste des actions ✅ / ❌'] },
+    { titre: 'Point par chantier', points: ['Statut général', 'Points bloquants', 'Décisions prises'] },
+    { titre: 'Actions de la semaine', points: ['Qui fait quoi avant lundi prochain'] },
+  ],
+  hommes_cles: [
+    { titre: 'Revue des actions de la dernière réunion', points: ['Liste des actions ✅ / ❌'] },
+    { titre: "Sujets de l'ordre du jour", points: ['Discussion (notes libres)', 'Décision prise', 'Action associée + assigné à'] },
+    { titre: 'Divers', points: ['Notes libres'] },
+    { titre: 'Prochaine réunion', points: ['Date confirmée'] },
+  ],
+  strategie: [
+    { titre: 'Bilan des 6 derniers mois', points: ['CA réalisé vs objectif', 'Marge', 'Points marquants'] },
+    { titre: 'Analyse', points: ['Ce qui a bien fonctionné', "Ce qui doit s'améliorer"] },
+    { titre: 'Objectifs des 6 prochains mois', points: ['CA cible', 'Nouveaux marchés / clients', 'Priorités'] },
+    { titre: 'Décisions stratégiques', points: ['Notes libres'] },
+    { titre: 'Actions', points: ['Qui / Quoi / Quand'] },
+  ],
+}
+
 // Helpers de dates pour les réunions COPIL.
 
 function atMidnight(d) {

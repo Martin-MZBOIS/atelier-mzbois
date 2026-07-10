@@ -2,12 +2,31 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatDate } from '../lib/format'
+import { formatLong } from '../lib/copil'
+import TrameGuide from '../components/TrameGuide'
 
 const RECENT_DAYS = 7 // réunion hebdomadaire → au-delà = plus récente
 
 function daysSince(dateStr) {
   if (!dateStr) return Infinity
   return Math.floor((new Date() - new Date(dateStr + 'T00:00:00')) / 86400000)
+}
+
+// Lundi de la semaine courante.
+function thisMonday() {
+  const d = new Date()
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7))
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+// Statut d'un chantier déduit de sa dernière réunion et de ses actions.
+function chantierStatut(reunion, age) {
+  if (!reunion || age > RECENT_DAYS) return { label: 'Bloqué', color: '#8b3a3a' }
+  const actions = reunion.reunion_actions ?? []
+  const undone = actions.filter((a) => !a.done).length
+  if (undone === 0) return { label: 'On track', color: '#5a7a5a' }
+  return { label: 'Attention', color: '#8a7040' }
 }
 
 // Onglet COPIL « Réunion de chantiers » — synthèse agrégée par chantier.
@@ -25,7 +44,7 @@ export default function CopilChantiers() {
       const [ch, reu] = await Promise.all([
         supabase
           .from('chantiers')
-          .select('id, num, client, nom')
+          .select('id, num, client, nom, ca:utilisateurs!ca_id(prenom, nom)')
           .neq('num', 'STOCK')
           .order('num'),
         supabase
@@ -63,9 +82,14 @@ export default function CopilChantiers() {
 
   return (
     <div>
-      <div className="copil-freq">
-        Fréquence&nbsp;: tous les lundis. Synthèse automatique des dernières
-        réunions par chantier.
+      <div className="copil-next">
+        <div className="copil-next-lbl">Réunion de chantiers — Lundi</div>
+        <div className="copil-next-date" style={{ textTransform: 'capitalize' }}>
+          {formatLong(thisMonday())}
+        </div>
+        <div className="muted" style={{ marginTop: 4 }}>
+          Synthèse des actions de la semaine précédente
+        </div>
       </div>
 
       {loading && <p className="muted">Chargement…</p>}
@@ -81,21 +105,30 @@ export default function CopilChantiers() {
           const age = reunion ? daysSince(reunion.date) : Infinity
           const staleChantier = !reunion || age > RECENT_DAYS
           const actions = reunion?.reunion_actions ?? []
+          const statut = chantierStatut(reunion, age)
           return (
             <div key={chantier.id} className="card copil-ch-card">
               <div className="card-head">
                 <div>
                   <span className="card-title mono">{chantier.num}</span>
                   <span className="card-count">{chantier.client}</span>
-                  {staleChantier && (
-                    <span className="copil-stale">⚠ sans réunion récente</span>
+                  {chantier.ca && (
+                    <span className="card-count">
+                      · 👤 {chantier.ca.prenom} {chantier.ca.nom}
+                    </span>
                   )}
+                  <span
+                    className="aspill"
+                    style={{ color: statut.color, backgroundColor: statut.color + '22', marginLeft: 8 }}
+                  >
+                    {statut.label}
+                  </span>
                 </div>
                 <button
                   className="btn bg bsm"
                   onClick={() => navigate(`/chantiers/${chantier.id}/reunion`)}
                 >
-                  + Nouvelle réunion de chantiers
+                  Ouvrir la réunion
                 </button>
               </div>
 
@@ -144,6 +177,12 @@ export default function CopilChantiers() {
 
       {!loading && !error && rows.length === 0 && (
         <div className="empty">Aucun chantier.</div>
+      )}
+
+      {!loading && !error && (
+        <div className="card">
+          <TrameGuide type="reunion_chantiers" title="Trame de réunion" />
+        </div>
       )}
     </div>
   )
