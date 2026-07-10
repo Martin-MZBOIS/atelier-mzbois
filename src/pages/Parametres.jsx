@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSettings, ROLE_DEFAULT_DENY } from '../store/settings'
 import { useAuthStore } from '../store'
+import CopilTramesEditor from '../components/CopilTramesEditor'
 
 // Onglets pouvant être activés/désactivés par rôle.
 const FEATURES = [
@@ -272,6 +273,8 @@ export default function Parametres() {
           </table>
         </div>
       </div>
+
+      <CopilTramesEditor />
 
       <div className="param-actions">
         <button className="btn bp" disabled={saving} onClick={handleSave}>

@@ -253,6 +253,31 @@ body {
   margin-top: 2px;
 }
 
+/* Éditeur de trames (Paramètres) */
+.trame-edit {
+  border: 0.5px solid var(--g4);
+  border-left: 2px solid var(--brun);
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+.trame-edit-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.trame-edit-titre {
+  flex: 1;
+  border: 0.5px solid var(--g4);
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.trame-edit-actions {
+  display: flex;
+  gap: 4px;
+}
+
 /* Trame de réunion (guide COPIL) */
 .trame-guide {
   font-size: 12px;
