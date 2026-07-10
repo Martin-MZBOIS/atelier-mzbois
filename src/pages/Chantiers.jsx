@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
 import { useDataCache } from '../store/cache'
 import { formatDate } from '../lib/format'
+import ChantierEditModal from './ChantierEditModal'
 
 const DONE = ['termine', 'facture']
 const PAGE_SIZE = 20
@@ -32,6 +33,10 @@ export default function Chantiers() {
   const cacheKey = `chantiers:${user?.role === 'ca' ? user.id : 'all'}`
   const cached = useDataCache((s) => s.cache[cacheKey])
   const setCache = useDataCache((s) => s.set)
+  const invalidate = useDataCache((s) => s.invalidate)
+  const canCreate = user?.role === 'dir' || user?.role === 'ca'
+  const [showNew, setShowNew] = useState(false)
+  const [tick, setTick] = useState(0)
   const [chantiers, setChantiers] = useState(cached ?? [])
   const [loading, setLoading] = useState(!cached)
   const [error, setError] = useState('')
@@ -73,7 +78,7 @@ export default function Chantiers() {
       active = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cacheKey])
+  }, [cacheKey, tick])
 
   const counts = useMemo(() => {
     const c = {}
@@ -143,6 +148,15 @@ export default function Chantiers() {
             >
               {sortDir === 'desc' ? '↓ Décroissant' : '↑ Croissant'}
             </button>
+            {canCreate && (
+              <button
+                className="btn bp bsm"
+                style={{ marginLeft: 'auto' }}
+                onClick={() => setShowNew(true)}
+              >
+                + Nouveau chantier
+              </button>
+            )}
           </div>
           <div className="course-filters">
             {FILTERS.map((f) => (
@@ -231,6 +245,18 @@ export default function Chantiers() {
             </div>
           )}
         </div>
+      )}
+
+      {showNew && (
+        <ChantierEditModal
+          chantier={user?.role === 'ca' ? { ca_id: user.id } : null}
+          onClose={() => setShowNew(false)}
+          onSaved={() => {
+            setShowNew(false)
+            invalidate(cacheKey)
+            setTick((t) => t + 1)
+          }}
+        />
       )}
     </section>
   )

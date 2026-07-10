@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-// Édition des informations d'un chantier.
+// Création / édition des informations d'un chantier.
+// `chantier` absent ou sans id → mode création (insert).
 export default function ChantierEditModal({ chantier, onClose, onSaved }) {
+  const isEdit = Boolean(chantier?.id)
   const [form, setForm] = useState({
-    num: chantier.num ?? '',
-    client: chantier.client ?? '',
-    nom: chantier.nom ?? '',
-    ca_id: chantier.ca_id ?? '',
-    dep_approx: chantier.dep_approx ?? '',
-    avec_pose: chantier.avec_pose ?? false,
+    num: chantier?.num ?? '',
+    client: chantier?.client ?? '',
+    nom: chantier?.nom ?? '',
+    ca_id: chantier?.ca_id ?? '',
+    dep_approx: chantier?.dep_approx ?? '',
+    avec_pose: chantier?.avec_pose ?? false,
   })
   const [utilisateurs, setUtilisateurs] = useState([])
   const [saving, setSaving] = useState(false)
@@ -34,17 +36,17 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
     }
     setSaving(true)
     setError('')
-    const { error: dbError } = await supabase
-      .from('chantiers')
-      .update({
-        num: form.num.trim() || null,
-        client: form.client.trim() || null,
-        nom: form.nom.trim(),
-        ca_id: form.ca_id || null,
-        dep_approx: form.dep_approx || null,
-        avec_pose: form.avec_pose,
-      })
-      .eq('id', chantier.id)
+    const payload = {
+      num: form.num.trim() || null,
+      client: form.client.trim() || null,
+      nom: form.nom.trim(),
+      ca_id: form.ca_id || null,
+      dep_approx: form.dep_approx || null,
+      avec_pose: form.avec_pose,
+    }
+    const { error: dbError } = isEdit
+      ? await supabase.from('chantiers').update(payload).eq('id', chantier.id)
+      : await supabase.from('chantiers').insert(payload)
     setSaving(false)
     if (dbError) {
       setError(dbError.message)
@@ -59,7 +61,7 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
         <button className="modal-close" onClick={onClose}>
           ×
         </button>
-        <div className="modal-title">Modifier le chantier</div>
+        <div className="modal-title">{isEdit ? 'Modifier le chantier' : 'Nouveau chantier'}</div>
 
         <div className="fg">
           <div className="fl">
