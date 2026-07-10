@@ -241,29 +241,27 @@ export default function PlanningGlobal() {
     return cells
   }
 
-  function buildRow(emp) {
-    const cells = []
-    let di = 0
-    while (di < days.length) {
-      const iso = isoDay(days[di])
-      const aff = affectations.find(
-        (a) => a.sal_id === emp.id && a.date_debut && a.date_fin && a.date_debut <= iso && a.date_fin >= iso
-      )
-      if (aff) {
-        let span = 0
-        for (let j = di; j < days.length; j++) {
-          const dj = isoDay(days[j])
-          if (dj >= aff.date_debut && dj <= aff.date_fin) span++
-          else break
+  // Répartit les affectations d'un salarié en pistes (lanes) : deux affectations
+  // qui se chevauchent dans le temps vont sur des pistes différentes, ce qui
+  // permet de les empiler verticalement dans la même cellule/journée.
+  function computeLanes(affs) {
+    const sorted = [...affs].sort((a, b) =>
+      a.date_debut < b.date_debut ? -1 : a.date_debut > b.date_debut ? 1 : 0
+    )
+    const lanes = []
+    for (const aff of sorted) {
+      let placed = false
+      for (const lane of lanes) {
+        const last = lane[lane.length - 1]
+        if (last.date_fin < aff.date_debut) {
+          lane.push(aff)
+          placed = true
+          break
         }
-        cells.push({ type: 'aff', aff, span, key: aff.id })
-        di += span
-      } else {
-        cells.push({ type: 'empty', key: 'e' + di, day: days[di] })
-        di += 1
       }
+      if (!placed) lanes.push([aff])
     }
-    return cells
+    return lanes
   }
 
   function DayHeaders() {
@@ -351,77 +349,92 @@ export default function PlanningGlobal() {
             </thead>
             <tbody>
               {viewMode === 'sal' &&
-                filteredEmployes.map((emp) => (
-                  <tr key={emp.id}>
-                    <td className="plan-emp">
-                      <div className="plan-emp-inner">
-                        <div
-                          className="plan-avatar"
-                          style={emp.couleur ? { background: emp.couleur } : undefined}
-                        >
-                          {(emp.prenom?.[0] ?? '') + (emp.nom?.[0] ?? '')}
-                        </div>
-                        <div>
-                          <div className="plan-emp-name">{emp.prenom} {emp.nom}</div>
-                          <div className="plan-emp-role">{emp.role ?? ''}</div>
-                        </div>
-                      </div>
-                    </td>
-                    {buildRow(emp).map((cell) => {
-                      if (cell.type === 'empty') {
-                        const we = cell.day.getDay() === 0 || cell.day.getDay() === 6
-                        const isT = isoDay(cell.day) === todayIso
-                        return (
-                          <td
-                            key={cell.key}
-                            className={'plan-cell plan-cell--empty' + (isT ? ' plan-cell--today' : we ? ' plan-cell--we' : '')}
-                            title="Affecter un chantier"
-                            onClick={() => setNewAff({ salId: emp.id, date: isoDay(cell.day) })}
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={() => onDropCell(emp, isoDay(cell.day))}
-                          />
-                        )
-                      }
-                      const { aff, span } = cell
-                      const ch = chantiers.find((c) => c.id === aff.chantier_id)
-                      const phase = aff.phase ? resolve(PHASE_PLANNING, aff.phase).label : ''
-                      return (
-                        <td key={cell.key} colSpan={span} className="plan-cell" title={aff.commentaire ?? ''}>
-                          <div
-                            className="plan-block plan-block--draggable"
-                            draggable
-                            onDragStart={(e) => onDragStartBlock(e, aff)}
-                            onClick={() => setEditAff(aff)}
-                            onContextMenu={(e) => {
-                              e.preventDefault()
-                              setMenu({ aff, x: e.clientX, y: e.clientY })
-                            }}
-                            title="Cliquer pour modifier · clic droit pour supprimer"
-                            style={{
-                              background: chantierColor[aff.chantier_id],
-                              borderLeft: `4px solid ${emp.couleur ?? 'transparent'}`,
-                            }}
-                          >
-                            <div className="plan-block-num">{ch?.num ?? '?'}</div>
-                            <div className="plan-block-sub">
-                              {(ch?.client ?? '').slice(0, 16)}
-                              {span > 1 ? ` · ${span}j` : ''}
-                            </div>
-                            {phase && <div className="plan-block-phase">{phase}</div>}
+                filteredEmployes.flatMap((emp) => {
+                  const empAffs = affectations.filter(
+                    (a) => a.sal_id === emp.id && a.date_debut && a.date_fin
+                  )
+                  const lanes = computeLanes(empAffs)
+                  if (lanes.length === 0) lanes.push([])
+                  const nb = lanes.length
+                  const multi = nb >= 2
+                  const dense = nb >= 3
+                  const cellCls = 'plan-cell' + (multi ? ' plan-cell--stacked' : '')
+                  return lanes.map((laneAffs, li) => (
+                    <tr key={emp.id + '-' + li}>
+                      {li === 0 && (
+                        <td className="plan-emp" rowSpan={nb}>
+                          <div className="plan-emp-inner">
                             <div
-                              className="plan-block-resize"
-                              title="Étendre"
-                              onMouseDown={(e) => onResizeStart(e, aff)}
-                              onDragStart={(e) => e.stopPropagation()}
+                              className="plan-avatar"
+                              style={emp.couleur ? { background: emp.couleur } : undefined}
                             >
-                              ⟩
+                              {(emp.prenom?.[0] ?? '') + (emp.nom?.[0] ?? '')}
+                            </div>
+                            <div>
+                              <div className="plan-emp-name">{emp.prenom} {emp.nom}</div>
+                              <div className="plan-emp-role">{emp.role ?? ''}</div>
                             </div>
                           </div>
                         </td>
-                      )
-                    })}
-                  </tr>
-                ))}
+                      )}
+                      {buildRowFromAffs(laneAffs).map((cell) => {
+                        if (cell.type === 'empty') {
+                          const we = cell.day.getDay() === 0 || cell.day.getDay() === 6
+                          const isT = isoDay(cell.day) === todayIso
+                          return (
+                            <td
+                              key={cell.key}
+                              className={cellCls + ' plan-cell--empty' + (isT ? ' plan-cell--today' : we ? ' plan-cell--we' : '')}
+                              title="Affecter un chantier"
+                              onClick={() => setNewAff({ salId: emp.id, date: isoDay(cell.day) })}
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={() => onDropCell(emp, isoDay(cell.day))}
+                            />
+                          )
+                        }
+                        const { aff, span } = cell
+                        const ch = chantiers.find((c) => c.id === aff.chantier_id)
+                        const phase = aff.phase ? resolve(PHASE_PLANNING, aff.phase).label : ''
+                        return (
+                          <td key={cell.key} colSpan={span} className={cellCls} title={aff.commentaire ?? ''}>
+                            <div
+                              className={'plan-block plan-block--draggable' + (dense ? ' plan-block--dense' : '')}
+                              draggable
+                              onDragStart={(e) => onDragStartBlock(e, aff)}
+                              onClick={() => setEditAff(aff)}
+                              onContextMenu={(e) => {
+                                e.preventDefault()
+                                setMenu({ aff, x: e.clientX, y: e.clientY })
+                              }}
+                              title="Cliquer pour modifier · clic droit pour supprimer"
+                              style={{
+                                background: chantierColor[aff.chantier_id],
+                                borderLeft: `4px solid ${emp.couleur ?? 'transparent'}`,
+                              }}
+                            >
+                              <div className="plan-block-num">{ch?.num ?? '?'}</div>
+                              {!dense && (
+                                <div className="plan-block-sub">
+                                  {(ch?.client ?? '').slice(0, 16)}
+                                  {span > 1 ? ` · ${span}j` : ''}
+                                </div>
+                              )}
+                              {phase && !dense && <div className="plan-block-phase">{phase}</div>}
+                              <div
+                                className="plan-block-resize"
+                                title="Étendre"
+                                onMouseDown={(e) => onResizeStart(e, aff)}
+                                onDragStart={(e) => e.stopPropagation()}
+                              >
+                                ⟩
+                              </div>
+                            </div>
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  ))
+                })}
 
               {viewMode === 'ch' &&
                 filteredChantiers.map((c) => {

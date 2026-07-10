@@ -2201,6 +2201,20 @@ textarea.ni:focus {
   opacity: 0.5;
 }
 
+/* Empilement de plusieurs affectations le même jour (pistes) */
+.plan-cell--stacked {
+  height: auto;
+}
+.plan-cell--stacked .plan-block {
+  min-height: 28px;
+}
+.plan-block--dense .plan-block-num {
+  font-size: 9px;
+}
+.plan-block--dense {
+  padding: 2px 6px;
+}
+
 /* Mode mois : colonnes plus étroites */
 .plan-table--month .plan-th-day {
   min-width: 26px;
