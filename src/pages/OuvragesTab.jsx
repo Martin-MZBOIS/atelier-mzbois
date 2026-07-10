@@ -9,6 +9,7 @@ import {
   STATUT_OUVRAGE_ORDER,
   TYP_ACHAT,
   TYP_ACHAT_ORDER,
+  ouvragePhase,
   resolve,
 } from '../lib/statuts'
 import ModelsModal from './ModelsModal'
@@ -282,10 +283,11 @@ export default function OuvragesTab() {
 
       {ouvrages.map((o) => {
         const st = resolve(STATUT_OUVRAGE, o.statut)
+        const phase = ouvragePhase(o.statut)
         const qty = Number(o.qty)
         const devis = o.devis
         return (
-          <div key={o.id} className="ov" style={{ borderLeftColor: st.color }}>
+          <div key={o.id} className="ov" style={{ borderLeftColor: phase.color }}>
             <div className="ov-main">
               <div className="ov-title-row">
                 <span
@@ -339,9 +341,13 @@ export default function OuvragesTab() {
             </div>
 
             <div className="ov-side">
-              <span className={'stbadge ' + st.cls}>
-                <span className="stdot" style={{ backgroundColor: st.color }} />
-                {st.label}
+              <span
+                className="stbadge stbadge--phase"
+                style={{ color: phase.color, backgroundColor: phase.color + '1a' }}
+                title={st.label}
+              >
+                <span className="stdot" style={{ backgroundColor: phase.color }} />
+                {phase.label}
               </span>
               <select
                 className="ss"

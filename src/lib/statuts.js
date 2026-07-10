@@ -25,6 +25,28 @@ export const STATUT_OUVRAGE_ORDER = [
   'facture',
 ]
 
+// Regroupement des 8 statuts d'ouvrage en 3 phases visuelles (P4-4C).
+// Le badge affiche la phase (couleur), le statut précis reste en tooltip.
+export const PHASE_OUVRAGE = {
+  etude: { label: 'Étude', color: '#4a6b8a' },
+  fabrication: { label: 'Fabrication', color: '#7a5a30' },
+  termine: { label: 'Terminé', color: '#5a7a5a' },
+}
+const STATUT_TO_PHASE = {
+  a_faire_be: 'etude',
+  en_attente: 'etude',
+  validation_client: 'etude',
+  prog_a_faire: 'etude',
+  pret_a_fabriquer: 'fabrication',
+  fabrication: 'fabrication',
+  termine: 'termine',
+  facture: 'termine',
+}
+// Renvoie la phase { label, color } d'un statut d'ouvrage.
+export function ouvragePhase(slug) {
+  return PHASE_OUVRAGE[STATUT_TO_PHASE[slug]] ?? { label: '—', color: '#cec6be' }
+}
+
 // --- statut_achat -----------------------------------------------------------
 export const STATUT_ACHAT = {
   a_traiter: { label: 'À traiter', color: '#6b5e58' },
