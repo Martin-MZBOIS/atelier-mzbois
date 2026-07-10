@@ -4,6 +4,7 @@ import { useAuthStore } from '../store'
 import { useSettings } from '../store/settings'
 import { ROLES } from '../lib/roles'
 import Icon from './Icon'
+import GlobalSearch from './GlobalSearch'
 
 // Élément de navigation : id = clé des droits d'accès.
 // to = route ; certains items COPIL partagent /copil avec un paramètre ?o=.
@@ -136,6 +137,8 @@ export default function Layout() {
             <div className="sidebar-subtitle">Atelier</div>
           </div>
         </div>
+
+        <GlobalSearch />
 
         <nav className="sidebar-nav">
           <NavItem item={DASHBOARD} />
