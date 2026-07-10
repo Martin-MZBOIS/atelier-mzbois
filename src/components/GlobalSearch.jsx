@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuthStore } from '../store'
 import Icon from './Icon'
 
 // Recherche globale (sidebar) : interroge en direct chantiers, achats,
 // contacts, articles et courses dès 2 caractères. Ctrl+K met le focus.
 export default function GlobalSearch() {
   const navigate = useNavigate()
+  const user = useAuthStore((s) => s.user)
+  const isCA = user?.role === 'ca'
   const [q, setQ] = useState('')
   const [results, setResults] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -50,29 +53,42 @@ export default function GlobalSearch() {
       // Neutralise les caractères qui casseraient le filtre `.or()`.
       const safe = term.replace(/[,()%]/g, ' ')
       const like = `%${safe}%`
+      // Confidentialité (P4-4A) : le CA ne cherche que dans ses propres
+      // chantiers, sans montants ni autres clients / chantiers.
+      let chQuery = supabase
+        .from('chantiers')
+        .select('id, num, client, nom')
+        .or(`num.ilike.${like},client.ilike.${like},nom.ilike.${like}`)
+        .limit(6)
+      if (isCA && user?.id) chQuery = chQuery.eq('ca_id', user.id)
+
+      let foQuery = supabase.from('fournisseurs').select('id, nom, type').ilike('nom', like).limit(6)
+      if (isCA) foQuery = foQuery.neq('type', 'client') // masque les autres clients
+
+      const empty = Promise.resolve({ data: [] })
       const [ch, ac, fo, em, ar, co] = await Promise.all([
-        supabase
-          .from('chantiers')
-          .select('id, num, client, nom')
-          .or(`num.ilike.${like},client.ilike.${like},nom.ilike.${like}`)
-          .limit(6),
-        supabase
-          .from('achats')
-          .select('id, nom, ref, chantier_id, chantier:chantiers!chantier_id(num)')
-          .or(`nom.ilike.${like},ref.ilike.${like}`)
-          .limit(6),
-        supabase.from('fournisseurs').select('id, nom, type').ilike('nom', like).limit(6),
+        chQuery,
+        isCA
+          ? empty // achats cross-chantier masqués pour le CA
+          : supabase
+              .from('achats')
+              .select('id, nom, ref, chantier_id, chantier:chantiers!chantier_id(num)')
+              .or(`nom.ilike.${like},ref.ilike.${like}`)
+              .limit(6),
+        foQuery,
         supabase
           .from('employes')
           .select('id, prenom, nom, role')
           .or(`prenom.ilike.${like},nom.ilike.${like}`)
           .limit(6),
         supabase.from('articles').select('id, nom').ilike('nom', like).limit(6),
-        supabase
-          .from('courses')
-          .select('id, quoi, chantier_id, chantier:chantiers!chantier_id(num)')
-          .ilike('quoi', like)
-          .limit(6),
+        isCA
+          ? empty // courses cross-chantier masquées pour le CA
+          : supabase
+              .from('courses')
+              .select('id, quoi, chantier_id, chantier:chantiers!chantier_id(num)')
+              .ilike('quoi', like)
+              .limit(6),
       ])
       if (!active) return
       setResults({

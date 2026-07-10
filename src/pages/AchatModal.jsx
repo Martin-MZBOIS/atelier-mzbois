@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { useAuthStore } from '../store'
 import {
   TYP_ACHAT,
   TYP_ACHAT_ORDER,
@@ -27,6 +28,8 @@ export default function AchatModal({
   onSaved,
 }) {
   const isEdit = Boolean(achat)
+  // Confidentialité (P4-4A) : le Chargé d'affaire ne voit pas les montants.
+  const canSeePrix = useAuthStore((s) => s.user?.role) !== 'ca'
   const showChantierPicker = Array.isArray(chantiers) && chantiers.length > 0
   const [form, setForm] = useState(() => ({
     chantier_id: achat?.chantier_id ?? chantierId ?? '',
@@ -96,9 +99,13 @@ export default function AchatModal({
       stk: num(form.stk),
       acmd: num(form.acmd),
       st: form.st || null,
-      prix_u: num(form.prix_u),
-      mht: num(form.mht),
       date_reception: form.date_reception || null,
+    }
+    // On n'écrit les montants que si l'utilisateur a le droit de les voir
+    // (évite qu'un CA, à qui les champs sont masqués, écrase les prix).
+    if (canSeePrix) {
+      payload.prix_u = num(form.prix_u)
+      payload.mht = num(form.mht)
     }
     if (isEdit) {
       const { error: dbError } = await supabase
@@ -249,22 +256,26 @@ export default function AchatModal({
               ))}
             </select>
           </div>
-          <div className="fl">
-            <label>Prix unit. (€)</label>
-            <input
-              type="number"
-              value={form.prix_u}
-              onChange={(e) => set('prix_u', e.target.value)}
-            />
-          </div>
-          <div className="fl">
-            <label>Montant HT (€)</label>
-            <input
-              type="number"
-              value={form.mht}
-              onChange={(e) => set('mht', e.target.value)}
-            />
-          </div>
+          {canSeePrix && (
+            <>
+              <div className="fl">
+                <label>Prix unit. (€)</label>
+                <input
+                  type="number"
+                  value={form.prix_u}
+                  onChange={(e) => set('prix_u', e.target.value)}
+                />
+              </div>
+              <div className="fl">
+                <label>Montant HT (€)</label>
+                <input
+                  type="number"
+                  value={form.mht}
+                  onChange={(e) => set('mht', e.target.value)}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         <div className="fl">

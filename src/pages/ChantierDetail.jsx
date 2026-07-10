@@ -17,7 +17,8 @@ const SUBTABS = [
 export default function ChantierDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const role = useAuthStore((s) => s.user?.role)
+  const user = useAuthStore((s) => s.user)
+  const role = user?.role
   // Admin : pas de Fil (masqué). Dir : + Analytique + Historique des modifications.
   const subtabs = (() => {
     let tabs = role === 'admin' ? SUBTABS.filter((t) => t.to !== 'fil') : SUBTABS
@@ -57,6 +58,8 @@ export default function ChantierDetail() {
   }, [loadChantier])
 
   const ca = chantier?.ca
+  // Confidentialité (P4-4A) : un CA ne peut ouvrir que ses propres chantiers.
+  const forbidden = role === 'ca' && chantier && chantier.ca_id !== user?.id
 
   return (
     <section className="page">
@@ -74,7 +77,11 @@ export default function ChantierDetail() {
         <p className="muted">Chantier introuvable.</p>
       )}
 
-      {chantier && (
+      {forbidden && (
+        <p className="muted">Accès non autorisé : ce chantier n'est pas le vôtre.</p>
+      )}
+
+      {chantier && !forbidden && (
         <>
           <div className="detail-head">
             <div>
