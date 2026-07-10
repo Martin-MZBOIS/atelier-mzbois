@@ -63,8 +63,10 @@ export default function AchatsGlobal() {
   async function loadAchats() {
     const { data, error: dbError } = await supabase
       .from('achats')
+      // Requête ciblée : colonnes affichées dans la liste uniquement.
+      // Les détails (prix_u, mht, date_reception) sont chargés par le modal.
       .select(
-        'id, chantier_id, nom, ref, typ, fournisseur_id, dtl, qty, stk, acmd, st, prix_u, mht, ' +
+        'id, chantier_id, nom, ref, typ, fournisseur_id, dtl, qty, stk, acmd, st, ' +
           'fournisseur:fournisseurs!fournisseur_id(nom), ' +
           'chantier:chantiers!chantier_id(num, nom)'
       )

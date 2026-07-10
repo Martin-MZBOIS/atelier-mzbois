@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import {
   TYP_ACHAT,
@@ -45,6 +45,30 @@ export default function AchatModal({
   }))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // Les listes ne chargent pas les colonnes de détail (prix_u, mht,
+  // date_reception) : on les récupère à l'ouverture du modal en édition.
+  useEffect(() => {
+    if (!achat?.id) return
+    let active = true
+    supabase
+      .from('achats')
+      .select('prix_u, mht, date_reception')
+      .eq('id', achat.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!active || !data) return
+        setForm((f) => ({
+          ...f,
+          prix_u: f.prix_u !== '' ? f.prix_u : data.prix_u ?? '',
+          mht: f.mht !== '' ? f.mht : data.mht ?? '',
+          date_reception: f.date_reception || data.date_reception || '',
+        }))
+      })
+    return () => {
+      active = false
+    }
+  }, [achat?.id])
 
   function set(key, value) {
     setForm((f) => ({ ...f, [key]: value }))
