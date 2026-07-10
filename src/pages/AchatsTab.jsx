@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useRealtime } from '../lib/useRealtime'
 import { formatEuro } from '../lib/format'
 import {
   TYP_ACHAT,
@@ -69,6 +70,9 @@ export default function AchatsTab() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chantier.id])
+
+  // Temps réel : réception/statut d'achats de ce chantier.
+  useRealtime('achats', loadAchats, { filter: `chantier_id=eq.${chantier.id}` })
 
   async function changeStatut(achatId, newStatut, e) {
     e.stopPropagation()

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useRealtime } from '../lib/useRealtime'
 import { useAuthStore } from '../store'
 import { formatDate } from '../lib/format'
 import {
@@ -85,6 +86,9 @@ export default function OuvragesTab() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chantier.id])
+
+  // Temps réel : statut d'ouvrage modifié par un autre utilisateur.
+  useRealtime('ouvrages', loadOuvrages, { filter: `chantier_id=eq.${chantier.id}` })
 
   async function changeStatut(ouvrageId, newStatut) {
     const previous = ouvrages

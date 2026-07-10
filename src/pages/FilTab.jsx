@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useRealtime } from '../lib/useRealtime'
 import { useAuthStore } from '../store'
 import { formatDateTime } from '../lib/format'
 
@@ -72,6 +73,9 @@ export default function FilTab() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chantier.id])
+
+  // Temps réel : nouveaux messages du fil postés par d'autres utilisateurs.
+  useRealtime('fil_messages', loadMessages, { filter: `chantier_id=eq.${chantier.id}` })
 
   async function postMessage() {
     if (!texte.trim() || !canPost) return

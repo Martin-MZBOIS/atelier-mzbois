@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useRealtime } from '../lib/useRealtime'
 import { useAuthStore } from '../store'
 import { useSettings } from '../store/settings'
 import { ROLES } from '../lib/roles'
@@ -147,6 +148,9 @@ export default function Dashboard() {
     const d = await loadAll()
     if (d) setData(d)
   }
+
+  // Temps réel : nouvelles tâches assignées visibles sans recharger la page.
+  useRealtime('taches', reload)
 
   useEffect(() => {
     let active = true

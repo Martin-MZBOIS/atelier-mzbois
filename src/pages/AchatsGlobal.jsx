@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useRealtime } from '../lib/useRealtime'
 import {
   TYP_ACHAT,
   TYP_ACHAT_ORDER,
@@ -59,6 +60,9 @@ export default function AchatsGlobal() {
   const [search, setSearch] = useState('')
   const [modal, setModal] = useState(null)
   const [visible, setVisible] = useState(PAGE_SIZE)
+
+  // Temps réel : réception/statut d'un achat mis à jour par un autre utilisateur.
+  useRealtime('achats', loadAchats)
 
   async function loadAchats() {
     const { data, error: dbError } = await supabase

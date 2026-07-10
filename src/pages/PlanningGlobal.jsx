@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { useRealtime } from '../lib/useRealtime'
 import { PHASE_PLANNING, resolve } from '../lib/statuts'
 import PlanAffectationModal from './PlanAffectationModal'
 
@@ -49,6 +50,9 @@ export default function PlanningGlobal() {
     if (dbError) setError(dbError.message)
     else setAffectations(data ?? [])
   }, [])
+
+  // Temps réel : le planning se met à jour quand un autre utilisateur affecte.
+  useRealtime('plan_affectations', loadAffectations)
 
   const dragAffRef = useRef(null)
   const resizeRef = useRef(null) // { affId, dateFin } pendant un redimensionnement
