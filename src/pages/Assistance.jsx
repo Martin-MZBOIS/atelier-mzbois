@@ -345,8 +345,12 @@ function SignalerSection({ user }) {
       .from('signalements')
       .select('id, type, description, capture_url, date, statut, reponse, soumis_par')
       .order('date', { ascending: false })
-    // Chaque utilisateur voit uniquement ses propres signalements.
-    if (!isDir && user?.id) query = query.eq('soumis_par', user.id)
+    // Chaque utilisateur voit uniquement ses propres signalements. En mode démo
+    // sans ligne `utilisateurs`, l'id est null : on filtre alors sur null plutôt
+    // que de ne pas filtrer du tout, ce qui exposerait tous les signalements.
+    if (!isDir) {
+      query = user?.id ? query.eq('soumis_par', user.id) : query.is('soumis_par', null)
+    }
     const { data, error: dbError } = await query
     if (dbError) {
       setError(

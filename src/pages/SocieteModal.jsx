@@ -84,13 +84,16 @@ export default function SocieteModal({ societe, defaultType, onClose, onSaved })
       setError(dbError.message)
       return
     }
-    // Synchronise les spécialités uniquement pour les sous-traitants.
-    if (form.type === 'sous_traitant') {
-      try {
+    // Les spécialités n'existent que pour les sous-traitants : on les synchronise
+    // pour ceux-ci, et on purge celles d'une société qui a changé de type.
+    try {
+      if (form.type === 'sous_traitant') {
         await syncSpecialites(data.id)
-      } catch {
-        /* table absente (migration 0023 non passée) : on ignore */
+      } else {
+        await supabase.from('soustraitant_specialites').delete().eq('fournisseur_id', data.id)
       }
+    } catch {
+      /* table absente (migration 0023 non passée) : on ignore */
     }
     setSaving(false)
     onSaved(data.id)
