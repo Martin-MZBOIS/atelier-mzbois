@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import CopilChantiers from './CopilChantiers'
 import CopilMeeting from './CopilMeeting'
 import { nextHommesCles, nextStrategie } from '../lib/copil'
+import { GEL } from '../lib/gel'
 
 const STRATEGIE_TEMPLATE = [
   'Bilan des 6 derniers mois',
@@ -12,13 +13,20 @@ const STRATEGIE_TEMPLATE = [
   'Notes libres',
 ]
 
+// Les réunions de pilotage sont gelées (voir lib/gel.js) : on retire leurs
+// onglets, et une URL ?o=hommes_cles saisie à la main retombe sur la réunion
+// de chantiers plutôt que sur une page vide.
 const SUBTABS = [
   { id: 'chantiers', label: '🏗 Réunion de chantiers' },
-  { id: 'hommes_cles', label: '👥 Hommes clés' },
-  { id: 'strategie', label: '📊 Stratégie' },
+  ...(GEL.copilPilotage
+    ? []
+    : [
+        { id: 'hommes_cles', label: '👥 Hommes clés' },
+        { id: 'strategie', label: '📊 Stratégie' },
+      ]),
 ]
 
-const VALID_TABS = ['chantiers', 'hommes_cles', 'strategie']
+const VALID_TABS = SUBTABS.map((t) => t.id)
 
 export default function Copil() {
   const [params, setParams] = useSearchParams()
@@ -39,9 +47,13 @@ export default function Copil() {
   return (
     <section className="page">
       <div className="page-head">
-        <h2>COPIL</h2>
+        <h2>{SUBTABS.length > 1 ? 'COPIL' : 'Réunion de chantiers'}</h2>
       </div>
 
+      {/* Une barre d'onglets pour un seul onglet n'apprend rien. On ne la rend
+          pas du tout : `hidden` serait neutralisé par le display:flex de
+          .subtabs. */}
+      {SUBTABS.length > 1 && (
       <nav className="subtabs">
         {SUBTABS.map((t) => (
           <button
@@ -53,6 +65,7 @@ export default function Copil() {
           </button>
         ))}
       </nav>
+      )}
 
       {tab === 'chantiers' && <CopilChantiers />}
       {tab === 'hommes_cles' && (

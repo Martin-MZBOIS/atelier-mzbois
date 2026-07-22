@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { daysUntil, formatLong, nextHommesCles, nextStrategie } from '../../lib/copil'
+import { GEL } from '../../lib/gel'
 
 function countdown(d) {
   if (d < 0) return 'passée'
@@ -9,6 +10,10 @@ function countdown(d) {
 
 // Prochaines réunions COPIL + accès direct à la préparation de l'ordre du jour.
 export default function CopilCard() {
+  // La carte n'annonce que les deux réunions de pilotage : gelées, elle n'a
+  // plus rien à dire. Sortie avant tout hook.
+  if (GEL.copilPilotage) return null
+
   const navigate = useNavigate()
   const reunions = [
     { id: 'hommes_cles', label: '👥 Hommes clés', date: nextHommesCles() },

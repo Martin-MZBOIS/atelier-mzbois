@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store'
 import { useSettings } from '../store/settings'
 import { ROLES } from '../lib/roles'
+import { GEL } from '../lib/gel'
 import Icon from './Icon'
 import GlobalSearch from './GlobalSearch'
 import NotificationBell from './NotificationBell'
@@ -37,8 +38,13 @@ const CHAPTERS = [
     title: 'COPIL',
     items: [
       { to: '/copil?o=chantiers', id: 'copil', label: 'Réunion de chantiers', icon: 'clipboard' },
-      { to: '/copil?o=hommes_cles', id: 'copil', label: 'Hommes clés', icon: 'users' },
-      { to: '/copil?o=strategie', id: 'copil', label: 'Stratégie', icon: 'chart' },
+      // Réunions de pilotage gelées (voir lib/gel.js) — le code reste en place.
+      ...(GEL.copilPilotage
+        ? []
+        : [
+            { to: '/copil?o=hommes_cles', id: 'copil', label: 'Hommes clés', icon: 'users' },
+            { to: '/copil?o=strategie', id: 'copil', label: 'Stratégie', icon: 'chart' },
+          ]),
     ],
   },
   {

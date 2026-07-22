@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
 import { formatDate } from '../lib/format'
+import { GEL } from '../lib/gel'
 import SujetModal from './SujetModal'
 
 const SUJET_STATUT = {
@@ -15,6 +16,11 @@ const SUJET_STATUT = {
 // Bloc « Boîte à idées » du tableau de bord (rôles BE et Resp. Prod).
 // Permet de soumettre / voir les derniers sujets sans passer par COPIL.
 export default function DashboardIdees() {
+  // Les idées alimentent les deux réunions de pilotage : gelées, la boîte
+  // n'aurait plus de destinataire. Sortie avant tout hook, pour que leur ordre
+  // reste constant d'un rendu à l'autre.
+  if (GEL.copilPilotage) return null
+
   const navigate = useNavigate()
   const role = useAuthStore((s) => s.user?.role)
 
