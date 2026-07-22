@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import EmptyState from '../components/EmptyState'
 import { SkelList } from '../components/Skeleton'
 import { useOutletContext } from 'react-router-dom'
@@ -138,18 +139,16 @@ export default function FeedbacksTab() {
                 >
                   {st.label}
                 </span>
-                <select
+                <SelectSearch
                   className="ss"
                   value={fb.statut ?? ''}
-                  onChange={(e) => changeStatut(fb.id, e.target.value)}
-                >
-                  {fb.statut == null && <option value="">—</option>}
-                  {STATUT_FEEDBACK_ORDER.map((slug) => (
-                    <option key={slug} value={slug}>
-                      {STATUT_FEEDBACK[slug].label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => changeStatut(fb.id, v)}
+                  allowEmpty={fb.statut == null}
+                  options={STATUT_FEEDBACK_ORDER.map((slug) => ({
+                    value: slug,
+                    label: STATUT_FEEDBACK[slug].label,
+                  }))}
+                />
               </div>
             </div>
 

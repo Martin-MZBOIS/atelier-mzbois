@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import EmptyState from '../components/EmptyState'
 import { SkelList } from '../components/Skeleton'
 import { supabase } from '../lib/supabase'
@@ -301,17 +302,15 @@ export default function CoursesGlobal() {
       {!loading && view === 'liste' && (
         <>
           <div className="course-filters" style={{ alignItems: 'center' }}>
-            <select
+            <SelectSearch
               className="ss"
               value={coursier}
-              onChange={(e) => setCoursier(e.target.value)}
+              onChange={setCoursier}
               title="Filtrer par coursier"
-            >
-              <option value="tous">Tous les coursiers</option>
-              {coursierOptions.map((o) => (
-                <option key={o.id} value={o.id}>{o.label}</option>
-              ))}
-            </select>
+              options={[{ value: 'tous', label: 'Tous les coursiers' }].concat(
+                coursierOptions.map((o) => ({ value: o.id, label: o.label }))
+              )}
+            />
             {['tous', ...STATUT_COURSE_ORDER].map((slug) => {
               const on = filter === slug
               const meta = slug === 'tous' ? null : STATUT_COURSE[slug]
@@ -373,18 +372,16 @@ export default function CoursesGlobal() {
                           📧 Mail
                         </a>
                       )}
-                      <select
+                      <SelectSearch
                         className="ss"
                         value={c.statut ?? ''}
-                        onChange={(e) => changeStatut(c.id, e.target.value)}
-                      >
-                        {c.statut == null && <option value="">—</option>}
-                        {STATUT_COURSE_ORDER.map((slug) => (
-                          <option key={slug} value={slug}>
-                            {STATUT_COURSE[slug].label}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(v) => changeStatut(c.id, v)}
+                        allowEmpty={c.statut == null}
+                        options={STATUT_COURSE_ORDER.map((slug) => ({
+                          value: slug,
+                          label: STATUT_COURSE[slug].label,
+                        }))}
+                      />
                     </div>
                   </div>
 

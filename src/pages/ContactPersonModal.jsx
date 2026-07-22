@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 
@@ -63,13 +64,11 @@ export default function ContactPersonModal({ fournisseurId, onClose, onSaved }) 
           </div>
           <div className="fl">
             <label>Rôle</label>
-            <select value={form.role} onChange={(e) => set('role', e.target.value)}>
-              {ROLES.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.role}
+              onChange={(v) => set('role', v)}
+              options={ROLES.map((r) => ({ value: r, label: r }))}
+            />
           </div>
         </div>
 

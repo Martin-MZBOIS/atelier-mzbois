@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { TYP_ACHAT, TYP_ACHAT_ORDER } from '../lib/statuts'
@@ -185,15 +186,12 @@ export default function ModeleModal({ modele, onClose, onSaved }) {
                   onChange={(e) => setCompoField(c.article_id, 'quantite', e.target.value)}
                   title="Quantité"
                 />
-                <select
+                <SelectSearch
                   className="ss"
                   value={c.statut_defaut}
-                  onChange={(e) => setCompoField(c.article_id, 'statut_defaut', e.target.value)}
-                >
-                  {STATUTS_DEFAUT.map((s) => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </select>
+                  onChange={(v) => setCompoField(c.article_id, 'statut_defaut', v)}
+                  options={STATUTS_DEFAUT.map((s) => ({ value: s.value, label: s.label }))}
+                />
                 <button type="button" className="chip-x" onClick={() => removeCompo(c.article_id)}>
                   ×
                 </button>

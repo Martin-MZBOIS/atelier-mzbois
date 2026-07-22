@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import EmptyState from '../components/EmptyState'
 import { SkelList } from '../components/Skeleton'
 import { useOutletContext } from 'react-router-dom'
@@ -436,19 +437,17 @@ export default function OuvragesTab() {
                 <span className="stdot" style={{ backgroundColor: phase.color }} />
                 {phase.label}
               </span>
-              <select
+              <SelectSearch
                 className="ss"
                 value={o.statut ?? ''}
                 disabled={saving === o.id}
-                onChange={(e) => changeStatut(o.id, e.target.value)}
-              >
-                {o.statut == null && <option value="">—</option>}
-                {STATUT_OUVRAGE_ORDER.map((slug) => (
-                  <option key={slug} value={slug}>
-                    {STATUT_OUVRAGE[slug].label}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => changeStatut(o.id, v)}
+                allowEmpty={o.statut == null}
+                options={STATUT_OUVRAGE_ORDER.map((slug) => ({
+                  value: slug,
+                  label: STATUT_OUVRAGE[slug].label,
+                }))}
+              />
             </div>
           </div>
         )

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import EmptyState from '../components/EmptyState'
 import { SkelList } from '../components/Skeleton'
 import { useOutletContext } from 'react-router-dom'
@@ -78,7 +79,9 @@ export default function AchatsTab() {
   useRealtime('achats', loadAchats, { filter: `chantier_id=eq.${chantier.id}` })
 
   async function changeStatut(achatId, newStatut, e) {
-    e.stopPropagation()
+    // Le menu déroulant est posé dans une ligne cliquable : on empêche le clic
+    // d'ouvrir l'achat. SelectSearch n'émet pas d'évènement, d'où le `?.`.
+    e?.stopPropagation()
     const previous = achats
     setAchats((prev) =>
       prev.map((a) => (a.id === achatId ? { ...a, st: newStatut } : a))
@@ -172,19 +175,18 @@ export default function AchatsTab() {
                     </div>
                     <div className="ac-side">
                       <StatutPill slug={a.st} />
-                      <select
-                        className="ss"
-                        value={a.st ?? ''}
-                        onClick={(e) => e.stopPropagation()}
-                        onChange={(e) => changeStatut(a.id, e.target.value, e)}
-                      >
-                        {a.st == null && <option value="">—</option>}
-                        {STATUT_ACHAT_ORDER.map((slug) => (
-                          <option key={slug} value={slug}>
-                            {STATUT_ACHAT[slug].label}
-                          </option>
-                        ))}
-                      </select>
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <SelectSearch
+                          className="ss"
+                          value={a.st ?? ''}
+                          onChange={(v) => changeStatut(a.id, v)}
+                          allowEmpty={a.st == null}
+                          options={STATUT_ACHAT_ORDER.map((slug) => ({
+                            value: slug,
+                            label: STATUT_ACHAT[slug].label,
+                          }))}
+                        />
+                      </span>
                     </div>
                   </div>
                 ))}

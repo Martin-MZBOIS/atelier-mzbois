@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 
@@ -101,11 +102,11 @@ export default function SalarieModal({ employe, onClose, onSaved }) {
         <div className="fg3">
           <div className="fl">
             <label>Rôle</label>
-            <select value={form.role} onChange={(e) => set('role', e.target.value)}>
-              {ROLES.map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.role}
+              onChange={(v) => set('role', v)}
+              options={ROLES.map((r) => ({ value: r, label: r }))}
+            />
           </div>
           <div className="fl">
             <label>Poste</label>
@@ -113,11 +114,11 @@ export default function SalarieModal({ employe, onClose, onSaved }) {
           </div>
           <div className="fl">
             <label>Contrat</label>
-            <select value={form.contrat} onChange={(e) => set('contrat', e.target.value)}>
-              {CONTRATS.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.contrat}
+              onChange={(v) => set('contrat', v)}
+              options={CONTRATS.map((c) => ({ value: c, label: c }))}
+            />
           </div>
         </div>
 

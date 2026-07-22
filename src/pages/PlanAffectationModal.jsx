@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { PHASE_PLANNING } from '../lib/statuts'
@@ -147,13 +148,14 @@ export default function PlanAffectationModal({
 
         <div className="fl">
           <label>Phase</label>
-          <select value={form.phase} onChange={(e) => set('phase', e.target.value)}>
-            {PHASE_ORDER.map((slug) => (
-              <option key={slug} value={slug}>
-                {PHASE_PLANNING[slug].label}
-              </option>
-            ))}
-          </select>
+          <SelectSearch
+            value={form.phase}
+            onChange={(v) => set('phase', v)}
+            options={PHASE_ORDER.map((slug) => ({
+              value: slug,
+              label: PHASE_PLANNING[slug].label,
+            }))}
+          />
         </div>
 
         <div className="fl">

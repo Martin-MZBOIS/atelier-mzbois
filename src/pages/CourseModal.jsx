@@ -359,16 +359,14 @@ export default function CourseModal({
                     placeholder="Fournisseur / contact / lieu…"
                   />
                   {ouvrages.length > 0 && (
-                    <select
+                    <SelectSearch
                       className="ss"
                       value={e.ouvrage_id ?? ''}
-                      onChange={(ev) => setEtape(i, 'ouvrage_id', ev.target.value)}
-                    >
-                      <option value="">Ouvrage (optionnel)…</option>
-                      {ouvrages.map((o) => (
-                        <option key={o.id} value={o.id}>{o.nom}</option>
-                      ))}
-                    </select>
+                      onChange={(v) => setEtape(i, 'ouvrage_id', v)}
+                      allowEmpty
+                      emptyLabel="Ouvrage (optionnel)…"
+                      options={ouvrages.map((o) => ({ value: o.id, label: o.nom }))}
+                    />
                   )}
                 </div>
                 <button type="button" className="chip-x" onClick={() => removeEtape(i)}>×</button>

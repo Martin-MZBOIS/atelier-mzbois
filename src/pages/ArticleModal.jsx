@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { useSettings } from '../store/settings'
@@ -15,7 +16,7 @@ function num(v) {
 export default function ArticleModal({ article, fournisseurs, onClose, onSaved }) {
   const isEdit = Boolean(article)
   const unites = useSettings((s) => s.unites)
-  // Unité : réel <select> alimenté par les paramètres + option « Autre » (champ libre).
+  // Unité : liste alimentée par les paramètres + option « Autre » (champ libre).
   const initUnite = article?.unite ?? ''
   const initIsAutre = initUnite !== '' && !unites.includes(initUnite)
   const [uniteChoice, setUniteChoice] = useState(initIsAutre ? '__autre__' : initUnite)
@@ -126,13 +127,14 @@ export default function ArticleModal({ article, fournisseurs, onClose, onSaved }
           </div>
           <div className="fl">
             <label>Typologie</label>
-            <select value={form.typ} onChange={(e) => set('typ', e.target.value)}>
-              {TYP_ACHAT_ORDER.map((slug) => (
-                <option key={slug} value={slug}>
-                  {TYP_ACHAT[slug].label}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.typ}
+              onChange={(v) => set('typ', v)}
+              options={TYP_ACHAT_ORDER.map((slug) => ({
+                value: slug,
+                label: TYP_ACHAT[slug].label,
+              }))}
+            />
           </div>
         </div>
 
@@ -148,13 +150,14 @@ export default function ArticleModal({ article, fournisseurs, onClose, onSaved }
           </div>
           <div className="fl">
             <label>Unité</label>
-            <select value={uniteChoice} onChange={(e) => setUniteChoice(e.target.value)}>
-              <option value="">—</option>
-              {unites.map((u) => (
-                <option key={u} value={u}>{u}</option>
-              ))}
-              <option value="__autre__">Autre…</option>
-            </select>
+            <SelectSearch
+              value={uniteChoice}
+              onChange={setUniteChoice}
+              allowEmpty
+              options={unites
+                .map((u) => ({ value: u, label: u }))
+                .concat([{ value: '__autre__', label: 'Autre…' }])}
+            />
             {uniteChoice === '__autre__' && (
               <input
                 style={{ marginTop: 6 }}

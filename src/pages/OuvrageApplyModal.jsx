@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 
 // Applique une valeur commune à tous les ouvrages du chantier.
 // mode 'depart' : une date de départ atelier.
@@ -46,14 +47,15 @@ export default function OuvrageApplyModal({ mode, employes, onApply, onClose }) 
         {isPose && (
           <div className="fl">
             <label>Poseur</label>
-            <select value={poseur} onChange={(e) => setPoseur(e.target.value)}>
-              <option value="">—</option>
-              {employes.map((em) => (
-                <option key={em.id} value={em.id}>
-                  {em.prenom} {em.nom}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={poseur}
+              onChange={setPoseur}
+              allowEmpty
+              options={employes.map((em) => ({
+                value: em.id,
+                label: `${em.prenom} ${em.nom}`,
+              }))}
+            />
           </div>
         )}
 

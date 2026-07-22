@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import SelectSearch from '../../components/SelectSearch'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store'
@@ -317,16 +318,14 @@ export default function DashboardAdmin() {
                   value={saisie['c' + c.id]?.montant ?? ''}
                   onChange={(e) => setField('c' + c.id, 'montant', e.target.value)}
                 />
-                <select
+                <SelectSearch
                   className="ss"
                   value={saisie['c' + c.id]?.chantierId ?? c.chantier_id ?? ''}
-                  onChange={(e) => setField('c' + c.id, 'chantierId', e.target.value)}
-                >
-                  <option value="">Chantier…</option>
-                  {d.chantiers.map((ch) => (
-                    <option key={ch.id} value={ch.id}>{ch.num}</option>
-                  ))}
-                </select>
+                  onChange={(v) => setField('c' + c.id, 'chantierId', v)}
+                  allowEmpty
+                  emptyLabel="Chantier…"
+                  options={d.chantiers.map((ch) => ({ value: ch.id, label: ch.num }))}
+                />
                 <button
                   className="btn bp bsm"
                   disabled={busy === 'c-' + c.id}

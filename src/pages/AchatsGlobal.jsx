@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import EmptyState from '../components/EmptyState'
 import { SkelTable } from '../components/Skeleton'
 import { useLocation } from 'react-router-dom'
@@ -196,14 +197,16 @@ export default function AchatsGlobal() {
       </div>
 
       <div className="qf-typ">
-        <select value={typ} onChange={(e) => setTyp(e.target.value)}>
-          <option value="tous">Toutes typologies</option>
-          {TYP_ACHAT_ORDER.map((slug) => (
-            <option key={slug} value={slug}>
-              {TYP_ACHAT[slug].label}
-            </option>
-          ))}
-        </select>
+        <SelectSearch
+          value={typ}
+          onChange={setTyp}
+          options={[{ value: 'tous', label: 'Toutes typologies' }].concat(
+            TYP_ACHAT_ORDER.map((slug) => ({
+              value: slug,
+              label: TYP_ACHAT[slug].label,
+            }))
+          )}
+        />
       </div>
 
       {loading ? (

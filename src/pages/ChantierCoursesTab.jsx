@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import EmptyState from '../components/EmptyState'
 import { SkelList } from '../components/Skeleton'
 import { useOutletContext } from 'react-router-dom'
@@ -155,14 +156,16 @@ export default function ChantierCoursesTab() {
                       📧 Mail
                     </a>
                   )}
-                  <select className="ss" value={c.statut ?? ''} onChange={(e) => changeStatut(c.id, e.target.value)}>
-                    {c.statut == null && <option value="">—</option>}
-                    {STATUT_COURSE_ORDER.map((slug) => (
-                      <option key={slug} value={slug}>
-                        {STATUT_COURSE[slug].label}
-                      </option>
-                    ))}
-                  </select>
+                  <SelectSearch
+                    className="ss"
+                    value={c.statut ?? ''}
+                    onChange={(v) => changeStatut(c.id, v)}
+                    allowEmpty={c.statut == null}
+                    options={STATUT_COURSE_ORDER.map((slug) => ({
+                      value: slug,
+                      label: STATUT_COURSE[slug].label,
+                    }))}
+                  />
                 </div>
               </div>
 

@@ -3997,6 +3997,29 @@ textarea.ni:focus {
   background: var(--g6);
   color: var(--g2);
 }
+/* Variante compacte, dans les lignes de liste et de tableau. La classe est
+   posée sur le conteneur : c'est le champ qui porte le cadre, pas la boîte,
+   sinon on en verrait deux. */
+.selsearch.ss {
+  width: auto;
+  min-width: 132px;
+  border: none;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+.selsearch.ss input {
+  font-size: 11px;
+  padding: 3px 22px 3px 7px;
+  border-radius: 3px;
+  border: 1px solid var(--g3);
+  background: var(--w);
+  color: var(--acier2);
+  cursor: pointer;
+}
+.selsearch.ss input:focus {
+  border-color: var(--nav-on-bg);
+}
 .selsearch-chevron {
   position: absolute;
   right: 9px;

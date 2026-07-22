@@ -177,13 +177,12 @@ export default function TachesHistorique() {
           )}
         />
 
-        <select className="ss" value={periode} onChange={(e) => setPeriode(e.target.value)}>
-          {PERIODES.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.label}
-            </option>
-          ))}
-        </select>
+        <SelectSearch
+          className="ss"
+          value={periode}
+          onChange={setPeriode}
+          options={PERIODES.map((p) => ({ value: p.id, label: p.label }))}
+        />
       </div>
 
       <div className="card">
