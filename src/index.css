@@ -757,16 +757,16 @@ body {
 
 .page-head {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 16px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
 .page-head h2 {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--acier);
 }
 
 .page-count {
@@ -798,7 +798,7 @@ body {
 
 .data-table thead th {
   text-align: left;
-  padding: 10px 14px;
+  padding: 11px 14px;
   background: var(--w);
   border-bottom: 0.5px solid var(--sep);
   color: var(--txt3);
@@ -887,7 +887,7 @@ body {
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  border-radius: 2px;
+  border-radius: var(--r);
   border: 0.5px solid var(--g4);
   font-size: 11px;
   font-weight: 600;
@@ -1022,8 +1022,8 @@ code {
 }
 
 .subtab {
-  padding: 9px 16px;
-  font-size: 10px;
+  padding: 10px 16px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   border: none;
@@ -1041,8 +1041,9 @@ code {
   color: var(--acier);
 }
 .subtab--active {
-  color: var(--brun);
-  border-bottom-color: var(--brun);
+  color: var(--nav-on-bg);
+  border-bottom-color: var(--nav-on-bg);
+  border-bottom-width: 2px;
 }
 
 /* Carte générique */
@@ -2510,9 +2511,9 @@ textarea.ni:focus {
   margin-bottom: 10px;
 }
 .qf--on {
-  background: var(--acier);
+  background: var(--nav-on-bg);
   color: #fff;
-  border-color: var(--acier);
+  border-color: var(--nav-on-bg);
 }
 .fil-item {
   display: flex;
@@ -3691,7 +3692,7 @@ textarea.ni:focus {
 /* Boutons additionnels (repris de la maquette) */
 .btn {
   border: none;
-  border-radius: 0;
+  border-radius: var(--r);
   cursor: pointer;
   font-weight: 600;
   font-family: inherit;
@@ -3702,8 +3703,9 @@ textarea.ni:focus {
   transition: all 0.15s;
 }
 .btn.bp {
-  background: var(--brun);
+  background: var(--nav-on-bg);
   color: #fff;
+  box-shadow: var(--sh);
 }
 .btn.bp:hover {
   background: var(--brun4);
