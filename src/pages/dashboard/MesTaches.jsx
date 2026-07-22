@@ -138,6 +138,7 @@ const MesTaches = forwardRef(function MesTaches({ employeId }, ref) {
         <TaskModal
           chantiers={chantiers}
           employes={employes}
+          defaultAssigneA={employeId ?? ''}
           onClose={() => setShowAdd(false)}
           onSaved={async () => {
             setShowAdd(false)

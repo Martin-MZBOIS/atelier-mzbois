@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { toast } from '../store/toasts'
 
 // Détail / édition d'une tâche.
 export default function TaskEditModal({ task, chantiers, employes, onClose, onSaved }) {
@@ -35,8 +36,12 @@ export default function TaskEditModal({ task, chantiers, employes, onClose, onSa
     setSaving(false)
     if (dbError) {
       setError(dbError.message)
+      toast.error('Tâche non enregistrée : ' + dbError.message)
       return
     }
+    toast(
+      form.assigne_a ? 'Tâche mise à jour' : 'Tâche mise à jour (plus assignée à personne)'
+    )
     onSaved()
   }
 
