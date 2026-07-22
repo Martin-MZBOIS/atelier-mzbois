@@ -28,6 +28,26 @@
   --gn2: #eef4ee;
   --rd: #8b3a3a;
   --rd2: #f9eeee;
+
+  /* --- Direction « Établi + Chantier » ---------------------------------
+     Navigation en aplat chaud (A), et couleurs pleines pour les indicateurs
+     et les en-têtes de carte (C). */
+  --nav-bg: #e9e0d5;
+  --nav-line: #d8cabb;
+  --nav-txt: #7a6a5c;
+  --nav-on-bg: #8a5a3b;
+  --nav-on-txt: #ffffff;
+
+  /* Teintes des indicateurs — une par domaine, jamais décoratives. */
+  --k-bleu: #3f5f7a;
+  --k-ocre: #b3812f;
+  --k-vert: #4f7a52;
+  --k-brun: #8a5a3b;
+
+  /* Rayon et ombre : très légers, pour adoucir l'angle droit sans le renier. */
+  --r: 3px;
+  --sh: 0 1px 2px rgba(44, 36, 32, 0.05);
+  --tr: 120ms ease;
 }
 
 *,
@@ -38,11 +58,6 @@
   padding: 0;
 }
 
-@font-face {
-  font-family: 'Avenir Next';
-  src: local('Avenir Next'), local('AvenirNext-Regular');
-}
-
 html,
 body,
 #root {
@@ -50,17 +65,26 @@ body,
 }
 
 body {
-  font-family: 'Avenir Next', 'Gill Sans', 'Nunito Sans', 'Trebuchet MS',
-    sans-serif;
+  /* IBM Plex Sans est embarquée avec l'app (voir main.jsx) : même rendu sur
+     tous les postes. Les replis ne servent qu'au tout premier affichage. */
+  font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
   background: var(--beige2);
   color: var(--acier);
-  font-size: 13px;
-  line-height: 1.5;
-  letter-spacing: 0.01em;
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: 0;
+}
+
+/* Chiffres alignés en colonne partout (tableaux, montants, KPIs). */
+.mono,
+.num,
+.kpi-val,
+.dash-line-val {
+  font-variant-numeric: tabular-nums;
 }
 
 .mono {
-  font-family: 'DM Mono', ui-monospace, monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 /* ------------------------------------------------------------------ Login */
@@ -206,8 +230,10 @@ body {
 .sidebar {
   width: 220px;
   flex-shrink: 0;
-  background: #fff;
-  border-right: 0.5px solid #dfd7cf;
+  /* Direction « Établi » : la navigation est un aplat chaud, qui détache la
+     zone de travail (blanc cassé) du reste de l'écran. */
+  background: var(--nav-bg);
+  border-right: 1px solid var(--nav-line);
   display: flex;
   flex-direction: column;
   position: sticky;
@@ -220,7 +246,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 18px 18px 16px;
-  border-bottom: 0.5px solid #dfd7cf;
+  border-bottom: 1px solid var(--nav-line);
 }
 .sidebar-logo {
   display: grid;
@@ -246,7 +272,7 @@ body {
   line-height: 1.3;
 }
 .sidebar-subtitle {
-  color: #b7afa8;
+  color: #9c8878;
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -266,7 +292,7 @@ body {
 .signalement-date {
   font-size: 10px;
   color: var(--g2);
-  font-family: 'DM Mono', ui-monospace, monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
 }
 .signalement-desc {
   font-size: 12px;
@@ -525,7 +551,7 @@ body {
   flex-shrink: 0;
   font-size: 10px;
   color: var(--g2);
-  font-family: 'DM Mono', ui-monospace, monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 /* Recherche globale (sidebar) */
@@ -604,7 +630,7 @@ body {
   flex-shrink: 0;
   font-size: 10px;
   color: var(--g2);
-  font-family: 'DM Mono', ui-monospace, monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 .sidebar-nav {
@@ -623,22 +649,22 @@ body {
   padding: 0 8px 8px;
 }
 .nav-chapter-num {
-  font-family: 'DM Mono', ui-monospace, monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-size: 9px;
-  color: #b7afa8;
+  color: #9c8878;
   letter-spacing: 0.08em;
 }
 .nav-chapter-line {
   width: 14px;
   height: 0;
-  border-top: 0.5px solid #dfd7cf;
+  border-top: 1px solid var(--nav-line);
   flex-shrink: 0;
 }
 .nav-chapter-title {
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #b7afa8;
+  color: #9c8878;
   font-weight: 400;
 }
 
@@ -651,7 +677,7 @@ body {
   border: none;
   border-left: 2px solid transparent;
   background: transparent;
-  color: #a59a94;
+  color: var(--nav-txt);
   font-family: inherit;
   font-size: 11px;
   letter-spacing: 0.1em;
@@ -662,11 +688,15 @@ body {
 }
 .nav-item:hover {
   color: var(--acier);
+  background: rgba(138, 90, 59, 0.07);
 }
-.nav-item--active {
-  color: var(--brun);
-  border-left-color: var(--brun);
-  background: linear-gradient(90deg, rgba(132, 106, 87, 0.08), transparent);
+/* L'onglet courant est un aplat plein : repère immédiat dans la navigation. */
+.nav-item--active,
+.nav-item--active:hover {
+  color: var(--nav-on-txt);
+  background: var(--nav-on-bg);
+  border-left-color: var(--nav-on-bg);
+  border-radius: 0 var(--r) var(--r) 0;
 }
 .nav-item-ico {
   flex-shrink: 0;
@@ -678,7 +708,7 @@ body {
 }
 
 .sidebar-user {
-  border-top: 0.5px solid #dfd7cf;
+  border-top: 1px solid var(--nav-line);
   padding: 14px 18px;
 }
 .sidebar-user-name {
@@ -799,7 +829,7 @@ body {
 }
 
 .data-table td.mono {
-  font-family: 'DM Mono', ui-monospace, monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-size: 10px;
   color: var(--brun);
 }
@@ -894,7 +924,7 @@ body {
 }
 
 code {
-  font-family: 'DM Mono', ui-monospace, monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
   background: var(--g5);
   padding: 0.1rem 0.35rem;
   border-radius: 3px;
@@ -962,7 +992,7 @@ code {
 }
 
 .detail-num {
-  font-family: 'DM Mono', ui-monospace, monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-size: 12px;
   color: var(--brun3);
   margin-top: 3px;
@@ -1025,6 +1055,15 @@ code {
   margin-bottom: 14px;
 }
 
+.dash-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.dash-stack .card,
+.dash-stack .meteo-card {
+  margin-bottom: 0;
+}
 .card-head {
   display: flex;
   align-items: center;
@@ -2053,33 +2092,81 @@ textarea.ni:focus {
 }
 
 /* ----------------------------------------------------------- Dashboard */
+.dash-head {
+  margin-bottom: 18px;
+}
 .dash-title {
-  font-size: 18px;
-  font-weight: 800;
-  margin-bottom: 14px;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--acier);
+}
+.dash-sub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.dash-date {
+  font-size: 13px;
+  color: var(--g1);
+  text-transform: capitalize;
+}
+.dash-role {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brun);
+  background: var(--brun2);
+  padding: 2px 8px;
+  border-radius: var(--r);
 }
 
 .dash-alerts {
-  background: var(--rd2);
-  border: 1px solid #fca5a5;
-  border-radius: 4px;
-  padding: 10px 14px;
-  margin-bottom: 14px;
+  background: var(--w);
+  border: 1px solid #e8d5c4;
+  border-left: 4px solid var(--k-ocre);
+  border-radius: var(--r);
+  padding: 13px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--sh);
+}
+.dash-alerts-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--k-ocre);
+  margin: 0 0 7px;
 }
 .dash-alert {
-  font-size: 13px;
-  color: var(--rd);
-  margin-bottom: 3px;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 4px 6px;
-  border-radius: 3px;
-  transition: background 0.12s;
+  gap: 9px;
+  width: 100%;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--acier);
+  padding: 6px 7px;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: background var(--tr);
 }
-.dash-alert:hover {
-  background: rgba(139, 58, 58, 0.08);
+.dash-alert:disabled {
+  cursor: default;
+}
+.dash-alert-ico {
+  flex: none;
+}
+.dash-alert-txt {
+  flex: 1;
+}
+.dash-alert:hover:not(:disabled) {
+  background: var(--brun2);
 }
 .dash-alert-arrow {
   margin-left: auto;
@@ -2094,31 +2181,46 @@ textarea.ni:focus {
   background: rgba(138, 112, 64, 0.1);
 }
 
-/* KPIs (tuiles chiffrées) */
+/* KPIs — blocs pleins colorés : lisibles d'un coup d'œil, cliquables. */
 .kpi-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 .kpi {
-  border: 0.5px solid var(--g4);
-  border-top: 2px solid var(--g4);
-  border-radius: 0;
-  padding: 12px 10px;
-  text-align: center;
-  background: var(--w);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  border: none;
+  border-radius: var(--r);
+  padding: 16px 18px;
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--sh);
+  transition: transform var(--tr), filter var(--tr);
 }
+.kpi:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+.kpi--bleu { background: var(--k-bleu); }
+.kpi--ocre { background: var(--k-ocre); }
+.kpi--vert { background: var(--k-vert); }
 .kpi-val {
-  font-size: 24px;
-  font-weight: 800;
-  line-height: 1.1;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 .kpi-lbl {
-  margin-top: 4px;
-  font-size: 9px;
+  font-size: 9.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #b7afa8;
+  opacity: 0.9;
 }
 
 /* Ligne générique de tableau de bord (course, réception, ouvrage…) */
@@ -2156,7 +2258,7 @@ textarea.ni:focus {
   flex-shrink: 0;
   font-size: 12px;
   font-weight: 600;
-  font-family: 'DM Mono', ui-monospace, monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 /* Demande de validation client (ouvrage en « Validation client ») */
@@ -2239,12 +2341,11 @@ textarea.ni:focus {
 }
 
 .meteo-card {
-  background: linear-gradient(135deg, var(--acier), #4a3828);
-  border-radius: 4px;
-  border-left: 4px solid var(--brun);
-  padding: 16px 20px;
-  color: #fff;
-  margin-bottom: 14px;
+  background: var(--acier);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  color: #f4efe9;
+  box-shadow: var(--sh);
 }
 .meteo-loading {
   font-size: 13px;
@@ -2970,7 +3071,7 @@ textarea.ni:focus {
   background: none;
 }
 .emp-color-hex {
-  font-family: 'DM Mono', monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-size: 12px;
   color: var(--g1);
 }

@@ -28,28 +28,27 @@ export default function KpiChantiers({ chantiers = [], ouvrages = [] }) {
     }
   }
 
+  // Chaque indicateur porte sa propre teinte : la couleur sert de repère,
+  // pas de décoration.
   const kpis = [
-    { lbl: 'Actifs', val: actifs, color: '#4a6b8a' },
-    { lbl: 'À facturer', val: aFacturer, color: '#8a7040' },
-    { lbl: 'Terminés', val: termines, color: '#5a7a5a' },
+    { lbl: 'Chantiers actifs', val: actifs, ton: 'bleu' },
+    { lbl: 'À facturer', val: aFacturer, ton: 'ocre' },
+    { lbl: 'Terminés', val: termines, ton: 'vert' },
   ]
 
   return (
-    <div className="card">
-      <div className="card-head">
-        <span className="card-title">📊 Chantiers</span>
-        <button className="btn bg bsm" onClick={() => navigate('/chantiers')}>
-          Voir tout →
+    <div className="kpi-row">
+      {kpis.map((k) => (
+        <button
+          key={k.lbl}
+          className={'kpi kpi--' + k.ton}
+          onClick={() => navigate('/chantiers')}
+          title="Voir les chantiers"
+        >
+          <span className="kpi-val">{k.val}</span>
+          <span className="kpi-lbl">{k.lbl}</span>
         </button>
-      </div>
-      <div className="kpi-row">
-        {kpis.map((k) => (
-          <div key={k.lbl} className="kpi" style={{ borderTopColor: k.color }}>
-            <div className="kpi-val" style={{ color: k.color }}>{k.val}</div>
-            <div className="kpi-lbl">{k.lbl}</div>
-          </div>
-        ))}
-      </div>
+      ))}
     </div>
   )
 }

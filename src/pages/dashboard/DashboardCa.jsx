@@ -7,6 +7,7 @@ import { useMonEmploye } from '../../lib/useMonEmploye'
 import { CLOS, daysUntil, eur, taskAge } from '../../lib/dashboard'
 import { formatDate } from '../../lib/format'
 import Alertes from './Alertes'
+import DashHeader from './DashHeader'
 import MesTaches from './MesTaches'
 import FilActualite from './FilActualite'
 
@@ -133,7 +134,7 @@ export default function DashboardCa() {
 
   return (
     <section className="page">
-      <h2 className="dash-title">Chargé d'affaire — Tableau de bord</h2>
+      <DashHeader />
 
       <Alertes items={alertes} />
 

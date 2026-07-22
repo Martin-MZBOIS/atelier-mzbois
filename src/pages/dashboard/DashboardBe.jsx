@@ -6,6 +6,7 @@ import { useMonEmploye } from '../../lib/useMonEmploye'
 import { taskAge } from '../../lib/dashboard'
 import { STATUT_OUVRAGE } from '../../lib/statuts'
 import Alertes from './Alertes'
+import DashHeader from './DashHeader'
 import MesTaches from './MesTaches'
 import FilActualite from './FilActualite'
 import CoursesDuJour from './CoursesDuJour'
@@ -113,7 +114,7 @@ export default function DashboardBe() {
 
   return (
     <section className="page">
-      <h2 className="dash-title">Resp. BE — Tableau de bord</h2>
+      <DashHeader />
 
       <Alertes items={alertes} />
 

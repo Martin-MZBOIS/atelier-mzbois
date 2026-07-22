@@ -5,6 +5,7 @@ import { useSettings } from '../../store/settings'
 import { useMonEmploye } from '../../lib/useMonEmploye'
 import { CLOS, daysSince, daysUntil, taskAge } from '../../lib/dashboard'
 import Alertes from './Alertes'
+import DashHeader from './DashHeader'
 import MeteoCard from './MeteoCard'
 import KpiChantiers from './KpiChantiers'
 import CopilCard from './CopilCard'
@@ -136,15 +137,19 @@ export default function DashboardDir() {
 
   return (
     <section className="page">
-      <h2 className="dash-title">Dirigeant — Tableau de bord</h2>
+      <DashHeader />
 
       <Alertes items={alertes} />
-      <MeteoCard />
+
+      {/* Les indicateurs passent en premier : c'est ce qu'on lit d'un coup d'œil. */}
+      <KpiChantiers chantiers={d.chantiers} ouvrages={d.ouvrages} />
 
       <div className="dash-grid">
-        <KpiChantiers chantiers={d.chantiers} ouvrages={d.ouvrages} />
-        <CopilCard />
         <MesTaches ref={tasksRef} employeId={employeId} />
+        <div className="dash-stack">
+          <MeteoCard />
+          <CopilCard />
+        </div>
         <FilActualite />
       </div>
     </section>

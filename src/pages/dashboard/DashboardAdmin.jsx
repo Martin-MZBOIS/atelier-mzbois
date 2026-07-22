@@ -6,6 +6,7 @@ import { useSettings } from '../../store/settings'
 import { logModif } from '../../lib/historique'
 import { CLOS, eur } from '../../lib/dashboard'
 import { formatDateTime } from '../../lib/format'
+import DashHeader from './DashHeader'
 
 // Un chantier est « à facturer » quand tous ses ouvrages sont clos et qu'au
 // moins un est au statut `termine` (donc pas encore `facture`).
@@ -186,7 +187,7 @@ export default function DashboardAdmin() {
 
   return (
     <section className="page">
-      <h2 className="dash-title">Admin — Tableau de bord</h2>
+      <DashHeader />
 
       {alertes.length > 0 && (
         <div className="dash-alerts">

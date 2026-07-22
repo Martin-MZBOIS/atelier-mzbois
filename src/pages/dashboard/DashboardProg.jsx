@@ -7,6 +7,7 @@ import { daysUntil, taskAge } from '../../lib/dashboard'
 import { formatDate } from '../../lib/format'
 import { STATUT_OUVRAGE, resolve } from '../../lib/statuts'
 import Alertes from './Alertes'
+import DashHeader from './DashHeader'
 import MesTaches from './MesTaches'
 import MiniPlanning from './MiniPlanning'
 
@@ -121,7 +122,7 @@ export default function DashboardProg() {
 
   return (
     <section className="page">
-      <h2 className="dash-title">Programmeur — Tableau de bord</h2>
+      <DashHeader />
 
       <Alertes items={alertes} />
 
