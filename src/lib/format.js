@@ -48,3 +48,27 @@ export function formatEuro(value) {
     maximumFractionDigits: 0,
   })
 }
+
+// Numéro de semaine ISO 8601 : la semaine 1 est celle qui contient le premier
+// jeudi de l'année. C'est la convention utilisée dans le bâtiment (« S30 »).
+export function numeroSemaine(dateStr) {
+  if (!dateStr) return null
+  const d = new Date(dateStr)
+  if (Number.isNaN(d.getTime())) return null
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+  const jour = t.getUTCDay() || 7 // dimanche compte comme 7
+  t.setUTCDate(t.getUTCDate() + 4 - jour) // on se cale sur le jeudi de la semaine
+  const debut = new Date(Date.UTC(t.getUTCFullYear(), 0, 1))
+  return Math.ceil(((t - debut) / 86400000 + 1) / 7)
+}
+
+// Trois premières lettres du nom d'un client, pour les références de courrier.
+// Accents retirés et ponctuation ignorée : « TF Groupe » → « TFG ».
+export function initialesClient(nom) {
+  return (nom ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Za-z]/g, '')
+    .slice(0, 3)
+    .toUpperCase()
+}

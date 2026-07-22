@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { useAuthStore } from '../store'
 import { toast } from '../store/toasts'
-import { formatDate } from '../lib/format'
+import { formatDate, initialesClient, numeroSemaine } from '../lib/format'
 import {
   STATUT_OUVRAGE,
   STATUT_OUVRAGE_ORDER,
@@ -85,25 +85,36 @@ export default function OuvragesTab() {
   }, [chantier.client_id, chantier.contact_id])
 
   // Mail de demande de validation d'un ouvrage au client.
+  //
+  // Les plans ne peuvent pas être joints automatiquement : un lien mailto ne
+  // transporte pas de pièce jointe. Le message s'ouvre rédigé dans la messagerie,
+  // où l'on attache les plans avant d'envoyer.
   function mailtoValidation(o) {
+    const reference = `${chantier.num ?? ''}${chantier.nom ? ' — ' + chantier.nom : ''}`
+    const semaine = numeroSemaine(o.dep)
+
     const lignes = [
       'Bonjour,',
       '',
-      'Nous vous soumettons pour validation l’ouvrage suivant :',
+      // « les plans du X » tombe faux dès que l'ouvrage est féminin (« la banque
+      // d'accueil ») ou commence par une voyelle (« l'habillage mural »). Le nom
+      // entre guillemets évite l'article et reste juste dans tous les cas.
+      `Vous trouverez en pièce jointe les plans de l’ouvrage « ${o.nom} », chantier : ${reference}`,
       '',
-      `Chantier : ${chantier.num ?? ''}${chantier.nom ? ' — ' + chantier.nom : ''}`,
-      `Ouvrage : ${o.nom}`,
-    ]
-    if (o.devis) lignes.push(`Devis : ${o.devis}`)
-    if (o.dep) lignes.push(`Départ atelier prévu : ${formatDate(o.dep)}`)
-    lignes.push(
+      semaine
+        ? `Départ atelier prévu : semaine ${semaine}, sous réserve de votre délai de validation des plans ci-joints.`
+        : 'Le départ atelier sera planifié dès réception de votre validation.',
       '',
-      'Merci de nous retourner votre validation afin que nous puissions lancer la suite.',
+      'Merci de nous retourner votre validation afin que nous puissions lancer en fabrication.',
       '',
       'Cordialement,',
-      'MZ Bois & Compagnie'
-    )
-    const sujet = `Validation — ${o.nom}${chantier.num ? ' — ' + chantier.num : ''}`
+      'MZ Bois & Compagnie',
+    ]
+
+    // Référence courrier : n° de chantier, trois lettres du client, ouvrage.
+    const initiales = initialesClient(chantier.client)
+    const prefixe = [chantier.num, initiales].filter(Boolean).join('-')
+    const sujet = `${prefixe}${prefixe ? '- ' : ''}Validation — ${o.nom}`
     return (
       'mailto:' +
       encodeURIComponent(clientMail?.email ?? '') +
