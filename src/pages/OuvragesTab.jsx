@@ -47,6 +47,58 @@ export default function OuvragesTab() {
   const [applyMode, setApplyMode] = useState(null) // 'depart' | 'pose' | null
   const [quickPurchase, setQuickPurchase] = useState(null) // { ouvrageId, typ }
   const [editing, setEditing] = useState(null) // ouvrage en cours d'édition
+  // Email du client rattaché au chantier (migration 0027) — sert à lui envoyer
+  // une demande de validation quand un ouvrage est en « Validation client ».
+  const [clientMail, setClientMail] = useState(null)
+
+  useEffect(() => {
+    let active = true
+    setClientMail(null)
+    if (!chantier.client_id) return
+    supabase
+      .from('fournisseurs')
+      .select('nom, contacts:contacts!fournisseur_id(email)')
+      .eq('id', chantier.client_id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!active || !data) return
+        const email = (data.contacts ?? []).find((c) => c.email)?.email ?? null
+        setClientMail(email ? { email, nom: data.nom } : null)
+      })
+    return () => {
+      active = false
+    }
+  }, [chantier.client_id])
+
+  // Mail de demande de validation d'un ouvrage au client.
+  function mailtoValidation(o) {
+    const lignes = [
+      'Bonjour,',
+      '',
+      'Nous vous soumettons pour validation l’ouvrage suivant :',
+      '',
+      `Chantier : ${chantier.num ?? ''}${chantier.nom ? ' — ' + chantier.nom : ''}`,
+      `Ouvrage : ${o.nom}`,
+    ]
+    if (o.devis) lignes.push(`Devis : ${o.devis}`)
+    if (o.dep) lignes.push(`Départ atelier prévu : ${formatDate(o.dep)}`)
+    lignes.push(
+      '',
+      'Merci de nous retourner votre validation afin que nous puissions lancer la suite.',
+      '',
+      'Cordialement,',
+      'MZ Bois & Compagnie'
+    )
+    const sujet = `Validation — ${o.nom}${chantier.num ? ' — ' + chantier.num : ''}`
+    return (
+      'mailto:' +
+      encodeURIComponent(clientMail?.email ?? '') +
+      '?subject=' +
+      encodeURIComponent(sujet) +
+      '&body=' +
+      encodeURIComponent(lignes.join('\n'))
+    )
+  }
 
   async function loadOuvrages() {
     const { data, error: dbError } = await supabase
@@ -325,6 +377,30 @@ export default function OuvragesTab() {
               </div>
 
               {o.notes && <div className="ov-notes">{o.notes}</div>}
+
+              {/* Demande de validation au client (statut « Validation client ») */}
+              {o.statut === 'validation_client' && (
+                <div className="ov-validation">
+                  {clientMail ? (
+                    <a
+                      className="btn bp bsm"
+                      href={mailtoValidation(o)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`Écrire à ${clientMail.nom} (${clientMail.email})`}
+                    >
+                      📧 Demander la validation
+                    </a>
+                  ) : (
+                    <span className="ov-validation-hint">
+                      📧 Demande de validation indisponible —{' '}
+                      {chantier.client_id
+                        ? 'la fiche client n’a aucun contact avec email.'
+                        : 'aucune fiche client rattachée à ce chantier.'}
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* Achat rapide par typologie */}
               <div className="ov-buy">

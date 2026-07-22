@@ -2159,6 +2159,16 @@ textarea.ni:focus {
   font-family: 'DM Mono', ui-monospace, monospace;
 }
 
+/* Demande de validation client (ouvrage en « Validation client ») */
+.ov-validation {
+  margin: 8px 0 2px;
+}
+.ov-validation-hint {
+  font-size: 11px;
+  color: var(--g2);
+  font-style: italic;
+}
+
 /* Saisie en ligne (tableau de bord Admin) */
 .admin-inp {
   flex-shrink: 0;
