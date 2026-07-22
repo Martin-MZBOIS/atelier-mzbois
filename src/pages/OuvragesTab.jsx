@@ -95,20 +95,23 @@ export default function OuvragesTab() {
     const lignes = [
       'Bonjour,',
       '',
-      // « les plans du X » tombe faux dès que l'ouvrage est féminin (« la banque
-      // d'accueil ») ou commence par une voyelle (« l'habillage mural »). Le nom
-      // entre guillemets évite l'article et reste juste dans tous les cas.
-      `Vous trouverez en pièce jointe les plans de l’ouvrage « ${o.nom} », chantier : ${reference}`,
+      `Vous trouverez en pièce jointe les plans du ${o.nom}, chantier : ${reference}`,
       '',
-      semaine
-        ? `Départ atelier prévu : semaine ${semaine}, sous réserve de votre délai de validation des plans ci-joints.`
-        : 'Le départ atelier sera planifié dès réception de votre validation.',
-      '',
+    ]
+    // Sans date de départ atelier, la ligne n'aurait pas de semaine à annoncer :
+    // on la retire plutôt que d'écrire une phrase qui n'a pas été demandée.
+    if (semaine) {
+      lignes.push(
+        `Départ atelier prévu : semaine ${semaine}, sous réserve de votre délai de validation des plans ci-joints.`,
+        ''
+      )
+    }
+    lignes.push(
       'Merci de nous retourner votre validation afin que nous puissions lancer en fabrication.',
       '',
       'Cordialement,',
-      'MZ Bois & Compagnie',
-    ]
+      'MZ Bois & Compagnie'
+    )
 
     // Référence courrier : n° de chantier, trois lettres du client, ouvrage.
     const initiales = initialesClient(chantier.client)
