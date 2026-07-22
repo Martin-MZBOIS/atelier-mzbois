@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { toast } from '../store/toasts'
@@ -72,25 +73,22 @@ export default function TaskEditModal({ task, chantiers, employes, onClose, onSa
         <div className="fg">
           <div className="fl">
             <label>Chantier lié</label>
-            <select value={form.chantier_id} onChange={(e) => set('chantier_id', e.target.value)}>
-              <option value="">—</option>
-              {chantiers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.num}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.chantier_id}
+              onChange={(v) => set('chantier_id', v)}
+              options={chantiers.map((c) => ({ value: c.id, label: c.num }))}
+              allowEmpty
+            />
           </div>
           <div className="fl">
             <label>Assigné à</label>
-            <select value={form.assigne_a} onChange={(e) => set('assigne_a', e.target.value)}>
-              <option value="">—</option>
-              {employes.map((em) => (
-                <option key={em.id} value={em.id}>
-                  {em.prenom} {em.nom}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.assigne_a}
+              onChange={(v) => set('assigne_a', v)}
+              options={employes.map((e) => ({ value: e.id, label: e.prenom + ' ' + e.nom }))}
+              allowEmpty
+              emptyLabel="— Personne —"
+            />
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { logModifs } from '../lib/historique'
@@ -134,14 +135,12 @@ export default function OuvrageEditModal({ ouvrage, employes, user, chantierId, 
           </div>
           <div className="fl">
             <label>Poseur</label>
-            <select value={form.poseur_id} onChange={(e) => set('poseur_id', e.target.value)}>
-              <option value="">—</option>
-              {employes.map((em) => (
-                <option key={em.id} value={em.id}>
-                  {em.prenom} {em.nom}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.poseur_id}
+              onChange={(v) => set('poseur_id', v)}
+              options={employes.map((em) => ({ value: em.id, label: em.prenom + ' ' + em.nom }))}
+              allowEmpty
+            />
           </div>
         </div>
 

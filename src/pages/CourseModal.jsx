@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { toast } from '../store/toasts'
@@ -321,11 +322,14 @@ export default function CourseModal({
           </div>
           <div className="fl">
             <label>Statut</label>
-            <select value={form.statut} onChange={(e) => set('statut', e.target.value)}>
-              {STATUT_COURSE_ORDER.map((slug) => (
-                <option key={slug} value={slug}>{STATUT_COURSE[slug].label}</option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.statut}
+              onChange={(v) => set('statut', v)}
+              options={STATUT_COURSE_ORDER.map((s) => ({
+                value: s,
+                label: STATUT_COURSE[s].label,
+              }))}
+            />
           </div>
         </div>
 
@@ -412,12 +416,15 @@ export default function CourseModal({
               🚚 Coursier externe
             </button>
           </div>
-          <select value={form.qui_id} onChange={(e) => set('qui_id', e.target.value)}>
-            <option value="">—</option>
-            {(quiKind === 'interne' ? employes : transporteurs).map((p) => (
-              <option key={p.id} value={p.id}>{p.prenom ? `${p.prenom} ${p.nom}` : p.nom}</option>
-            ))}
-          </select>
+          <SelectSearch
+            value={form.qui_id}
+            onChange={(v) => set('qui_id', v)}
+            options={(quiKind === 'interne' ? employes : transporteurs).map((p) => ({
+              value: p.id,
+              label: p.prenom ? `${p.prenom} ${p.nom}` : p.nom,
+            }))}
+            allowEmpty
+          />
           {quiKind === 'externe' && form.qui_id && (
             <a
               className="btn bg bsm"
@@ -479,12 +486,16 @@ export default function CourseModal({
               </div>
               <div className="fl">
                 <label>Chantier imputé</label>
-                <select value={chantierImpute} onChange={(e) => setChantierImpute(e.target.value)}>
-                  <option value="">— (même que lié)</option>
-                  {chantiers.map((c) => (
-                    <option key={c.id} value={c.id}>{c.num} · {c.nom}</option>
-                  ))}
-                </select>
+                <SelectSearch
+                  value={chantierImpute}
+                  onChange={setChantierImpute}
+                  options={chantiers.map((c) => ({
+                    value: c.id,
+                    label: `${c.num} · ${c.nom ?? ''}`.trim(),
+                  }))}
+                  allowEmpty
+                  emptyLabel="— (même que lié)"
+                />
               </div>
             </div>
           </>

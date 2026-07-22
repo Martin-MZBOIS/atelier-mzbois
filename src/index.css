@@ -3971,3 +3971,76 @@ textarea.ni:focus {
   color: var(--gn);
   font-weight: 600;
 }
+
+/* --------------------------------------- Menu déroulant saisissable */
+.selsearch {
+  position: relative;
+  width: 100%;
+}
+.selsearch input {
+  width: 100%;
+  padding-right: 26px;
+}
+.selsearch input:disabled {
+  background: var(--g6);
+  color: var(--g2);
+}
+.selsearch-chevron {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px;
+  color: var(--g2);
+  pointer-events: none;
+}
+.selsearch-list {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 0;
+  right: 0;
+  z-index: 120;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--w);
+  border: 0.5px solid var(--g4);
+  border-top: 1px solid var(--brun);
+  border-radius: 0 0 var(--r) var(--r);
+  box-shadow: 0 8px 22px rgba(44, 36, 32, 0.13);
+}
+.selsearch-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 11px;
+  font-size: 13px;
+  color: var(--acier);
+  cursor: pointer;
+}
+.selsearch-item--hi {
+  background: var(--brun2);
+}
+.selsearch-item--on .selsearch-lbl {
+  font-weight: 600;
+  color: var(--brun);
+}
+.selsearch-lbl {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.selsearch-sub {
+  flex: none;
+  font-size: 11px;
+  color: var(--g2);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+.selsearch-vide {
+  padding: 8px 11px;
+  font-size: 12px;
+  color: var(--g2);
+}

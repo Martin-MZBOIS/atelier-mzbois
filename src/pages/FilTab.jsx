@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
@@ -250,18 +251,14 @@ export default function FilTab() {
           disabled={!canPost}
         />
         <div className="fil-composer-actions">
-          <select
+          <SelectSearch
             value={tag}
-            onChange={(e) => setTag(e.target.value)}
+            onChange={setTag}
             disabled={!canPost}
-          >
-            <option value="">Taguer un ouvrage…</option>
-            {ouvrages.map((o) => (
-              <option key={o.id} value={o.nom}>
-                {o.nom}
-              </option>
-            ))}
-          </select>
+            options={ouvrages.map((o) => ({ value: o.nom, label: o.nom }))}
+            allowEmpty
+            emptyLabel="Taguer un ouvrage…"
+          />
           <button
             className="btn bp bsm"
             disabled={!canPost || sending || !texte.trim()}

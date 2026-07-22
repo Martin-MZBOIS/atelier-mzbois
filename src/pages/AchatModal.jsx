@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
@@ -164,17 +165,12 @@ export default function AchatModal({
         {showChantierPicker && (
           <div className="fl">
             <label>Chantier *</label>
-            <select
+            <SelectSearch
               value={form.chantier_id}
-              onChange={(e) => set('chantier_id', e.target.value)}
-            >
-              <option value="">—</option>
-              {chantiers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.num} · {c.nom}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => set('chantier_id', v)}
+              options={chantiers.map((c) => ({ value: c.id, label: c.num + ' · ' + (c.nom ?? '') }))}
+              allowEmpty
+            />
           </div>
         )}
 
@@ -196,27 +192,20 @@ export default function AchatModal({
         <div className="fg">
           <div className="fl">
             <label>Typologie</label>
-            <select value={form.typ} onChange={(e) => set('typ', e.target.value)}>
-              {TYP_ACHAT_ORDER.map((slug) => (
-                <option key={slug} value={slug}>
-                  {TYP_ACHAT[slug].label}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.typ}
+              onChange={(v) => set('typ', v)}
+              options={TYP_ACHAT_ORDER.map((s) => ({ value: s, label: TYP_ACHAT[s].label }))}
+            />
           </div>
           <div className="fl">
             <label>Fournisseur</label>
-            <select
+            <SelectSearch
               value={form.fournisseur_id}
-              onChange={(e) => set('fournisseur_id', e.target.value)}
-            >
-              <option value="">—</option>
-              {fournisseurs.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.nom}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => set('fournisseur_id', v)}
+              options={fournisseurs.map((f) => ({ value: f.id, label: f.nom }))}
+              allowEmpty
+            />
           </div>
         </div>
 
@@ -255,13 +244,11 @@ export default function AchatModal({
         <div className="fg3">
           <div className="fl">
             <label>Statut</label>
-            <select value={form.st} onChange={(e) => set('st', e.target.value)}>
-              {STATUT_ACHAT_ORDER.map((slug) => (
-                <option key={slug} value={slug}>
-                  {STATUT_ACHAT[slug].label}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.st}
+              onChange={(v) => set('st', v)}
+              options={STATUT_ACHAT_ORDER.map((s) => ({ value: s, label: STATUT_ACHAT[s].label }))}
+            />
           </div>
           {canSeePrix && (
             <>

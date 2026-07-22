@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { toast } from '../store/toasts'
@@ -121,13 +122,11 @@ export default function SocieteModal({ societe, defaultType, onClose, onSaved })
           </div>
           <div className="fl">
             <label>Type</label>
-            <select value={form.type} onChange={(e) => set('type', e.target.value)}>
-              {TYPE_ORDER.map((t) => (
-                <option key={t} value={t}>
-                  {TYPE_SOCIETE[t].label}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.type}
+              onChange={(v) => set('type', v)}
+              options={TYPE_ORDER.map((t) => ({ value: t, label: TYPE_SOCIETE[t].label }))}
+            />
           </div>
         </div>
 

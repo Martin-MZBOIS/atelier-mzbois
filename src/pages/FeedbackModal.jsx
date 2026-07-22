@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
@@ -58,14 +59,12 @@ export default function FeedbackModal({ chantierId, ouvrages, onClose, onSaved }
 
         <div className="fl">
           <label>Ouvrage concerné</label>
-          <select value={ouvrageId} onChange={(e) => setOuvrageId(e.target.value)}>
-            <option value="">—</option>
-            {ouvrages.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.nom}
-              </option>
-            ))}
-          </select>
+          <SelectSearch
+            value={ouvrageId}
+            onChange={setOuvrageId}
+            options={ouvrages.map((o) => ({ value: o.id, label: o.nom }))}
+            allowEmpty
+          />
         </div>
 
         {error && <div className="alert">{error}</div>}

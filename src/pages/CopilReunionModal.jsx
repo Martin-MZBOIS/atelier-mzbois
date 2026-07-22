@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { toIso } from '../lib/copil'
@@ -127,14 +128,13 @@ export default function CopilReunionModal({
               value={a.texte}
               onChange={(e) => setAction(i, 'texte', e.target.value)}
             />
-            <select value={a.assigne_a} onChange={(e) => setAction(i, 'assigne_a', e.target.value)}>
-              <option value="">Assigner…</option>
-              {employes.map((em) => (
-                <option key={em.id} value={em.id}>
-                  {em.prenom} {em.nom}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={a.assigne_a}
+              onChange={(v) => setAction(i, 'assigne_a', v)}
+              options={employes.map((em) => ({ value: em.id, label: em.prenom + ' ' + em.nom }))}
+              allowEmpty
+              emptyLabel="Assigner…"
+            />
             <button className="btn bg bsm" onClick={() => removeAction(i)} disabled={actions.length === 1}>
               ×
             </button>

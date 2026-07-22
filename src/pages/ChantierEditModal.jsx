@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { supabase } from '../lib/supabase'
 import { raccourcisModal } from '../lib/clavier'
 import { toast } from '../store/toasts'
@@ -111,12 +112,13 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
 
         <div className="fl">
           <label>Fiche client (pour lui écrire)</label>
-          <select value={form.client_id} onChange={(e) => selectClient(e.target.value)}>
-            <option value="">— Aucune fiche rattachée —</option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>{c.nom}</option>
-            ))}
-          </select>
+          <SelectSearch
+            value={form.client_id}
+            onChange={selectClient}
+            options={clients.map((c) => ({ value: c.id, label: c.nom }))}
+            allowEmpty
+            emptyLabel="— Aucune fiche rattachée —"
+          />
           <div className="param-hint" style={{ marginTop: 5 }}>
             {!form.client_id
               ? 'Rattachez une fiche client pour pouvoir lui envoyer une demande de validation.'
@@ -134,14 +136,12 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
         <div className="fg">
           <div className="fl">
             <label>Chargé d'affaire</label>
-            <select value={form.ca_id} onChange={(e) => set('ca_id', e.target.value)}>
-              <option value="">—</option>
-              {utilisateurs.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.prenom} {u.nom}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={form.ca_id}
+              onChange={(v) => set('ca_id', v)}
+              options={utilisateurs.map((u) => ({ value: u.id, label: u.prenom + ' ' + u.nom }))}
+              allowEmpty
+            />
           </div>
           <div className="fl">
             <label>Départ approx.</label>

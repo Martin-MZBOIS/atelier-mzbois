@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 
@@ -141,17 +142,13 @@ export default function ReunionModal({ chantierId, reunion, employes, onClose, o
               value={a.texte}
               onChange={(e) => setAction(i, 'texte', e.target.value)}
             />
-            <select
+            <SelectSearch
               value={a.assigne_a}
-              onChange={(e) => setAction(i, 'assigne_a', e.target.value)}
-            >
-              <option value="">Assigner…</option>
-              {employes.map((em) => (
-                <option key={em.id} value={em.id}>
-                  {em.prenom} {em.nom}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setAction(i, 'assigne_a', v)}
+              options={employes.map((em) => ({ value: em.id, label: em.prenom + ' ' + em.nom }))}
+              allowEmpty
+              emptyLabel="Assigner…"
+            />
             <button
               className="btn bg bsm"
               onClick={() => removeAction(i)}

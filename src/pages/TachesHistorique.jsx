@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
 import { useMonEmploye } from '../lib/useMonEmploye'
@@ -157,24 +158,24 @@ export default function TachesHistorique() {
         </div>
 
         {voitTout && (
-          <select className="ss" value={qui} onChange={(e) => setQui(e.target.value)}>
-            <option value="tous">Toute l’équipe</option>
-            {employes.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.prenom} {e.nom}
-              </option>
-            ))}
-          </select>
+          <SelectSearch
+            className="hist-sel"
+            value={qui}
+            onChange={setQui}
+            options={[{ value: 'tous', label: 'Toute l’équipe' }].concat(
+              employes.map((e) => ({ value: e.id, label: e.prenom + ' ' + e.nom }))
+            )}
+          />
         )}
 
-        <select className="ss" value={chantier} onChange={(e) => setChantier(e.target.value)}>
-          <option value="tous">Tous les chantiers</option>
-          {chantiers.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.num}
-            </option>
-          ))}
-        </select>
+        <SelectSearch
+          className="hist-sel"
+          value={chantier}
+          onChange={setChantier}
+          options={[{ value: 'tous', label: 'Tous les chantiers' }].concat(
+            chantiers.map((c) => ({ value: c.id, label: c.num }))
+          )}
+        />
 
         <select className="ss" value={periode} onChange={(e) => setPeriode(e.target.value)}>
           {PERIODES.map((p) => (

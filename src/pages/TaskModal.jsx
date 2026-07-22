@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { toast } from '../store/toasts'
@@ -75,26 +76,25 @@ export default function TaskModal({
         <div className="fg">
           <div className="fl">
             <label>Chantier</label>
-            <select value={chantierId} onChange={(e) => setChantierId(e.target.value)}>
-              <option value="">—</option>
-              {chantiers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.num}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={chantierId}
+              onChange={setChantierId}
+              options={chantiers.map((c) => ({ value: c.id, label: c.num }))}
+              allowEmpty
+            />
           </div>
           <div className="fl">
             <label>Assigner à</label>
-            <select value={assigneA} onChange={(e) => setAssigneA(e.target.value)}>
-              <option value="">— Personne —</option>
-              {employes.map((em) => (
-                <option key={em.id} value={em.id}>
-                  {em.prenom} {em.nom}
-                  {em.id === defaultAssigneA ? ' (moi)' : ''}
-                </option>
-              ))}
-            </select>
+            <SelectSearch
+              value={assigneA}
+              onChange={setAssigneA}
+              options={employes.map((em) => ({
+                value: em.id,
+                label: `${em.prenom} ${em.nom}${em.id === defaultAssigneA ? ' (moi)' : ''}`,
+              }))}
+              allowEmpty
+              emptyLabel="— Personne —"
+            />
             {!assigneA && (
               <div className="param-hint" style={{ marginTop: 5 }}>
                 Sans destinataire, la tâche n’apparaîtra dans « Mes tâches » de
