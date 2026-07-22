@@ -68,6 +68,28 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
     }
     setSaving(true)
     setError('')
+
+    // Deux chantiers portant le même numéro rendent illisibles le planning,
+    // les achats et les courses. On prévient ici plutôt que de laisser
+    // remonter la violation de contrainte (migration 0031).
+    const num = form.num.trim()
+    if (num) {
+      let q = supabase.from('chantiers').select('id, num, nom').ilike('num', num)
+      if (isEdit) q = q.neq('id', chantier.id)
+      const { data: homonymes } = await q
+      const conflit = (homonymes ?? []).find(
+        (c) => (c.num ?? '').trim().toLowerCase() === num.toLowerCase()
+      )
+      if (conflit) {
+        setSaving(false)
+        setError(
+          `Le numéro ${conflit.num} est déjà utilisé par « ${conflit.nom} ». ` +
+            'Choisissez-en un autre.'
+        )
+        return
+      }
+    }
+
     const base = {
       num: form.num.trim() || null,
       client: form.client.trim() || null,
@@ -95,7 +117,15 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
     }
     setSaving(false)
     if (dbError) {
-      setError(dbError.message)
+      // La contrainte d'unicité peut se déclencher malgré la vérification
+      // ci-dessus, si quelqu'un enregistre le même numéro entre-temps.
+      const doublon =
+        dbError.code === '23505' || /idx_chantiers_num_unique/.test(dbError.message)
+      setError(
+        doublon
+          ? `Le numéro ${num} vient d’être attribué à un autre chantier. Choisissez-en un autre.`
+          : dbError.message
+      )
       return
     }
     toast('Chantier enregistré')
