@@ -37,6 +37,8 @@ export default function Parametres() {
   const [newUnite, setNewUnite] = useState('')
   const [specialites, setSpecialites] = useState(settings.specialites ?? [])
   const [newSpec, setNewSpec] = useState('')
+  const [camions, setCamions] = useState(settings.camions ?? [])
+  const [newCamion, setNewCamion] = useState('')
   const [droits, setDroits] = useState(settings.droits)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
@@ -50,8 +52,9 @@ export default function Parametres() {
     })
     setUnites(settings.unites)
     setSpecialites(settings.specialites ?? [])
+    setCamions(settings.camions ?? [])
     setDroits(settings.droits ?? {})
-  }, [settings.loaded, settings.cout_horaire, settings.alerte_orange, settings.alerte_rouge, settings.unites, settings.specialites, settings.droits])
+  }, [settings.loaded, settings.cout_horaire, settings.alerte_orange, settings.alerte_rouge, settings.unites, settings.specialites, settings.camions, settings.droits])
 
   if (role !== 'dir') {
     return (
@@ -71,6 +74,14 @@ export default function Parametres() {
   }
   function removeUnite(u) {
     setUnites((prev) => prev.filter((x) => x !== u))
+  }
+  function addCamion() {
+    const c = newCamion.trim()
+    if (c && !camions.includes(c)) setCamions((prev) => [...prev, c])
+    setNewCamion('')
+  }
+  function removeCamion(c) {
+    setCamions((prev) => prev.filter((x) => x !== c))
   }
   function addSpec() {
     const s = newSpec.trim()
@@ -103,12 +114,17 @@ export default function Parametres() {
       alerte_rouge: parseInt(form.alerte_rouge, 10) || 0,
       unites,
       specialites,
+      camions,
       droits,
     }
     let err = await save(patch)
-    // Repli si la colonne specialites (migration 0023) n'existe pas encore.
+    // Replis si camions (0032) puis specialites (0023) n'existent pas encore.
+    if (err && /camions/.test(err.message)) {
+      const { camions: _sansCamions, ...rest } = patch
+      err = await save(rest)
+    }
     if (err && /specialites/.test(err.message)) {
-      const { specialites: _omit, ...rest } = patch
+      const { specialites: _omit, camions: _aussi, ...rest } = patch
       err = await save(rest)
     }
     setSaving(false)
@@ -204,6 +220,36 @@ export default function Parametres() {
           <button className="btn bg bsm" onClick={addUnite}>
             + Ajouter
           </button>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-head">
+          <span className="card-title">Véhicules de livraison</span>
+        </div>
+        <div className="chip-row">
+          {camions.map((c) => (
+            <span key={c} className="chip-select">
+              {c}
+              <button type="button" className="chip-x" onClick={() => removeCamion(c)}>
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        <div className="param-add">
+          <input
+            value={newCamion}
+            placeholder="Nouveau véhicule…"
+            onChange={(e) => setNewCamion(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addCamion()}
+          />
+          <button className="btn bg bsm" onClick={addCamion}>
+            + Ajouter
+          </button>
+        </div>
+        <div className="param-hint">
+          Proposés sur un ouvrage quand la livraison se fait par camion.
         </div>
       </div>
 

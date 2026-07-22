@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS = {
   alerte_orange: 3,
   alerte_rouge: 7,
   unites: ['panneau', 'ml', 'm²', 'pièce', 'rouleau'],
+  camions: ['Camion MZ', 'Poids lourd', 'Utilitaire', '20m3 hayon'],
   specialites: [
     'Métallier',
     'Tapissier',

@@ -140,3 +140,18 @@ export function resolve(table, slug) {
     table[slug] ?? { label: slug ?? '—', color: '#cec6be', cls: 'st-none' }
   )
 }
+
+// Acheminement d'un ouvrage — le type de livraison commande la suite :
+// `camion` = on choisit un véhicule, `transporteur` = on désigne la société.
+export const TYPE_LIVRAISON = {
+  enlevement_client: { label: 'Enlèvement client', camion: false, transporteur: false },
+  livraison_interne: { label: 'Livraison interne', camion: true, transporteur: false },
+  livraison_externe: { label: 'Livraison externe', camion: true, transporteur: true },
+  messagerie: { label: 'Messagerie', camion: false, transporteur: true },
+}
+export const TYPE_LIVRAISON_ORDER = [
+  'enlevement_client',
+  'livraison_interne',
+  'livraison_externe',
+  'messagerie',
+]

@@ -13,6 +13,7 @@ import {
   STATUT_OUVRAGE_ORDER,
   TYP_ACHAT,
   TYP_ACHAT_ORDER,
+  TYPE_LIVRAISON,
   ouvragePhase,
   resolve,
 } from '../lib/statuts'
@@ -26,7 +27,6 @@ const EMPTY_ADD = {
   qty: '1',
   devis: '',
   dep: '',
-  camion: '',
 }
 function num(v) {
   if (v === '' || v == null) return null
@@ -133,15 +133,31 @@ export default function OuvragesTab() {
   }
 
   async function loadOuvrages() {
-    const { data, error: dbError } = await supabase
-      .from('ouvrages')
-      .select(
-        'id, nom, statut, notes, qty, dep, camion, pose, ' +
-          'dp_pose, devis, sit_pct, fact_def, ' +
-          'poseur:employes!poseur_id(prenom, nom)'
-      )
-      .eq('chantier_id', chantier.id)
-      .order('nom', { ascending: true })
+    const commun =
+      'id, nom, statut, notes, qty, dep, camion, pose, ' +
+      'dp_pose, devis, sit_pct, fact_def, ' +
+      'poseur:employes!poseur_id(prenom, nom)'
+    const avecLivraison =
+      commun +
+      ', type_livraison, transporteur_id, transporteur:fournisseurs!transporteur_id(nom)'
+
+    const charger = (champs) =>
+      supabase
+        .from('ouvrages')
+        .select(champs)
+        .eq('chantier_id', chantier.id)
+        .order('nom', { ascending: true })
+
+    // Repli si la migration 0032 n'est pas encore passée. PostgREST signale la
+    // colonne manquante, mais pour la jointure il parle de « relationship » ou
+    // de « schema cache » sans nommer le champ : il faut couvrir les deux.
+    let { data, error: dbError } = await charger(avecLivraison)
+    if (
+      dbError &&
+      /type_livraison|transporteur|relationship|schema cache/i.test(dbError.message)
+    ) {
+      ;({ data, error: dbError } = await charger(commun))
+    }
     if (dbError) {
       setError(dbError.message)
       setOuvrages([])
@@ -208,7 +224,6 @@ export default function OuvragesTab() {
       qty: num(addForm.qty) ?? 1,
       devis: addForm.devis.trim() || null,
       dep: addForm.dep || null,
-      camion: addForm.camion.trim() || null,
       pose: false,
       fact_def: false,
     })
@@ -340,12 +355,8 @@ export default function OuvragesTab() {
               <input type="date" value={addForm.dep} onChange={(e) => setAdd('dep', e.target.value)} />
             </div>
           </div>
-          <div className="fg">
-            <div className="fl">
-              <label>Camion</label>
-              <input value={addForm.camion} onChange={(e) => setAdd('camion', e.target.value)} placeholder="ex : 20m3 hayon" />
-            </div>
-          </div>
+          {/* L'acheminement (type de livraison, camion, transporteur) se règle
+              à l'édition de l'ouvrage : il n'est pas connu à la création. */}
           <div className="modal-actions">
             <button className="btn bp bsm" onClick={addOuvrage}>Créer</button>
             <button className="btn bg bsm" onClick={() => { setShowAdd(false); setAddForm(EMPTY_ADD) }}>Annuler</button>
@@ -389,7 +400,15 @@ export default function OuvragesTab() {
 
               <div className="ov-meta">
                 {o.dep && <span className="ov-dep">📅 {formatDate(o.dep)}</span>}
+                {o.type_livraison && (
+                  <span className="ov-liv">
+                    {resolve(TYPE_LIVRAISON, o.type_livraison).label}
+                  </span>
+                )}
                 {o.camion && <span className="ov-cam">🚛 {o.camion}</span>}
+                {o.transporteur && (
+                  <span className="ov-cam">🏢 {o.transporteur.nom}</span>
+                )}
                 {o.pose && o.dp_pose && (
                   <span className="ov-pose">
                     🔧 Pose {formatDate(o.dp_pose)}
