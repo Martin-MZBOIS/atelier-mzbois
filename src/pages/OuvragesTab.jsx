@@ -26,7 +26,6 @@ const EMPTY_ADD = {
   qty: '1',
   devis: '',
   dep: '',
-  livraison: '',
   camion: '',
 }
 function num(v) {
@@ -129,7 +128,7 @@ export default function OuvragesTab() {
     const { data, error: dbError } = await supabase
       .from('ouvrages')
       .select(
-        'id, nom, statut, notes, qty, dep, livraison, camion, pose, ' +
+        'id, nom, statut, notes, qty, dep, camion, pose, ' +
           'dp_pose, devis, sit_pct, fact_def, ' +
           'poseur:employes!poseur_id(prenom, nom)'
       )
@@ -201,7 +200,6 @@ export default function OuvragesTab() {
       qty: num(addForm.qty) ?? 1,
       devis: addForm.devis.trim() || null,
       dep: addForm.dep || null,
-      livraison: addForm.livraison || null,
       camion: addForm.camion.trim() || null,
       pose: false,
       fact_def: false,
@@ -336,10 +334,6 @@ export default function OuvragesTab() {
           </div>
           <div className="fg">
             <div className="fl">
-              <label>Livraison</label>
-              <input type="date" value={addForm.livraison} onChange={(e) => setAdd('livraison', e.target.value)} />
-            </div>
-            <div className="fl">
               <label>Camion</label>
               <input value={addForm.camion} onChange={(e) => setAdd('camion', e.target.value)} placeholder="ex : 20m3 hayon" />
             </div>
@@ -387,9 +381,6 @@ export default function OuvragesTab() {
 
               <div className="ov-meta">
                 {o.dep && <span className="ov-dep">📅 {formatDate(o.dep)}</span>}
-                {o.livraison && (
-                  <span className="ov-liv">🚚 {formatDate(o.livraison)}</span>
-                )}
                 {o.camion && <span className="ov-cam">🚛 {o.camion}</span>}
                 {o.pose && o.dp_pose && (
                   <span className="ov-pose">

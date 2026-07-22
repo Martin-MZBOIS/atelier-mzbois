@@ -17,7 +17,6 @@ export default function OuvrageEditModal({ ouvrage, employes, user, chantierId, 
     qty: ouvrage.qty ?? 1,
     devis: ouvrage.devis ?? '',
     dep: ouvrage.dep ?? '',
-    livraison: ouvrage.livraison ?? '',
     camion: ouvrage.camion ?? '',
     pose: ouvrage.pose ?? false,
     dp_pose: ouvrage.dp_pose ?? '',
@@ -47,7 +46,6 @@ export default function OuvrageEditModal({ ouvrage, employes, user, chantierId, 
         qty: num(form.qty) ?? 1,
         devis: form.devis.trim() || null,
         dep: form.dep || null,
-        livraison: form.livraison || null,
         camion: form.camion.trim() || null,
         pose: form.pose,
         dp_pose: form.dp_pose || null,
@@ -116,10 +114,6 @@ export default function OuvrageEditModal({ ouvrage, employes, user, chantierId, 
           <div className="fl">
             <label>Départ atelier</label>
             <input type="date" value={form.dep} onChange={(e) => set('dep', e.target.value)} />
-          </div>
-          <div className="fl">
-            <label>Livraison</label>
-            <input type="date" value={form.livraison} onChange={(e) => set('livraison', e.target.value)} />
           </div>
         </div>
 

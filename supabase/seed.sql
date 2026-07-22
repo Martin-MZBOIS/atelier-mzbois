@@ -96,16 +96,16 @@ on conflict (id) do nothing;
 -- -----------------------------------------------------------------------------
 -- Ouvrages (2 par chantier)
 -- -----------------------------------------------------------------------------
-insert into ouvrages (id, chantier_id, nom, statut, qty, dep, livraison, camion, pose, dp_pose, poseur_id, devis, sit_pct, fact_def) values
+insert into ouvrages (id, chantier_id, nom, statut, qty, dep, camion, pose, dp_pose, poseur_id, devis, sit_pct, fact_def) values
   -- 228-LEFEBVRE
-  ('55555555-5555-5555-5555-000000000001', '44444444-4444-4444-4444-000000000001', 'Cuisine sur mesure',   'fabrication',       1, (current_date + 2), (current_date + 6), 'Camion 1', true,  (current_date + 7), '22222222-2222-2222-2222-000000000008', 'DEV-228-01', 40.00, false),
-  ('55555555-5555-5555-5555-000000000002', '44444444-4444-4444-4444-000000000001', 'Dressing chambre',     'pret_a_fabriquer',  1, null,         null,         null,       true,  (current_date + 10), '22222222-2222-2222-2222-000000000008', 'DEV-228-02',  0.00, false),
+  ('55555555-5555-5555-5555-000000000001', '44444444-4444-4444-4444-000000000001', 'Cuisine sur mesure',   'fabrication',       1, (current_date + 2), 'Camion 1', true,  (current_date + 7), '22222222-2222-2222-2222-000000000008', 'DEV-228-01', 40.00, false),
+  ('55555555-5555-5555-5555-000000000002', '44444444-4444-4444-4444-000000000001', 'Dressing chambre',     'pret_a_fabriquer',  1, null,         null,       true,  (current_date + 10), '22222222-2222-2222-2222-000000000008', 'DEV-228-02',  0.00, false),
   -- 291-TF2026
-  ('55555555-5555-5555-5555-000000000003', '44444444-4444-4444-4444-000000000002', 'Banque d''accueil',    'a_faire_be',        1, null,         null,         null,       false, null,         null,                                   'DEV-291-01',  0.00, false),
-  ('55555555-5555-5555-5555-000000000004', '44444444-4444-4444-4444-000000000002', 'Habillage mural',      'validation_client', 1, null,         null,         null,       false, null,         null,                                   'DEV-291-02',  0.00, false),
+  ('55555555-5555-5555-5555-000000000003', '44444444-4444-4444-4444-000000000002', 'Banque d''accueil',    'a_faire_be',        1, null,         null,       false, null,         null,                                   'DEV-291-01',  0.00, false),
+  ('55555555-5555-5555-5555-000000000004', '44444444-4444-4444-4444-000000000002', 'Habillage mural',      'validation_client', 1, null,         null,       false, null,         null,                                   'DEV-291-02',  0.00, false),
   -- 365-DVN
-  ('55555555-5555-5555-5555-000000000005', '44444444-4444-4444-4444-000000000003', 'Meubles salle de bain','termine',           3, (current_date - 27), (current_date - 21), 'Camion 2', true,  (current_date - 20), '22222222-2222-2222-2222-000000000008', 'DEV-365-01',100.00, true),
-  ('55555555-5555-5555-5555-000000000006', '44444444-4444-4444-4444-000000000003', 'Placards entrée',      'prog_a_faire',      2, null,         null,         null,       true,  (current_date - 20), '22222222-2222-2222-2222-000000000008', 'DEV-365-02', 20.00, false)
+  ('55555555-5555-5555-5555-000000000005', '44444444-4444-4444-4444-000000000003', 'Meubles salle de bain','termine',           3, (current_date - 27), 'Camion 2', true,  (current_date - 20), '22222222-2222-2222-2222-000000000008', 'DEV-365-01',100.00, true),
+  ('55555555-5555-5555-5555-000000000006', '44444444-4444-4444-4444-000000000003', 'Placards entrée',      'prog_a_faire',      2, null,         null,       true,  (current_date - 20), '22222222-2222-2222-2222-000000000008', 'DEV-365-02', 20.00, false)
 on conflict (id) do nothing;
 
 -- -----------------------------------------------------------------------------
