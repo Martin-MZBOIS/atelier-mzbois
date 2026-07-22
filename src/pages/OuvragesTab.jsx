@@ -51,8 +51,10 @@ export default function OuvragesTab() {
   const [applyMode, setApplyMode] = useState(null) // 'depart' | 'pose' | null
   const [quickPurchase, setQuickPurchase] = useState(null) // { ouvrageId, typ }
   const [editing, setEditing] = useState(null) // ouvrage en cours d'édition
-  // Email du client rattaché au chantier (migration 0027) — sert à lui envoyer
-  // une demande de validation quand un ouvrage est en « Validation client ».
+  // Interlocuteur à qui adresser une demande de validation d'ouvrage.
+  // On écrit au contact désigné sur le chantier (migration 0029). À défaut —
+  // chantier ancien ou migration non passée — on retombe sur le premier contact
+  // de la fiche client qui possède un email.
   const [clientMail, setClientMail] = useState(null)
 
   useEffect(() => {
@@ -61,18 +63,26 @@ export default function OuvragesTab() {
     if (!chantier.client_id) return
     supabase
       .from('fournisseurs')
-      .select('nom, contacts:contacts!fournisseur_id(email)')
+      .select('nom, contacts:contacts!fournisseur_id(id, nom, email)')
       .eq('id', chantier.client_id)
       .maybeSingle()
       .then(({ data }) => {
         if (!active || !data) return
-        const email = (data.contacts ?? []).find((c) => c.email)?.email ?? null
-        setClientMail(email ? { email, nom: data.nom } : null)
+        const contacts = data.contacts ?? []
+        const designe = chantier.contact_id
+          ? contacts.find((c) => c.id === chantier.contact_id)
+          : null
+        const contact = designe?.email ? designe : contacts.find((c) => c.email)
+        setClientMail(
+          contact?.email
+            ? { email: contact.email, nom: data.nom, contact: contact.nom }
+            : null
+        )
       })
     return () => {
       active = false
     }
-  }, [chantier.client_id])
+  }, [chantier.client_id, chantier.contact_id])
 
   // Mail de demande de validation d'un ouvrage au client.
   function mailtoValidation(o) {

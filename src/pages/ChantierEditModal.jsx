@@ -12,6 +12,7 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
     num: chantier?.num ?? '',
     client: chantier?.client ?? '',
     client_id: chantier?.client_id ?? '',
+    contact_id: chantier?.contact_id ?? '',
     nom: chantier?.nom ?? '',
     ca_id: chantier?.ca_id ?? '',
     dep_approx: chantier?.dep_approx ?? '',
@@ -30,9 +31,10 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
       .then(({ data }) => setUtilisateurs(data ?? []))
     // Fiches sociétés de type « client » — pour rattacher le chantier et
     // pouvoir écrire au client (demande de validation d'un ouvrage).
+    // Fiches sociétés de type « client », avec leurs interlocuteurs.
     supabase
       .from('fournisseurs')
-      .select('id, nom, contacts:contacts!fournisseur_id(email)')
+      .select('id, nom, contacts:contacts!fournisseur_id(id, nom, role, email)')
       .eq('type', 'client')
       .order('nom')
       .then(({ data }) => setClients(data ?? []))
@@ -42,14 +44,22 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
     setForm((f) => ({ ...f, [key]: value }))
   }
 
-  // Rattacher une fiche client aligne aussi le libellé affiché du chantier.
+  // Changer de client remet le contact à zéro : garder l'ancien désignerait
+  // quelqu'un d'une autre société.
   function selectClient(id) {
     const fiche = clients.find((c) => c.id === id)
-    setForm((f) => ({ ...f, client_id: id, client: fiche ? fiche.nom : f.client }))
+    setForm((f) => ({
+      ...f,
+      client_id: id,
+      // Sans fiche choisie, on conserve le libellé déjà saisi.
+      client: fiche ? fiche.nom : f.client,
+      contact_id: '',
+    }))
   }
 
   const ficheClient = clients.find((c) => c.id === form.client_id)
-  const emailClient = ficheClient?.contacts?.find((ct) => ct.email)?.email ?? null
+  const contacts = ficheClient?.contacts ?? []
+  const contactChoisi = contacts.find((ct) => ct.id === form.contact_id)
 
   async function handleSave() {
     if (!form.nom.trim()) {
@@ -66,15 +76,20 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
       dep_approx: form.dep_approx || null,
       avec_pose: form.avec_pose,
     }
-    const full = { ...base, client_id: form.client_id || null }
+    const avecClient = { ...base, client_id: form.client_id || null }
+    const full = { ...avecClient, contact_id: form.contact_id || null }
 
     const run = (payload) =>
       isEdit
         ? supabase.from('chantiers').update(payload).eq('id', chantier.id)
         : supabase.from('chantiers').insert(payload)
 
-    // Repli si la colonne client_id (migration 0027) n'existe pas encore.
+    // Replis successifs si contact_id (0029) puis client_id (0027) n'existent
+    // pas encore en base : l'enregistrement passe quand même.
     let { error: dbError } = await run(full)
+    if (dbError && /contact_id/.test(dbError.message)) {
+      ;({ error: dbError } = await run(avecClient))
+    }
     if (dbError && /client_id/.test(dbError.message)) {
       ;({ error: dbError } = await run(base))
     }
@@ -106,25 +121,40 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
           </div>
           <div className="fl">
             <label>Client</label>
-            <input value={form.client} onChange={(e) => set('client', e.target.value)} />
+            <SelectSearch
+              value={form.client_id}
+              onChange={selectClient}
+              options={clients.map((c) => ({ value: c.id, label: c.nom }))}
+              allowEmpty
+              emptyLabel={form.client || '— Aucun client —'}
+            />
           </div>
         </div>
 
         <div className="fl">
-          <label>Fiche client (pour lui écrire)</label>
+          <label>Contact</label>
           <SelectSearch
-            value={form.client_id}
-            onChange={selectClient}
-            options={clients.map((c) => ({ value: c.id, label: c.nom }))}
+            value={form.contact_id}
+            onChange={(v) => set('contact_id', v)}
+            disabled={!form.client_id}
+            options={contacts.map((ct) => ({
+              value: ct.id,
+              label: ct.nom,
+              sub: ct.role || ct.email || '',
+            }))}
             allowEmpty
-            emptyLabel="— Aucune fiche rattachée —"
+            emptyLabel="— Aucun contact désigné —"
           />
           <div className="param-hint" style={{ marginTop: 5 }}>
             {!form.client_id
-              ? 'Rattachez une fiche client pour pouvoir lui envoyer une demande de validation.'
-              : emailClient
-                ? `✓ Email de validation : ${emailClient}`
-                : '⚠ Cette fiche client n’a aucun contact avec email — ajoutez-en un dans Contacts.'}
+              ? 'Choisissez d’abord un client : ses contacts s’afficheront ici.'
+              : contacts.length === 0
+                ? '⚠ Cette fiche client n’a aucun contact — ajoutez-en un dans Contacts.'
+                : contactChoisi
+                  ? contactChoisi.email
+                    ? `✓ Demande de validation envoyée à ${contactChoisi.email}`
+                    : '⚠ Ce contact n’a pas d’email — impossible de lui écrire.'
+                  : 'Désignez l’interlocuteur à qui envoyer les demandes de validation.'}
           </div>
         </div>
 
