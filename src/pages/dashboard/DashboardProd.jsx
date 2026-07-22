@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useSettings } from '../../store/settings'
 import { useMonEmploye } from '../../lib/useMonEmploye'
-import { isoDay, ouvrirAlerte, tacheEnRetard, taskAge } from '../../lib/dashboard'
+import { amenerAlEcran, isoDay, ouvrirAlerte, tacheEnRetard, taskAge } from '../../lib/dashboard'
 import { STATUT_FEEDBACK, resolve } from '../../lib/statuts'
 import Alertes from './Alertes'
 import { SkelPage } from '../../components/Skeleton'
@@ -112,13 +112,13 @@ export default function DashboardProd() {
     alertes.push({
       ico: '🔴',
       txt: `${tachesEnRetard.length} tâche${tachesEnRetard.length > 1 ? 's' : ''} en retard`,
-      onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }),
+      onClick: () => amenerAlEcran(tasksRef.current),
     })
   if (tachesQuiTrainent.length)
     alertes.push({
       ico: '🕓',
       txt: `${tachesQuiTrainent.length} tâche${tachesQuiTrainent.length > 1 ? 's' : ''} sans mouvement depuis plus de ${ageLate} jours`,
-      onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }),
+      onClick: () => amenerAlEcran(tasksRef.current),
     })
 
   return (

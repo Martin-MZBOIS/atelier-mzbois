@@ -57,6 +57,39 @@ export function tacheEnRetard(t) {
   return fin < new Date()
 }
 
+// Amène un bloc à l'écran, dans le conteneur qui défile réellement.
+//
+// `scrollIntoView` visait la fenêtre, qui ne défile pas ici : c'est `.app-main`
+// qui porte le défilement. Et l'animation « smooth » ne démarre pas dans tous
+// les environnements — on retombe donc sur un saut immédiat si rien n'a bougé.
+export function amenerAlEcran(el) {
+  if (!el) return
+  let boite = el.parentElement
+  while (boite && boite !== document.body) {
+    const oy = getComputedStyle(boite).overflowY
+    if ((oy === 'auto' || oy === 'scroll') && boite.scrollHeight > boite.clientHeight) break
+    boite = boite.parentElement
+  }
+  const conteneur = boite && boite !== document.body ? boite : document.scrollingElement
+  if (!conteneur) return
+
+  const depart = conteneur.scrollTop
+  const cible = Math.max(
+    0,
+    el.getBoundingClientRect().top -
+      conteneur.getBoundingClientRect().top +
+      depart -
+      12
+  )
+  if (Math.abs(cible - depart) < 2) return
+
+  const anime = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  conteneur.scrollTo({ top: cible, behavior: anime ? 'smooth' : 'auto' })
+  setTimeout(() => {
+    if (conteneur.scrollTop === depart) conteneur.scrollTop = cible
+  }, 150)
+}
+
 // Destination d'une alerte qui porte sur des ouvrages ou des feedbacks.
 //
 // Ces éléments vivent dans les onglets d'un chantier : renvoyer vers la liste

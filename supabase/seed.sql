@@ -1,3 +1,13 @@
+-- Dates relatives à la date d'exécution.
+--
+-- Ce jeu de démonstration décrivait une situation figée au 8 septembre 2026 :
+-- exécuté un autre jour, il affichait des messages et des feedbacks postés
+-- dans le futur. Chaque date est désormais un écart en jours par rapport à
+-- `current_date`, ce qui garde la démonstration cohérente à tout moment.
+--
+-- Les écarts positifs sont volontaires : un départ atelier, une course ou une
+-- échéance se situent normalement devant nous.
+
 -- =============================================================================
 -- MZ Bois & Compagnie — Données de test (maquette)
 -- À exécuter APRÈS schema.sql, dans le SQL Editor de Supabase.
@@ -76,9 +86,9 @@ on conflict (id) do nothing;
 -- Chantiers (3)
 -- -----------------------------------------------------------------------------
 insert into chantiers (id, num, client, nom, dep_approx, ca_id, avec_pose, heures_vendues, heures_realisees, fournitures_vendues) values
-  ('44444444-4444-4444-4444-000000000001', '228-LEFEBVRE', 'Lefebvre',   'Aménagement villa Lefebvre',  '2026-09-15', '11111111-1111-1111-1111-000000000002', true,  220, 180, 9000),
-  ('44444444-4444-4444-4444-000000000002', '291-TF2026',   'TF Groupe',  'Agencement bureaux TF 2026',  '2026-10-30', '11111111-1111-1111-1111-000000000001', false, 150,  95, 6500),
-  ('44444444-4444-4444-4444-000000000003', '365-DVN',      'DVN',        'Agencement boutique DVN',     '2026-08-20', '11111111-1111-1111-1111-000000000002', true,   90, 110, 4000),
+  ('44444444-4444-4444-4444-000000000001', '228-LEFEBVRE', 'Lefebvre',   'Aménagement villa Lefebvre',  (current_date + 7), '11111111-1111-1111-1111-000000000002', true,  220, 180, 9000),
+  ('44444444-4444-4444-4444-000000000002', '291-TF2026',   'TF Groupe',  'Agencement bureaux TF 2026',  (current_date + 52), '11111111-1111-1111-1111-000000000001', false, 150,  95, 6500),
+  ('44444444-4444-4444-4444-000000000003', '365-DVN',      'DVN',        'Agencement boutique DVN',     (current_date - 19), '11111111-1111-1111-1111-000000000002', true,   90, 110, 4000),
   -- Chantier spécial STOCK (commandes non affectées)
   ('44444444-4444-4444-4444-000000000099', 'STOCK',        'Interne',    'Stock atelier — commandes non affectées', null, null,                              false,   0,   0,    0)
 on conflict (id) do nothing;
@@ -88,14 +98,14 @@ on conflict (id) do nothing;
 -- -----------------------------------------------------------------------------
 insert into ouvrages (id, chantier_id, nom, statut, qty, dep, livraison, camion, pose, dp_pose, poseur_id, devis, sit_pct, fact_def) values
   -- 228-LEFEBVRE
-  ('55555555-5555-5555-5555-000000000001', '44444444-4444-4444-4444-000000000001', 'Cuisine sur mesure',   'fabrication',       1, '2026-09-10', '2026-09-14', 'Camion 1', true,  '2026-09-15', '22222222-2222-2222-2222-000000000008', 'DEV-228-01', 40.00, false),
-  ('55555555-5555-5555-5555-000000000002', '44444444-4444-4444-4444-000000000001', 'Dressing chambre',     'pret_a_fabriquer',  1, null,         null,         null,       true,  '2026-09-18', '22222222-2222-2222-2222-000000000008', 'DEV-228-02',  0.00, false),
+  ('55555555-5555-5555-5555-000000000001', '44444444-4444-4444-4444-000000000001', 'Cuisine sur mesure',   'fabrication',       1, (current_date + 2), (current_date + 6), 'Camion 1', true,  (current_date + 7), '22222222-2222-2222-2222-000000000008', 'DEV-228-01', 40.00, false),
+  ('55555555-5555-5555-5555-000000000002', '44444444-4444-4444-4444-000000000001', 'Dressing chambre',     'pret_a_fabriquer',  1, null,         null,         null,       true,  (current_date + 10), '22222222-2222-2222-2222-000000000008', 'DEV-228-02',  0.00, false),
   -- 291-TF2026
   ('55555555-5555-5555-5555-000000000003', '44444444-4444-4444-4444-000000000002', 'Banque d''accueil',    'a_faire_be',        1, null,         null,         null,       false, null,         null,                                   'DEV-291-01',  0.00, false),
   ('55555555-5555-5555-5555-000000000004', '44444444-4444-4444-4444-000000000002', 'Habillage mural',      'validation_client', 1, null,         null,         null,       false, null,         null,                                   'DEV-291-02',  0.00, false),
   -- 365-DVN
-  ('55555555-5555-5555-5555-000000000005', '44444444-4444-4444-4444-000000000003', 'Meubles salle de bain','termine',           3, '2026-08-12', '2026-08-18', 'Camion 2', true,  '2026-08-19', '22222222-2222-2222-2222-000000000008', 'DEV-365-01',100.00, true),
-  ('55555555-5555-5555-5555-000000000006', '44444444-4444-4444-4444-000000000003', 'Placards entrée',      'prog_a_faire',      2, null,         null,         null,       true,  '2026-08-19', '22222222-2222-2222-2222-000000000008', 'DEV-365-02', 20.00, false)
+  ('55555555-5555-5555-5555-000000000005', '44444444-4444-4444-4444-000000000003', 'Meubles salle de bain','termine',           3, (current_date - 27), (current_date - 21), 'Camion 2', true,  (current_date - 20), '22222222-2222-2222-2222-000000000008', 'DEV-365-01',100.00, true),
+  ('55555555-5555-5555-5555-000000000006', '44444444-4444-4444-4444-000000000003', 'Placards entrée',      'prog_a_faire',      2, null,         null,         null,       true,  (current_date - 20), '22222222-2222-2222-2222-000000000008', 'DEV-365-02', 20.00, false)
 on conflict (id) do nothing;
 
 -- -----------------------------------------------------------------------------
@@ -125,54 +135,54 @@ on conflict do nothing;
 -- (qui_id -> employé selon qui_type ; de_id/vers_id polymorphes, sans FK)
 -- -----------------------------------------------------------------------------
 insert into courses (id, date, statut, qui_id, qui_type, de_id, vers_id, chantier_id, ouvrage, quoi, commentaire) values
-  ('77777777-7777-7777-7777-000000000001', '2026-09-08', 'programmee', '22222222-2222-2222-2222-000000000004', 'employe', '33333333-3333-3333-3333-000000000002', '44444444-4444-4444-4444-000000000001', '44444444-4444-4444-4444-000000000001', 'Cuisine sur mesure', 'Récupérer panneaux mélaminé chez DISPANO', 'Prévoir remorque'),
-  ('77777777-7777-7777-7777-000000000002', '2026-09-09', 'urgente',    '22222222-2222-2222-2222-000000000007', 'employe', '33333333-3333-3333-3333-000000000003', '44444444-4444-4444-4444-000000000001', '44444444-4444-4444-4444-000000000001', null,                 'Chercher quincaillerie manquante chez Würth',   'Bloque le montage'),
-  ('77777777-7777-7777-7777-000000000003', '2026-08-14', 'faite',      '22222222-2222-2222-2222-000000000008', 'employe', null,                                   '44444444-4444-4444-4444-000000000003', '44444444-4444-4444-4444-000000000003', 'Meubles salle de bain', 'Livraison meubles SDB sur chantier',        null)
+  ('77777777-7777-7777-7777-000000000001', (current_date), 'programmee', '22222222-2222-2222-2222-000000000004', 'employe', '33333333-3333-3333-3333-000000000002', '44444444-4444-4444-4444-000000000001', '44444444-4444-4444-4444-000000000001', 'Cuisine sur mesure', 'Récupérer panneaux mélaminé chez DISPANO', 'Prévoir remorque'),
+  ('77777777-7777-7777-7777-000000000002', (current_date + 1), 'urgente',    '22222222-2222-2222-2222-000000000007', 'employe', '33333333-3333-3333-3333-000000000003', '44444444-4444-4444-4444-000000000001', '44444444-4444-4444-4444-000000000001', null,                 'Chercher quincaillerie manquante chez Würth',   'Bloque le montage'),
+  ('77777777-7777-7777-7777-000000000003', (current_date - 25), 'faite',      '22222222-2222-2222-2222-000000000008', 'employe', null,                                   '44444444-4444-4444-4444-000000000003', '44444444-4444-4444-4444-000000000003', 'Meubles salle de bain', 'Livraison meubles SDB sur chantier',        null)
 on conflict (id) do nothing;
 
 -- -----------------------------------------------------------------------------
 -- Planning — affectations
 -- -----------------------------------------------------------------------------
 insert into plan_affectations (id, chantier_id, phase, sal_id, date_debut, date_fin, commentaire) values
-  ('88888888-8888-8888-8888-000000000001', '44444444-4444-4444-4444-000000000001', 'fabrication', '22222222-2222-2222-2222-000000000004', '2026-09-08', '2026-09-12', 'Fabrication cuisine'),
-  ('88888888-8888-8888-8888-000000000002', '44444444-4444-4444-4444-000000000001', 'pose',        '22222222-2222-2222-2222-000000000008', '2026-09-15', '2026-09-17', 'Pose cuisine + dressing'),
-  ('88888888-8888-8888-8888-000000000003', '44444444-4444-4444-4444-000000000002', 'etude',       '22222222-2222-2222-2222-000000000001', '2026-09-01', '2026-09-10', 'Étude banque accueil'),
-  ('88888888-8888-8888-8888-000000000004', '44444444-4444-4444-4444-000000000003', 'fabrication', '22222222-2222-2222-2222-000000000005', '2026-08-10', '2026-08-14', 'Fabrication meubles SDB')
+  ('88888888-8888-8888-8888-000000000001', '44444444-4444-4444-4444-000000000001', 'fabrication', '22222222-2222-2222-2222-000000000004', (current_date), (current_date + 4), 'Fabrication cuisine'),
+  ('88888888-8888-8888-8888-000000000002', '44444444-4444-4444-4444-000000000001', 'pose',        '22222222-2222-2222-2222-000000000008', (current_date + 7), (current_date + 9), 'Pose cuisine + dressing'),
+  ('88888888-8888-8888-8888-000000000003', '44444444-4444-4444-4444-000000000002', 'etude',       '22222222-2222-2222-2222-000000000001', (current_date - 7), (current_date + 2), 'Étude banque accueil'),
+  ('88888888-8888-8888-8888-000000000004', '44444444-4444-4444-4444-000000000003', 'fabrication', '22222222-2222-2222-2222-000000000005', (current_date - 29), (current_date - 25), 'Fabrication meubles SDB')
 on conflict (id) do nothing;
 
 -- -----------------------------------------------------------------------------
 -- Feedbacks
 -- -----------------------------------------------------------------------------
 insert into feedbacks (id, chantier_id, ouvrage_id, description, saisi_par, date, statut, solution, date_solution) values
-  ('99999999-9999-9999-9999-000000000001', '44444444-4444-4444-4444-000000000001', '55555555-5555-5555-5555-000000000001', 'Défaut d''alignement sur façade tiroir', '11111111-1111-1111-1111-000000000004', '2026-09-11 09:30:00+02', 'remonte',  null,                                 null),
-  ('99999999-9999-9999-9999-000000000002', '44444444-4444-4444-4444-000000000003', '55555555-5555-5555-5555-000000000005', 'Chant décollé sur meuble bas',           '11111111-1111-1111-1111-000000000004', '2026-08-15 14:00:00+02', 'resolu',   'Rechampi et recollage en atelier',   '2026-08-16'),
-  ('99999999-9999-9999-9999-000000000003', '44444444-4444-4444-4444-000000000002', '55555555-5555-5555-5555-000000000003', 'Cote client à confirmer avant lancement','11111111-1111-1111-1111-000000000002', '2026-09-02 11:15:00+02', 'en_cours', null,                                 null)
+  ('99999999-9999-9999-9999-000000000001', '44444444-4444-4444-4444-000000000001', '55555555-5555-5555-5555-000000000001', 'Défaut d''alignement sur façade tiroir', '11111111-1111-1111-1111-000000000004', (current_date - 9 + time '09:30')::timestamptz, 'remonte',  null,                                 null),
+  ('99999999-9999-9999-9999-000000000002', '44444444-4444-4444-4444-000000000003', '55555555-5555-5555-5555-000000000005', 'Chant décollé sur meuble bas',           '11111111-1111-1111-1111-000000000004', (current_date - 24 + time '14:00')::timestamptz, 'resolu',   'Rechampi et recollage en atelier',   (current_date - 23)),
+  ('99999999-9999-9999-9999-000000000003', '44444444-4444-4444-4444-000000000002', '55555555-5555-5555-5555-000000000003', 'Cote client à confirmer avant lancement','11111111-1111-1111-1111-000000000002', (current_date - 6 + time '11:15')::timestamptz, 'en_cours', null,                                 null)
 on conflict (id) do nothing;
 
 -- -----------------------------------------------------------------------------
 -- Tâches
 -- -----------------------------------------------------------------------------
 insert into taches (id, texte, done, chantier_id, assigne_a, source, echeance) values
-  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000001', 'Valider plans BE banque accueil',        false, '44444444-4444-4444-4444-000000000002', '22222222-2222-2222-2222-000000000001', 'reunion',  '2026-09-05'),
-  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000002', 'Commander panneaux mélaminé chêne',      false, '44444444-4444-4444-4444-000000000001', '22222222-2222-2222-2222-000000000002', 'achat',    '2026-09-06'),
-  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000003', 'Préparer la pose du dressing',           false, '44444444-4444-4444-4444-000000000001', '22222222-2222-2222-2222-000000000008', 'manuel',   '2026-09-17'),
-  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000004', 'Reprendre chant meuble SDB',             true,  '44444444-4444-4444-4444-000000000003', '22222222-2222-2222-2222-000000000003', 'feedback', '2026-08-16')
+  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000001', 'Valider plans BE banque accueil',        false, '44444444-4444-4444-4444-000000000002', '22222222-2222-2222-2222-000000000001', 'reunion',  (current_date - 3)),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000002', 'Commander panneaux mélaminé chêne',      false, '44444444-4444-4444-4444-000000000001', '22222222-2222-2222-2222-000000000002', 'achat',    (current_date - 2)),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000003', 'Préparer la pose du dressing',           false, '44444444-4444-4444-4444-000000000001', '22222222-2222-2222-2222-000000000008', 'manuel',   (current_date + 9)),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-000000000004', 'Reprendre chant meuble SDB',             true,  '44444444-4444-4444-4444-000000000003', '22222222-2222-2222-2222-000000000003', 'feedback', (current_date - 23))
 on conflict (id) do nothing;
 
 -- -----------------------------------------------------------------------------
 -- Fil de discussion par chantier
 -- -----------------------------------------------------------------------------
 insert into fil_messages (id, chantier_id, auteur_id, texte, ouvrage_tag, date) values
-  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000001', '44444444-4444-4444-4444-000000000001', '11111111-1111-1111-1111-000000000002', 'Plans cuisine validés, transmis à la prog.',                  'Cuisine sur mesure', '2026-09-05 08:45:00+02'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000002', '44444444-4444-4444-4444-000000000001', '11111111-1111-1111-1111-000000000003', 'Débit lancé, panneaux à commander en urgence.',               'Cuisine sur mesure', '2026-09-07 16:20:00+02'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000003', '44444444-4444-4444-4444-000000000002', '11111111-1111-1111-1111-000000000001', 'RDV client la semaine prochaine pour valider l''habillage.',   'Habillage mural',    '2026-09-03 10:00:00+02'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000004', '44444444-4444-4444-4444-000000000003', '11111111-1111-1111-1111-000000000004', 'Meubles SDB livrés et posés, chantier clôturé.',              null,                 '2026-08-19 17:30:00+02')
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000001', '44444444-4444-4444-4444-000000000001', '11111111-1111-1111-1111-000000000002', 'Plans cuisine validés, transmis à la prog.',                  'Cuisine sur mesure', (current_date - 3 + time '08:45')::timestamptz),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000002', '44444444-4444-4444-4444-000000000001', '11111111-1111-1111-1111-000000000003', 'Débit lancé, panneaux à commander en urgence.',               'Cuisine sur mesure', (current_date - 1 + time '16:20')::timestamptz),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000003', '44444444-4444-4444-4444-000000000002', '11111111-1111-1111-1111-000000000001', 'RDV client la semaine prochaine pour valider l''habillage.',   'Habillage mural',    (current_date - 5 + time '10:00')::timestamptz),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000004', '44444444-4444-4444-4444-000000000003', '11111111-1111-1111-1111-000000000004', 'Meubles SDB livrés et posés, chantier clôturé.',              null,                 (current_date - 20 + time '17:30')::timestamptz)
 on conflict (id) do nothing;
 
 -- Réponses en fil (parent_id -> message racine)
 insert into fil_messages (id, chantier_id, auteur_id, texte, ouvrage_tag, parent_id, date) values
-  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000005', '44444444-4444-4444-4444-000000000001', '11111111-1111-1111-1111-000000000003', 'Bien reçu, je lance le débit dès demain matin.', null, 'bbbbbbbb-bbbb-bbbb-bbbb-000000000001', '2026-09-05 09:10:00+02'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000006', '44444444-4444-4444-4444-000000000002', '11111111-1111-1111-1111-000000000002', 'Je prépare les plans pour le RDV client.',      null, 'bbbbbbbb-bbbb-bbbb-bbbb-000000000003', '2026-09-03 11:30:00+02')
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000005', '44444444-4444-4444-4444-000000000001', '11111111-1111-1111-1111-000000000003', 'Bien reçu, je lance le débit dès demain matin.', null, 'bbbbbbbb-bbbb-bbbb-bbbb-000000000001', (current_date - 3 + time '09:10')::timestamptz),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-000000000006', '44444444-4444-4444-4444-000000000002', '11111111-1111-1111-1111-000000000002', 'Je prépare les plans pour le RDV client.',      null, 'bbbbbbbb-bbbb-bbbb-bbbb-000000000003', (current_date - 5 + time '11:30')::timestamptz)
 on conflict (id) do nothing;
 
 -- -----------------------------------------------------------------------------

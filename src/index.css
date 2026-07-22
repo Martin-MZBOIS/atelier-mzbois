@@ -1619,7 +1619,26 @@ textarea.ni:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
   margin-bottom: 10px;
+}
+/* Le titre occupe la place restante pour que la croix reste calée à droite,
+   que le compte-rendu porte un statut ou non. */
+.reunion-head .reunion-title {
+  flex: 1 1 auto;
+}
+.reunion-del {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  color: var(--g2);
+  font-size: 12px;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+.reunion-del:hover {
+  color: var(--rd);
 }
 
 .reunion-title {

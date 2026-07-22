@@ -5,6 +5,7 @@ import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatDate } from '../lib/format'
 import { STATUT_REUNION, resolve } from '../lib/statuts'
+import { toast } from '../store/toasts'
 import ReunionModal from './ReunionModal'
 
 export default function ReunionTab() {
@@ -74,6 +75,27 @@ export default function ReunionTab() {
     }
   }
 
+  // Suppression d'un compte-rendu. Les actions partent avec lui : on annonce
+  // combien, parce qu'une action encore ouverte alimente les alertes du COPIL.
+  async function supprimerReunion(r) {
+    const actions = r.reunion_actions ?? []
+    const detail = actions.length
+      ? `\n\nSes ${actions.length} action${actions.length > 1 ? 's' : ''} seront supprimées avec lui.`
+      : ''
+    const ok = window.confirm(
+      `Supprimer définitivement le compte-rendu du ${formatDate(r.date)} ?${detail}`
+    )
+    if (!ok) return
+    const { error: dbError } = await supabase.from('reunions').delete().eq('id', r.id)
+    if (dbError) {
+      setError('Suppression impossible : ' + dbError.message)
+      toast.error('Compte-rendu non supprimé')
+      return
+    }
+    toast('Compte-rendu du ' + formatDate(r.date) + ' supprimé')
+    await loadReunions()
+  }
+
   return (
     <div className="card">
       <div className="card-head">
@@ -114,6 +136,14 @@ export default function ReunionTab() {
                   {st.label}
                 </span>
               )}
+              <button
+                className="reunion-del"
+                title="Supprimer ce compte-rendu"
+                aria-label={'Supprimer le compte-rendu du ' + formatDate(r.date)}
+                onClick={() => supprimerReunion(r)}
+              >
+                ✕
+              </button>
             </div>
 
             {r.notes && <div className="reunion-notes">{r.notes}</div>}

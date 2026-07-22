@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store'
 import { useSettings } from '../../store/settings'
 import { useMonEmploye } from '../../lib/useMonEmploye'
-import { CLOS, daysUntil, eur, taskAge } from '../../lib/dashboard'
+import { amenerAlEcran, CLOS, daysUntil, eur, taskAge } from '../../lib/dashboard'
 import { formatDate } from '../../lib/format'
 import Alertes from './Alertes'
 import { SkelPage } from '../../components/Skeleton'
@@ -128,7 +128,7 @@ export default function DashboardCa() {
     alertes.push({
       ico: '🔴',
       txt: `${tachesEnRetard.length} tâche${tachesEnRetard.length > 1 ? 's' : ''} en retard`,
-      onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }),
+      onClick: () => amenerAlEcran(tasksRef.current),
     })
 
   const chantierIds = d.chantiers.map((c) => c.id)
