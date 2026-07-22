@@ -86,9 +86,9 @@ on conflict (id) do nothing;
 -- Chantiers (3)
 -- -----------------------------------------------------------------------------
 insert into chantiers (id, num, client, nom, dep_approx, ca_id, avec_pose, heures_vendues, heures_realisees, fournitures_vendues) values
-  ('44444444-4444-4444-4444-000000000001', '228-LEFEBVRE', 'Lefebvre',   'Aménagement villa Lefebvre',  (current_date + 7), '11111111-1111-1111-1111-000000000002', true,  220, 180, 9000),
-  ('44444444-4444-4444-4444-000000000002', '291-TF2026',   'TF Groupe',  'Agencement bureaux TF 2026',  (current_date + 52), '11111111-1111-1111-1111-000000000001', false, 150,  95, 6500),
-  ('44444444-4444-4444-4444-000000000003', '365-DVN',      'DVN',        'Agencement boutique DVN',     (current_date - 19), '11111111-1111-1111-1111-000000000002', true,   90, 110, 4000),
+  ('44444444-4444-4444-4444-000000000001', '228',         'Lefebvre',   'Aménagement villa Lefebvre',  (current_date + 7), '11111111-1111-1111-1111-000000000002', true,  220, 180, 9000),
+  ('44444444-4444-4444-4444-000000000002', '291',         'TF Groupe',  'Agencement bureaux TF 2026',  (current_date + 52), '11111111-1111-1111-1111-000000000001', false, 150,  95, 6500),
+  ('44444444-4444-4444-4444-000000000003', '365',         'DVN',        'Agencement boutique DVN',     (current_date - 19), '11111111-1111-1111-1111-000000000002', true,   90, 110, 4000),
   -- Chantier spécial STOCK (commandes non affectées)
   ('44444444-4444-4444-4444-000000000099', 'STOCK',        'Interne',    'Stock atelier — commandes non affectées', null, null,                              false,   0,   0,    0)
 on conflict (id) do nothing;
