@@ -906,14 +906,8 @@ body {
 .qf-typ {
   margin-bottom: 14px;
 }
-.qf-typ select {
-  font-size: 12px;
-  padding: 5px 10px;
-  border-radius: 3px;
-  border: 1px solid var(--g3);
-  font-family: inherit;
-  outline: none;
-  background: var(--w);
+.qf-typ .selsearch {
+  width: 210px;
 }
 
 .data-table.striped tbody tr:nth-child(even) {
@@ -3932,6 +3926,14 @@ textarea.ni:focus {
   gap: 9px;
   align-items: center;
   margin-bottom: 14px;
+}
+/* Dans une barre de filtres, un menu déroulant doit garder sa largeur : sans
+   cela le `width: 100%` de .selsearch l'étire sur toute la ligne. Le double
+   sélecteur est nécessaire — .selsearch est déclaré plus bas dans la feuille
+   et l'emporterait à spécificité égale. */
+.selsearch.hist-sel {
+  width: 168px;
+  flex: 0 0 auto;
 }
 .hist-item {
   display: grid;
