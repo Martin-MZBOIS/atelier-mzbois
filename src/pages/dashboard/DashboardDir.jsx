@@ -6,7 +6,6 @@ import { useMonEmploye } from '../../lib/useMonEmploye'
 import { CLOS, daysSince, daysUntil, taskAge } from '../../lib/dashboard'
 import Alertes from './Alertes'
 import DashHeader from './DashHeader'
-import MeteoCard from './MeteoCard'
 import KpiChantiers from './KpiChantiers'
 import CopilCard from './CopilCard'
 import MesTaches from './MesTaches'
@@ -146,10 +145,7 @@ export default function DashboardDir() {
 
       <div className="dash-grid">
         <MesTaches ref={tasksRef} employeId={employeId} />
-        <div className="dash-stack">
-          <MeteoCard />
-          <CopilCard />
-        </div>
+        <CopilCard />
         <FilActualite />
       </div>
     </section>

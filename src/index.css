@@ -1055,15 +1055,6 @@ code {
   margin-bottom: 14px;
 }
 
-.dash-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.dash-stack .card,
-.dash-stack .meteo-card {
-  margin-bottom: 0;
-}
 .card-head {
   display: flex;
   align-items: center;
@@ -2093,7 +2084,79 @@ textarea.ni:focus {
 
 /* ----------------------------------------------------------- Dashboard */
 .dash-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
   margin-bottom: 18px;
+}
+.dash-head-txt {
+  min-width: 0;
+}
+
+/* Météo d'agrément : discrète, à droite de l'accueil. */
+.dash-meteo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--w);
+  border: 1px solid var(--g4);
+  border-radius: var(--r);
+  box-shadow: var(--sh);
+  padding: 9px 14px;
+}
+.dash-meteo-now {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dash-meteo-ico {
+  font-size: 26px;
+  line-height: 1;
+}
+.dash-meteo-temp {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--acier);
+  font-variant-numeric: tabular-nums;
+}
+.dash-meteo-lbl {
+  font-size: 11px;
+  color: var(--g1);
+  margin-top: 2px;
+}
+.dash-meteo-days {
+  display: flex;
+  gap: 12px;
+  padding-left: 16px;
+  border-left: 1px solid var(--g5);
+}
+.dash-meteo-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  font-size: 12px;
+}
+.dash-meteo-day-lbl {
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--txt3);
+}
+.dash-meteo-day-max {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--g1);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 700px) {
+  .dash-meteo-days {
+    display: none;
+  }
 }
 .dash-title {
   font-size: 26px;
@@ -2338,58 +2401,6 @@ textarea.ni:focus {
   color: var(--brun);
   background: var(--brun2);
   padding: 2px 7px;
-}
-
-.meteo-card {
-  background: var(--acier);
-  border-radius: var(--r);
-  padding: 14px 16px;
-  color: #f4efe9;
-  box-shadow: var(--sh);
-}
-.meteo-loading {
-  font-size: 13px;
-  opacity: 0.7;
-}
-.meteo-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.meteo-loc {
-  font-size: 11px;
-  opacity: 0.7;
-  margin-bottom: 2px;
-}
-.meteo-temp {
-  font-size: 28px;
-  font-weight: 800;
-}
-.meteo-desc {
-  font-size: 13px;
-  opacity: 0.8;
-}
-.meteo-days {
-  display: flex;
-  gap: 12px;
-}
-.meteo-day {
-  text-align: center;
-}
-.meteo-day-lbl {
-  font-size: 11px;
-  opacity: 0.6;
-}
-.meteo-day-ico {
-  font-size: 16px;
-}
-.meteo-day-max {
-  font-size: 12px;
-  font-weight: 600;
-}
-.meteo-day-min {
-  font-size: 11px;
-  opacity: 0.6;
 }
 
 .dash-grid {
