@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 
 function today() {
@@ -103,7 +104,11 @@ export default function ReunionModal({ chantierId, reunion, employes, onClose, o
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-box"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={raccourcisModal(handleSave, onClose, saving)}
+      >
         <button className="modal-close" onClick={onClose}>
           ×
         </button>

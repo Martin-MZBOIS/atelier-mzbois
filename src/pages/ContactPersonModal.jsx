@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 
 const ROLES = [
@@ -45,7 +46,11 @@ export default function ContactPersonModal({ fournisseurId, onClose, onSaved }) 
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-box"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={raccourcisModal(handleSave, onClose, saving)}
+      >
         <button className="modal-close" onClick={onClose}>
           ×
         </button>

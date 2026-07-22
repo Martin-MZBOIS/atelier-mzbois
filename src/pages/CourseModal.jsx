@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { toast } from '../store/toasts'
 import { STATUT_COURSE, STATUT_COURSE_ORDER } from '../lib/statuts'
@@ -281,7 +282,11 @@ export default function CourseModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-box"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={raccourcisModal(handleSave, onClose, saving)}
+      >
         <button className="modal-close" onClick={onClose}>
           ×
         </button>

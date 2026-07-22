@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { raccourcisModal } from '../lib/clavier'
 import { toast } from '../store/toasts'
 
 // Création / édition des informations d'un chantier.
@@ -87,7 +88,11 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-box"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={raccourcisModal(handleSave, onClose, saving)}
+      >
         <button className="modal-close" onClick={onClose}>
           ×
         </button>

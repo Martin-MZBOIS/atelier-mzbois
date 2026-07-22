@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
 
@@ -34,7 +35,11 @@ export default function FeedbackModal({ chantierId, ouvrages, onClose, onSaved }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-box"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={raccourcisModal(handleSave, onClose, saving)}
+      >
         <button className="modal-close" onClick={onClose}>
           ×
         </button>

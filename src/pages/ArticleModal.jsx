@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { useSettings } from '../store/settings'
 import { TYP_ACHAT, TYP_ACHAT_ORDER } from '../lib/statuts'
@@ -108,7 +109,11 @@ export default function ArticleModal({ article, fournisseurs, onClose, onSaved }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-box"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={raccourcisModal(handleSave, onClose, saving)}
+      >
         <button className="modal-close" onClick={onClose}>
           ×
         </button>
