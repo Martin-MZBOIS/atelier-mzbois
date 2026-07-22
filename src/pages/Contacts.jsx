@@ -245,9 +245,12 @@ export default function Contacts() {
           {/* Détail */}
           <div className="contacts-detail">
             {!selected ? (
-              <div className="empty contacts-empty">
-                Sélectionne un élément pour voir sa fiche.
-              </div>
+              <EmptyState
+                className="contacts-empty"
+                ico="👈"
+                titre="Aucune fiche ouverte"
+                aide="Choisissez un élément dans la liste pour afficher sa fiche."
+              />
             ) : isSalaries ? (
               <EmployeDetail
                 e={selected.raw}

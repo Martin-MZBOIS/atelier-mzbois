@@ -5,9 +5,9 @@
 // titre   : la phrase principale
 // aide    : précision facultative
 // action  : { label, onClick } — le bouton qui débloque la situation
-export default function EmptyState({ ico = '—', titre, aide, action }) {
+export default function EmptyState({ ico = '—', titre, aide, action, className = '' }) {
   return (
-    <div className="empty-state">
+    <div className={'empty-state' + (className ? ' ' + className : '')}>
       <div className="empty-state-ico" aria-hidden="true">{ico}</div>
       <div className="empty-state-txt">{titre}</div>
       {aide && <div className="empty-state-aide">{aide}</div>}
