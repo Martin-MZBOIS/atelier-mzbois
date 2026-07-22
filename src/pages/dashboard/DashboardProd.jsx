@@ -6,6 +6,7 @@ import { useMonEmploye } from '../../lib/useMonEmploye'
 import { isoDay, taskAge } from '../../lib/dashboard'
 import { STATUT_FEEDBACK, resolve } from '../../lib/statuts'
 import Alertes from './Alertes'
+import { SkelPage } from '../../components/Skeleton'
 import DashHeader from './DashHeader'
 import MesTaches from './MesTaches'
 import MiniPlanning from './MiniPlanning'
@@ -84,7 +85,7 @@ export default function DashboardProd() {
   if (!d)
     return (
       <section className="page">
-        <p className="muted">Chargement…</p>
+        <SkelPage cards={2} rows={3} />
       </section>
     )
 

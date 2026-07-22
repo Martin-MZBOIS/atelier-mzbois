@@ -8,6 +8,7 @@ import { toast } from '../../store/toasts'
 import { CLOS, eur } from '../../lib/dashboard'
 import { formatDateTime } from '../../lib/format'
 import Alertes from './Alertes'
+import { SkelPage } from '../../components/Skeleton'
 import DashHeader from './DashHeader'
 
 // Un chantier est « à facturer » quand tous ses ouvrages sont clos et qu'au
@@ -74,7 +75,7 @@ export default function DashboardAdmin() {
   if (!d)
     return (
       <section className="page">
-        <p className="muted">Chargement…</p>
+        <SkelPage cards={2} rows={3} />
       </section>
     )
 

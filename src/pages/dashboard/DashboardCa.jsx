@@ -7,6 +7,7 @@ import { useMonEmploye } from '../../lib/useMonEmploye'
 import { CLOS, daysUntil, eur, taskAge } from '../../lib/dashboard'
 import { formatDate } from '../../lib/format'
 import Alertes from './Alertes'
+import { SkelPage } from '../../components/Skeleton'
 import DashHeader from './DashHeader'
 import MesTaches from './MesTaches'
 import FilActualite from './FilActualite'
@@ -98,7 +99,7 @@ export default function DashboardCa() {
   if (!d)
     return (
       <section className="page">
-        <p className="muted">Chargement…</p>
+        <SkelPage cards={2} rows={3} />
       </section>
     )
 

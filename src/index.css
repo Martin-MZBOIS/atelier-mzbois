@@ -3851,3 +3851,64 @@ textarea.ni:focus {
   border-color: var(--brun3);
   color: var(--brun4);
 }
+
+/* ------------------------------------------------ Squelettes de chargement */
+.skel {
+  display: block;
+  background: linear-gradient(90deg, var(--g5) 25%, #e7e0d9 37%, var(--g5) 63%);
+  background-size: 400% 100%;
+  border-radius: 2px;
+  animation: skel-shine 1.3s ease-in-out infinite;
+}
+@keyframes skel-shine {
+  from { background-position: 100% 50%; }
+  to   { background-position: 0 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel { animation: none; }
+}
+.skel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.skel-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.skel-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.skel-page {
+  padding: 2px 0;
+}
+
+/* ------------------------------------------------------------ États vides */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 26px 18px;
+  color: var(--g1);
+}
+.empty-state-ico {
+  font-size: 24px;
+  opacity: 0.5;
+  margin-bottom: 8px;
+}
+.empty-state-txt {
+  font-size: 13.5px;
+  color: var(--acier);
+}
+.empty-state-aide {
+  font-size: 12px;
+  color: var(--g2);
+  margin-top: 3px;
+  max-width: 42ch;
+}

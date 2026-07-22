@@ -5,6 +5,7 @@ import { useSettings } from '../../store/settings'
 import { useMonEmploye } from '../../lib/useMonEmploye'
 import { CLOS, daysSince, daysUntil, taskAge } from '../../lib/dashboard'
 import Alertes from './Alertes'
+import { SkelPage } from '../../components/Skeleton'
 import DashHeader from './DashHeader'
 import KpiChantiers from './KpiChantiers'
 import CopilCard from './CopilCard'
@@ -86,7 +87,7 @@ export default function DashboardDir() {
   if (!d)
     return (
       <section className="page">
-        <p className="muted">Chargement…</p>
+        <SkelPage cards={2} rows={3} />
       </section>
     )
 

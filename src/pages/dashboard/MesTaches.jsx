@@ -4,6 +4,7 @@ import { useRealtime } from '../../lib/useRealtime'
 import { useSettings } from '../../store/settings'
 import { toast } from '../../store/toasts'
 import { daysSince, taskAge } from '../../lib/dashboard'
+import EmptyState from '../../components/EmptyState'
 import TaskModal from '../TaskModal'
 import TaskEditModal from '../TaskEditModal'
 
@@ -98,9 +99,19 @@ const MesTaches = forwardRef(function MesTaches({ employeId }, ref) {
       </div>
 
       {shown.length === 0 ? (
-        <div className="empty">
-          {view === 'done' ? 'Aucune tâche terminée' : '✓ Aucune tâche en attente'}
-        </div>
+        view === 'done' ? (
+          <EmptyState
+            ico="✓"
+            titre="Aucune tâche terminée pour l'instant"
+            aide="Les tâches que vous cochez viendront s'archiver ici."
+          />
+        ) : (
+          <EmptyState
+            ico="🎉"
+            titre="Rien en attente, tout est à jour"
+            action={{ label: '+ Créer une tâche', onClick: () => setShowAdd(true) }}
+          />
+        )
       ) : (
         shown.map((t) => {
           const age = taskAge(t, ageWarn, ageLate)

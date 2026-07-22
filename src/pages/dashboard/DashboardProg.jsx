@@ -7,6 +7,7 @@ import { daysUntil, taskAge } from '../../lib/dashboard'
 import { formatDate } from '../../lib/format'
 import { STATUT_OUVRAGE, resolve } from '../../lib/statuts'
 import Alertes from './Alertes'
+import { SkelPage } from '../../components/Skeleton'
 import DashHeader from './DashHeader'
 import MesTaches from './MesTaches'
 import MiniPlanning from './MiniPlanning'
@@ -90,7 +91,7 @@ export default function DashboardProg() {
   if (!d)
     return (
       <section className="page">
-        <p className="muted">Chargement…</p>
+        <SkelPage cards={2} rows={3} />
       </section>
     )
 
