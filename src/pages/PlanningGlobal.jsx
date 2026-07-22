@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { SkelTable } from '../components/Skeleton'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { PHASE_PLANNING, resolve } from '../lib/statuts'
@@ -341,7 +342,7 @@ export default function PlanningGlobal() {
       )}
 
       {loading ? (
-        <p className="muted">Chargement…</p>
+        <SkelTable rows={7} cols={6} />
       ) : (
         <div className="plan-scroll">
           <table className={'plan-table' + (isMonth ? ' plan-table--month' : '')}>

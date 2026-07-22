@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelTable } from '../components/Skeleton'
 import { supabase } from '../lib/supabase'
 import { TYP_ACHAT, TYP_ACHAT_ORDER, resolve } from '../lib/statuts'
 import ArticleModal from './ArticleModal'
@@ -145,7 +147,7 @@ export default function Bibliotheque() {
         </div>
       )}
 
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelTable rows={6} cols={5} />}
 
       {!loading && tab === 'articles' && (
         <>
@@ -216,8 +218,16 @@ export default function Bibliotheque() {
                 })}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="empty">
-                      Aucun article
+                    <td colSpan="5">
+                      <EmptyState
+                        ico="📚"
+                        titre="Aucun article"
+                        aide="La bibliothèque alimente les ouvrages : ajoutez-y vos références."
+                        action={{
+                          label: '+ Nouvel article',
+                          onClick: () => setArticleModal({ article: null }),
+                        }}
+                      />
                     </td>
                   </tr>
                 )}
@@ -254,7 +264,11 @@ export default function Bibliotheque() {
             onChange={(e) => setSearch(e.target.value)}
           />
           {filteredModeles.length === 0 ? (
-            <div className="empty">Aucun modèle</div>
+            <EmptyState
+              ico="📐"
+              titre="Aucun modèle"
+              aide="Les modèles font gagner du temps : ils pré-remplissent un ouvrage complet."
+            />
           ) : (
             filteredModeles.map((m) => (
               <div

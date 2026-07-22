@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
 import { toast } from '../store/toasts'
@@ -294,7 +296,7 @@ export default function CoursesGlobal() {
           <strong>Erreur :</strong> {error}
         </div>
       )}
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelList rows={6} />}
 
       {!loading && view === 'liste' && (
         <>
@@ -431,7 +433,11 @@ export default function CoursesGlobal() {
               )
             })}
             {filtered.length === 0 && (
-              <div className="empty">Aucune course</div>
+              <EmptyState
+                ico="🚚"
+                titre="Aucune course"
+                aide="Aucune course ne correspond à ces filtres."
+              />
             )}
           </div>
           {filtered.length > visible && (

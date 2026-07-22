@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
@@ -327,14 +329,19 @@ export default function OuvragesTab() {
         </div>
       )}
 
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelList rows={5} />}
       {error && (
         <div className="alert">
           <strong>Erreur :</strong> {error}
         </div>
       )}
       {!loading && !error && ouvrages.length === 0 && (
-        <div className="empty">Aucun ouvrage</div>
+        <EmptyState
+          ico="📐"
+          titre="Aucun ouvrage sur ce chantier"
+          aide="Créez le premier ouvrage, ou partez d’un modèle de la bibliothèque."
+          action={{ label: '+ Nouvel ouvrage', onClick: () => setShowAdd(true) }}
+        />
       )}
 
       {ouvrages.map((o) => {

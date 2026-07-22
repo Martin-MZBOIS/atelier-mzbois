@@ -33,6 +33,26 @@ export function SkelCard({ rows = 3 }) {
   )
 }
 
+// Tableau en attente : on reprend la grille de colonnes pour que les vraies
+// lignes se substituent aux blocs sans décaler la mise en page.
+export function SkelTable({ rows = 6, cols = 5 }) {
+  return (
+    <div className="table-wrap skel-table" aria-hidden="true">
+      {Array.from({ length: rows }, (_, r) => (
+        <div
+          key={r}
+          className="skel-trow"
+          style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+        >
+          {Array.from({ length: cols }, (_, c) => (
+            <SkelLine key={c} w={c === 0 ? '72%' : '50%'} />
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // Écran de chargement d'une page : en-tête + grille de cartes.
 export function SkelPage({ cards = 2, rows = 3 }) {
   return (

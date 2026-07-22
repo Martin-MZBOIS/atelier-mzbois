@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelTable } from '../components/Skeleton'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
@@ -177,7 +179,7 @@ export default function Chantiers() {
         </>
       )}
 
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelTable rows={6} cols={7} />}
 
       {error && (
         <div className="alert">
@@ -230,8 +232,16 @@ export default function Chantiers() {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="empty">
-                    Aucun chantier pour ce filtre.
+                  <td colSpan="7">
+                    <EmptyState
+                      ico="🏗"
+                      titre="Aucun chantier pour ce filtre"
+                      aide="Élargissez le filtre, ou lancez un nouveau chantier."
+                      action={{
+                        label: '+ Nouveau chantier',
+                        onClick: () => setShowNew(true),
+                      }}
+                    />
                   </td>
                 </tr>
               )}

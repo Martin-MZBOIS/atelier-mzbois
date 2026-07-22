@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelTable } from '../components/Skeleton'
 import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
@@ -205,7 +207,7 @@ export default function AchatsGlobal() {
       </div>
 
       {loading ? (
-        <p className="muted">Chargement…</p>
+        <SkelTable rows={6} cols={7} />
       ) : (
         <div className="table-wrap">
           <table className="data-table striped">
@@ -247,8 +249,12 @@ export default function AchatsGlobal() {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="empty">
-                    Aucun achat pour ce filtre.
+                  <td colSpan="7">
+                    <EmptyState
+                      ico="📦"
+                      titre="Aucun achat pour ce filtre"
+                      aide="Changez de type ou de période pour élargir la recherche."
+                    />
                   </td>
                 </tr>
               )}

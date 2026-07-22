@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
 import { useSettings } from '../store/settings'
@@ -171,7 +173,7 @@ export default function Contacts() {
         </div>
       )}
       {loading ? (
-        <p className="muted">Chargement…</p>
+        <SkelList rows={8} />
       ) : (
         <div className="contacts-layout">
           {/* Liste */}
@@ -203,7 +205,11 @@ export default function Contacts() {
               </div>
             )}
             {list.length === 0 ? (
-              <div className="empty">Aucun élément</div>
+              <EmptyState
+                ico="📇"
+                titre="Aucun élément"
+                aide="Affinez votre recherche, ou ajoutez une fiche avec le bouton ci-dessus."
+              />
             ) : (
               list.map((it) => {
                 const specs = tab === 'sous_traitant' ? specNames(it.raw) : []
@@ -370,7 +376,11 @@ function SocieteDetail({ s, onEdit, onAddContact }) {
         </button>
       </div>
       {contacts.length === 0 ? (
-        <div className="empty">Aucun contact</div>
+        <EmptyState
+          ico="👤"
+          titre="Aucun contact"
+          aide="Ajoutez les interlocuteurs de cette fiche pour les retrouver depuis un chantier."
+        />
       ) : (
         contacts.map((c) => (
           <div key={c.id} className="contact-card">
