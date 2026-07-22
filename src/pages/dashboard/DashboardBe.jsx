@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useSettings } from '../../store/settings'
 import { useMonEmploye } from '../../lib/useMonEmploye'
-import { taskAge } from '../../lib/dashboard'
+import { ouvrirAlerte, tacheEnRetard, taskAge } from '../../lib/dashboard'
 import { STATUT_OUVRAGE } from '../../lib/statuts'
 import Alertes from './Alertes'
 import { SkelPage } from '../../components/Skeleton'
@@ -38,7 +38,10 @@ export default function DashboardBe() {
           .from('achats')
           .select('id, nom, st, fournisseur:fournisseurs!fournisseur_id(nom), chantier:chantiers!chantier_id(id, num)')
           .eq('st', 'a_commander'),
-        supabase.from('feedbacks').select('id, statut').neq('statut', 'resolu'),
+        supabase
+          .from('feedbacks')
+          .select('id, statut, chantier_id')
+          .neq('statut', 'resolu'),
       ])
       const err = [ouv, ach, fb].find((r) => r.error)
       if (!active) return
@@ -50,7 +53,7 @@ export default function DashboardBe() {
       if (employeId) {
         const t = await supabase
           .from('taches')
-          .select('id, done, created_at')
+          .select('id, done, created_at, echeance')
           .eq('assigne_a', employeId)
         taches = t.data ?? []
       }
@@ -77,8 +80,10 @@ export default function DashboardBe() {
     )
 
   const enAttenteValidation = d.ouvrages.filter((o) => o.statut === 'validation_client')
-  const tachesEnRetard = d.taches.filter(
-    (t) => !t.done && taskAge(t, ageWarn, ageLate) === 'late'
+  const tachesEnRetard = d.taches.filter(tacheEnRetard)
+  // Distinct du retard : ouvertes depuis longtemps, échéance ou non.
+  const tachesQuiTrainent = d.taches.filter(
+    (t) => !t.done && !tacheEnRetard(t) && taskAge(t, ageWarn, ageLate) === 'late'
   )
 
   const alertes = []
@@ -86,18 +91,25 @@ export default function DashboardBe() {
     alertes.push({
       ico: '📐', tone: 'orange',
       txt: `${enAttenteValidation.length} ouvrage${enAttenteValidation.length > 1 ? 's' : ''} en attente de validation client`,
-      onClick: () => navigate('/chantiers'),
+      onClick: () =>
+        ouvrirAlerte(navigate, enAttenteValidation, 'ouvrages', 'Ouvrages en attente de validation client'),
     })
   if (d.feedbacks.length)
     alertes.push({
       ico: '🔧',
       txt: `${d.feedbacks.length} feedback${d.feedbacks.length > 1 ? 's' : ''} non résolu${d.feedbacks.length > 1 ? 's' : ''}`,
-      onClick: () => navigate('/chantiers'),
+      onClick: () => ouvrirAlerte(navigate, d.feedbacks, 'feedbacks', 'Feedbacks non résolus'),
     })
   if (tachesEnRetard.length)
     alertes.push({
       ico: '🔴',
       txt: `${tachesEnRetard.length} tâche${tachesEnRetard.length > 1 ? 's' : ''} en retard`,
+      onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }),
+    })
+  if (tachesQuiTrainent.length)
+    alertes.push({
+      ico: '🕓',
+      txt: `${tachesQuiTrainent.length} tâche${tachesQuiTrainent.length > 1 ? 's' : ''} sans mouvement depuis plus de ${ageLate} jours`,
       onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }),
     })
 

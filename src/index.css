@@ -3882,6 +3882,28 @@ textarea.ni:focus {
 .skel-page {
   padding: 2px 0;
 }
+/* Bandeau posé par une alerte du tableau de bord : la liste est volontairement
+   restreinte, on dit pourquoi et on offre la sortie. */
+.focus-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 9px 13px;
+  margin-bottom: 12px;
+  border-radius: var(--r);
+  border: 0.5px solid var(--nav-on-bg);
+  background: var(--nav-bg);
+  color: var(--acier);
+  font-size: 12px;
+}
+.focus-txt {
+  flex: 1 1 auto;
+}
+.focus-bar strong {
+  color: var(--nav-on-bg);
+}
+
 .skel-trow {
   display: grid;
   gap: 14px;

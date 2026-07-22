@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useSettings } from '../../store/settings'
 import { useMonEmploye } from '../../lib/useMonEmploye'
-import { daysUntil, taskAge } from '../../lib/dashboard'
+import { daysUntil, ouvrirAlerte, tacheEnRetard, taskAge } from '../../lib/dashboard'
 import { formatDate } from '../../lib/format'
 import { STATUT_OUVRAGE, resolve } from '../../lib/statuts'
 import Alertes from './Alertes'
@@ -69,7 +69,7 @@ export default function DashboardProg() {
       if (employeId) {
         const t = await supabase
           .from('taches')
-          .select('id, done, created_at')
+          .select('id, done, created_at, echeance')
           .eq('assigne_a', employeId)
         taches = t.data ?? []
       }
@@ -101,8 +101,10 @@ export default function DashboardProg() {
     .sort(parDepart)
 
   const urgents = aProgrammer.filter((o) => o.dep && daysUntil(o.dep) <= 14)
-  const tachesEnRetard = d.taches.filter(
-    (t) => !t.done && taskAge(t, ageWarn, ageLate) === 'late'
+  const tachesEnRetard = d.taches.filter(tacheEnRetard)
+  // Distinct du retard : ouvertes depuis longtemps, échéance ou non.
+  const tachesQuiTrainent = d.taches.filter(
+    (t) => !t.done && !tacheEnRetard(t) && taskAge(t, ageWarn, ageLate) === 'late'
   )
 
   const alertes = []
@@ -110,12 +112,19 @@ export default function DashboardProg() {
     alertes.push({
       ico: '⌨',
       txt: `${urgents.length} ouvrage${urgents.length > 1 ? 's' : ''} à programmer avec un départ dans moins de 14 jours`,
-      onClick: () => navigate('/chantiers'),
+      onClick: () =>
+        ouvrirAlerte(navigate, urgents, 'ouvrages', 'Ouvrages à programmer, départ sous 14 jours'),
     })
   if (tachesEnRetard.length)
     alertes.push({
       ico: '🔴',
       txt: `${tachesEnRetard.length} tâche${tachesEnRetard.length > 1 ? 's' : ''} en retard`,
+      onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }),
+    })
+  if (tachesQuiTrainent.length)
+    alertes.push({
+      ico: '🕓',
+      txt: `${tachesQuiTrainent.length} tâche${tachesQuiTrainent.length > 1 ? 's' : ''} sans mouvement depuis plus de ${ageLate} jours`,
       onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }),
     })
 

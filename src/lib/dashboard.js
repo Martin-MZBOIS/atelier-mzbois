@@ -36,11 +36,44 @@ export function daysUntilAnniv(dateStr) {
 }
 
 // Ancienneté d'une tâche : 'ok' | 'warn' | 'late' (seuils réglés en Paramètres).
+//
+// Attention : c'est le temps écoulé depuis la CRÉATION, pas un retard. Une
+// tâche ouverte depuis trois semaines mais due le mois prochain est 'late'
+// ici sans être en retard pour autant — voir `tacheEnRetard`.
 export function taskAge(t, warn, late) {
   const d = daysSince(t.created_at)
   if (d >= late) return 'late'
   if (d >= warn) return 'warn'
   return 'ok'
+}
+
+// Tâche réellement en retard : son échéance est passée et elle n'est pas faite.
+// Sans échéance, une tâche ne peut pas être en retard.
+export function tacheEnRetard(t) {
+  if (t.done || !t.echeance) return false
+  const fin = new Date(t.echeance)
+  if (Number.isNaN(fin.getTime())) return false
+  fin.setHours(23, 59, 59, 999) // on laisse le jour d'échéance en entier
+  return fin < new Date()
+}
+
+// Destination d'une alerte qui porte sur des ouvrages ou des feedbacks.
+//
+// Ces éléments vivent dans les onglets d'un chantier : renvoyer vers la liste
+// brute obligerait à les rechercher à la main. Un seul chantier concerné → on y
+// va directement, sur le bon onglet ; plusieurs → on restreint la liste des
+// chantiers à ceux qui sont en cause, en annonçant pourquoi.
+export function ouvrirAlerte(navigate, elements, onglet, titre) {
+  const ids = [
+    ...new Set(
+      elements.map((e) => e.chantier_id ?? e.chantier?.id).filter(Boolean)
+    ),
+  ]
+  if (ids.length === 1) {
+    navigate(`/chantiers/${ids[0]}/${onglet}`)
+    return
+  }
+  navigate('/chantiers', { state: { focus: { ids, titre, onglet } } })
 }
 
 // Les 5 jours ouvrés (lundi→vendredi) de la semaine courante.

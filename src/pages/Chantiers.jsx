@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import EmptyState from '../components/EmptyState'
 import { SkelTable } from '../components/Skeleton'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
 import { useDataCache } from '../store/cache'
@@ -46,6 +46,11 @@ export default function Chantiers() {
   const [filter, setFilter] = useState('tous')
   const [sortDir, setSortDir] = useState('desc') // 'desc' = plus récent en haut
   const [visible, setVisible] = useState(PAGE_SIZE)
+
+  // Ciblage venu d'une alerte du tableau de bord : { ids, titre, onglet }.
+  // On restreint la liste aux chantiers concernés, en disant pourquoi.
+  const location = useLocation()
+  const [focus, setFocus] = useState(location.state?.focus ?? null)
 
   useEffect(() => {
     let active = true
@@ -101,6 +106,7 @@ export default function Chantiers() {
     const activeFilter = FILTERS.find((f) => f.id === filter) ?? FILTERS[0]
     return chantiers
       .filter((c) => {
+        if (focus && !focus.ids.includes(c.id)) return false
         if (!activeFilter.test(chantierFlags(c))) return false
         if (!q) return true
         return (
@@ -115,12 +121,12 @@ export default function Chantiers() {
         const diff = numKey(a) - numKey(b)
         return sortDir === 'desc' ? -diff : diff
       })
-  }, [chantiers, search, filter, sortDir])
+  }, [chantiers, search, filter, sortDir, focus])
 
   // Réinitialise la pagination quand la vue filtrée change.
   useEffect(() => {
     setVisible(PAGE_SIZE)
-  }, [search, filter, sortDir])
+  }, [search, filter, sortDir, focus])
 
   const shown = filtered.slice(0, visible)
 
@@ -132,6 +138,22 @@ export default function Chantiers() {
           {loading ? '' : `${filtered.length} / ${chantiers.length}`}
         </span>
       </div>
+
+      {focus && (
+        <div className="focus-bar">
+          <span className="focus-txt">
+            <strong>{focus.titre}</strong>
+            {focus.onglet === 'feedbacks'
+              ? ' — ouvrez le chantier, onglet Feedbacks.'
+              : focus.onglet === 'ouvrages'
+                ? ' — ouvrez le chantier, onglet Ouvrages.'
+                : ''}
+          </span>
+          <button className="btn bg bxs" onClick={() => setFocus(null)}>
+            Voir tous les chantiers
+          </button>
+        </div>
+      )}
 
       {!loading && !error && (
         <>

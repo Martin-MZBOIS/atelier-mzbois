@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useSettings } from '../../store/settings'
 import { useMonEmploye } from '../../lib/useMonEmploye'
-import { isoDay, taskAge } from '../../lib/dashboard'
+import { isoDay, ouvrirAlerte, tacheEnRetard, taskAge } from '../../lib/dashboard'
 import { STATUT_FEEDBACK, resolve } from '../../lib/statuts'
 import Alertes from './Alertes'
 import { SkelPage } from '../../components/Skeleton'
@@ -57,7 +57,7 @@ export default function DashboardProd() {
       if (employeId) {
         const t = await supabase
           .from('taches')
-          .select('id, done, created_at')
+          .select('id, done, created_at, echeance')
           .eq('assigne_a', employeId)
         taches = t.data ?? []
       }
@@ -89,8 +89,10 @@ export default function DashboardProd() {
       </section>
     )
 
-  const tachesEnRetard = d.taches.filter(
-    (t) => !t.done && taskAge(t, ageWarn, ageLate) === 'late'
+  const tachesEnRetard = d.taches.filter(tacheEnRetard)
+  // Distinct du retard : ouvertes depuis longtemps, échéance ou non.
+  const tachesQuiTrainent = d.taches.filter(
+    (t) => !t.done && !tacheEnRetard(t) && taskAge(t, ageWarn, ageLate) === 'late'
   )
 
   const alertes = []
@@ -104,12 +106,18 @@ export default function DashboardProd() {
     alertes.push({
       ico: '🔧',
       txt: `${d.feedbacks.length} feedback${d.feedbacks.length > 1 ? 's' : ''} non traité${d.feedbacks.length > 1 ? 's' : ''}`,
-      onClick: () => navigate('/chantiers'),
+      onClick: () => ouvrirAlerte(navigate, d.feedbacks, 'feedbacks', 'Feedbacks non traités'),
     })
   if (tachesEnRetard.length)
     alertes.push({
       ico: '🔴',
       txt: `${tachesEnRetard.length} tâche${tachesEnRetard.length > 1 ? 's' : ''} en retard`,
+      onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }),
+    })
+  if (tachesQuiTrainent.length)
+    alertes.push({
+      ico: '🕓',
+      txt: `${tachesQuiTrainent.length} tâche${tachesQuiTrainent.length > 1 ? 's' : ''} sans mouvement depuis plus de ${ageLate} jours`,
       onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }),
     })
 

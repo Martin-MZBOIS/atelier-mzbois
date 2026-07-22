@@ -3,7 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useSettings } from '../../store/settings'
 import { useMonEmploye } from '../../lib/useMonEmploye'
-import { CLOS, daysSince, daysUntil, taskAge } from '../../lib/dashboard'
+import {
+  CLOS,
+  daysSince,
+  daysUntil,
+  ouvrirAlerte,
+  tacheEnRetard,
+  taskAge,
+} from '../../lib/dashboard'
 import Alertes from './Alertes'
 import { SkelPage } from '../../components/Skeleton'
 import DashHeader from './DashHeader'
@@ -44,7 +51,7 @@ export default function DashboardDir() {
       const [ouv, ach, fb, reu, ch] = await Promise.all([
         supabase.from('ouvrages').select('id, statut, dep, chantier_id'),
         supabase.from('achats').select('id, st'),
-        supabase.from('feedbacks').select('id, statut, date'),
+        supabase.from('feedbacks').select('id, statut, date, chantier_id'),
         supabase.from('reunions').select('chantier_id, date, reunion_actions(done)'),
         supabase.from('chantiers').select('id, num').order('num'),
       ])
@@ -58,7 +65,7 @@ export default function DashboardDir() {
       if (employeId) {
         const t = await supabase
           .from('taches')
-          .select('id, done, created_at')
+          .select('id, done, created_at, echeance')
           .eq('assigne_a', employeId)
         taches = t.data ?? []
       }
@@ -95,8 +102,10 @@ export default function DashboardDir() {
     (o) => o.dep && daysUntil(o.dep) <= 7 && !CLOS.includes(o.statut)
   )
   const aCommander = d.achats.filter((a) => a.st === 'a_commander')
-  const tachesEnRetard = d.taches.filter(
-    (t) => !t.done && taskAge(t, ageWarn, ageLate) === 'late'
+  const tachesEnRetard = d.taches.filter(tacheEnRetard)
+  // Distinct du retard : ouvertes depuis longtemps, échéance ou non.
+  const tachesQuiTrainent = d.taches.filter(
+    (t) => !t.done && !tacheEnRetard(t) && taskAge(t, ageWarn, ageLate) === 'late'
   )
   const fbVieux = d.feedbacks.filter(
     (f) => f.statut !== 'resolu' && daysSince(f.date) > 7
@@ -108,7 +117,8 @@ export default function DashboardDir() {
     alertes.push({
       ico: '🚨',
       txt: `${depUrgents.length} départ${depUrgents.length > 1 ? 's' : ''} atelier dans moins de 7 jours`,
-      onClick: () => navigate('/chantiers'),
+      onClick: () =>
+        ouvrirAlerte(navigate, depUrgents, 'ouvrages', 'Départs atelier sous 7 jours'),
     })
   if (aCommander.length)
     alertes.push({
@@ -122,11 +132,18 @@ export default function DashboardDir() {
       txt: `${tachesEnRetard.length} tâche${tachesEnRetard.length > 1 ? 's' : ''} en retard`,
       onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }),
     })
+  if (tachesQuiTrainent.length)
+    alertes.push({
+      ico: '🕓',
+      txt: `${tachesQuiTrainent.length} tâche${tachesQuiTrainent.length > 1 ? 's' : ''} sans mouvement depuis plus de ${ageLate} jours`,
+      onClick: () => tasksRef.current?.scrollIntoView({ behavior: 'smooth' }),
+    })
   if (fbVieux.length)
     alertes.push({
       ico: '🔧',
       txt: `${fbVieux.length} feedback${fbVieux.length > 1 ? 's' : ''} non résolu${fbVieux.length > 1 ? 's' : ''} depuis plus de 7 jours`,
-      onClick: () => navigate('/chantiers'),
+      onClick: () =>
+        ouvrirAlerte(navigate, fbVieux, 'feedbacks', 'Feedbacks non résolus depuis plus de 7 jours'),
     })
   if (bloques.length)
     alertes.push({
