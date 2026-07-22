@@ -2,6 +2,7 @@ import { forwardRef, useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRealtime } from '../../lib/useRealtime'
 import { useSettings } from '../../store/settings'
+import { toast } from '../../store/toasts'
 import { daysSince, taskAge } from '../../lib/dashboard'
 import TaskModal from '../TaskModal'
 import TaskEditModal from '../TaskEditModal'
@@ -62,11 +63,13 @@ const MesTaches = forwardRef(function MesTaches({ employeId }, ref) {
 
   async function toggle(t) {
     const { error } = await supabase.from('taches').update({ done: !t.done }).eq('id', t.id)
-    if (!error) load()
+    if (error) toast.error(error.message)
+    else { toast(t.done ? 'Tâche rouverte' : 'Tâche terminée'); load() }
   }
   async function remove(id) {
     const { error } = await supabase.from('taches').delete().eq('id', id)
-    if (!error) load()
+    if (error) toast.error(error.message)
+    else { toast('Tâche supprimée'); load() }
   }
 
   return (

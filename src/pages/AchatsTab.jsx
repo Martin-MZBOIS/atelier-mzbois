@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
+import { toast } from '../store/toasts'
 import { formatEuro } from '../lib/format'
 import {
   TYP_ACHAT,
@@ -87,6 +88,9 @@ export default function AchatsTab() {
     if (dbError) {
       setAchats(previous)
       setError('Échec de la mise à jour : ' + dbError.message)
+      toast.error('Statut non enregistré : ' + dbError.message)
+    } else {
+      toast('Statut mis à jour')
     }
   }
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { toast } from '../store/toasts'
 import { STATUT_COURSE, STATUT_COURSE_ORDER } from '../lib/statuts'
 import Autocomplete from '../components/Autocomplete'
 import { logModifs } from '../lib/historique'
@@ -272,6 +273,8 @@ export default function CourseModal({
         { table: 'courses', chantierId: base.chantier_id, user }
       )
     }
+
+    toast('Course enregistrée')
 
     onSaved()
   }

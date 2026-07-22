@@ -6,6 +6,7 @@ import { ROLES } from '../lib/roles'
 import Icon from './Icon'
 import GlobalSearch from './GlobalSearch'
 import NotificationBell from './NotificationBell'
+import Toaster from './Toaster'
 
 // Élément de navigation : id = clé des droits d'accès.
 // to = route ; certains items COPIL partagent /copil avec un paramètre ?o=.
@@ -181,6 +182,8 @@ export default function Layout() {
       <main className="app-main">
         {blocked ? <Navigate to="/dashboard" replace /> : <Outlet />}
       </main>
+
+      <Toaster />
     </div>
   )
 }

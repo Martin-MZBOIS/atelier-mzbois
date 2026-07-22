@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
+import { toast } from '../store/toasts'
 import {
   TYP_ACHAT,
   TYP_ACHAT_ORDER,
@@ -141,6 +142,7 @@ export default function AchatModal({
       }
       setSaving(false)
     }
+    toast('Achat enregistré')
     onSaved()
   }
 

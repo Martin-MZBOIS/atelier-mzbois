@@ -3795,3 +3795,59 @@ textarea.ni:focus {
   background: var(--g3);
   border-radius: 99px;
 }
+
+/* ------------------------------------------------ Messages de retour (toasts) */
+.toaster {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  max-width: min(360px, calc(100vw - 40px));
+}
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  padding: 11px 14px;
+  border-radius: var(--r);
+  border: 1px solid;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(44, 36, 32, 0.16);
+  animation: toast-in 160ms ease-out;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; }
+}
+.toast-ico {
+  flex: none;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.toast-txt {
+  flex: 1;
+}
+.toast--ok {
+  background: #eef4ee;
+  border-color: #c4d8c4;
+  color: #3f6b42;
+}
+.toast--error {
+  background: var(--rd2);
+  border-color: #e2b4b4;
+  color: var(--rd);
+}
+.toast--info {
+  background: var(--brun2);
+  border-color: var(--brun3);
+  color: var(--brun4);
+}

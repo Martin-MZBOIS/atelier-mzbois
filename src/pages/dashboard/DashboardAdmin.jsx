@@ -4,8 +4,10 @@ import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store'
 import { useSettings } from '../../store/settings'
 import { logModif } from '../../lib/historique'
+import { toast } from '../../store/toasts'
 import { CLOS, eur } from '../../lib/dashboard'
 import { formatDateTime } from '../../lib/format'
+import Alertes from './Alertes'
 import DashHeader from './DashHeader'
 
 // Un chantier est « à facturer » quand tous ses ouvrages sont clos et qu'au
@@ -128,8 +130,13 @@ export default function DashboardAdmin() {
         chantierId: c.id, user,
       })
     setBusy(null)
-    if (e) setError(e.message)
-    else await load()
+    if (e) {
+      setError(e.message)
+      toast.error(e.message)
+    } else {
+      toast(`Chantier ${c.num} marqué facturé`)
+      await load()
+    }
   }
 
   async function saveMontantAchat(a) {
@@ -147,8 +154,11 @@ export default function DashboardAdmin() {
         chantierId: a.chantier?.id, user,
       })
     setBusy(null)
-    if (e) setError(e.message)
-    else {
+    if (e) {
+      setError(e.message)
+      toast.error(e.message)
+    } else {
+      toast('Montant enregistré — ' + a.nom)
       setSaisie((s) => ({ ...s, ['a' + a.id]: {} }))
       await load()
     }
@@ -175,8 +185,11 @@ export default function DashboardAdmin() {
         })
     }
     setBusy(null)
-    if (e) setError(e.message)
-    else {
+    if (e) {
+      setError(e.message)
+      toast.error(e.message)
+    } else {
+      toast('Course imputée')
       setSaisie((st) => ({ ...st, ['c' + c.id]: {} }))
       await load()
     }
@@ -189,18 +202,7 @@ export default function DashboardAdmin() {
     <section className="page">
       <DashHeader />
 
-      {alertes.length > 0 && (
-        <div className="dash-alerts">
-          {alertes.map((a, i) => (
-            <div
-              key={i}
-              className={'dash-alert dash-alert--static' + (a.tone === 'orange' ? ' dash-alert--orange' : '')}
-            >
-              {a.ico} <span>{a.txt}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      <Alertes items={alertes} />
 
       <div className="dash-grid">
         {/* À facturer */}

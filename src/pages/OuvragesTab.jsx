@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { useAuthStore } from '../store'
+import { toast } from '../store/toasts'
 import { formatDate } from '../lib/format'
 import {
   STATUT_OUVRAGE,
@@ -157,6 +158,9 @@ export default function OuvragesTab() {
     if (dbError) {
       setOuvrages(previous)
       setError('Échec de la mise à jour du statut : ' + dbError.message)
+      toast.error('Statut non enregistré : ' + dbError.message)
+    } else {
+      toast('Statut mis à jour — ' + resolve(STATUT_OUVRAGE, newStatut).label)
     }
   }
 

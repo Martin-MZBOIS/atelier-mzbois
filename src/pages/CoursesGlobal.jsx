@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
+import { toast } from '../store/toasts'
 import { formatDate } from '../lib/format'
 import { STATUT_COURSE, STATUT_COURSE_ORDER, resolve } from '../lib/statuts'
 import CourseModal from './CourseModal'
@@ -148,6 +149,9 @@ export default function CoursesGlobal() {
     if (dbError) {
       setCourses(previous)
       setError('Échec de la mise à jour : ' + dbError.message)
+      toast.error('Statut non enregistré : ' + dbError.message)
+    } else {
+      toast('Statut de la course mis à jour')
     }
   }
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { toast } from '../store/toasts'
 import { useSettings } from '../store/settings'
 import { TYPE_SOCIETE } from '../lib/statuts'
 
@@ -96,6 +97,7 @@ export default function SocieteModal({ societe, defaultType, onClose, onSaved })
       /* table absente (migration 0023 non passée) : on ignore */
     }
     setSaving(false)
+    toast('Fiche enregistrée')
     onSaved(data.id)
   }
 

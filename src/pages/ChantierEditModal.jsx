@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { toast } from '../store/toasts'
 
 // Création / édition des informations d'un chantier.
 // `chantier` absent ou sans id → mode création (insert).
@@ -80,6 +81,7 @@ export default function ChantierEditModal({ chantier, onClose, onSaved }) {
       setError(dbError.message)
       return
     }
+    toast('Chantier enregistré')
     onSaved()
   }
 
