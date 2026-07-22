@@ -89,13 +89,18 @@ export default function OuvragesTab() {
   // transporte pas de pièce jointe. Le message s'ouvre rédigé dans la messagerie,
   // où l'on attache les plans avant d'envoyer.
   function mailtoValidation(o) {
-    const reference = `${chantier.num ?? ''}${chantier.nom ? ' — ' + chantier.nom : ''}`
+    // La référence annoncée au client est le nom du chantier ; on retombe sur
+    // son numéro si le nom n'est pas renseigné.
+    const reference = chantier.nom || chantier.num || ''
     const semaine = numeroSemaine(o.dep)
 
     const lignes = [
       'Bonjour,',
       '',
-      `Vous trouverez en pièce jointe les plans du ${o.nom}, chantier : ${reference}`,
+      // Le nom entre guillemets évite l'article : « du » tombe faux dès que
+      // l'ouvrage est féminin (« la banque d'accueil ») ou commence par une
+      // voyelle (« l'habillage mural »).
+      `Vous trouverez en pièce jointe les plans de l’ouvrage « ${o.nom} », chantier : ${reference}`,
       '',
     ]
     // Sans date de départ atelier, la ligne n'aurait pas de semaine à annoncer :
