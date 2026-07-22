@@ -3912,3 +3912,62 @@ textarea.ni:focus {
   margin-top: 3px;
   max-width: 42ch;
 }
+
+/* ------------------------------------------- Historique des tâches */
+.hist-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.hist-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 11px;
+  padding: 10px 2px;
+  border-bottom: 0.5px solid var(--g5);
+}
+.hist-item:last-child {
+  border-bottom: none;
+}
+.hist-etat {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--g4);
+  border-radius: var(--r);
+  font-size: 11px;
+  color: var(--g2);
+  flex: none;
+}
+.hist-etat--ok {
+  background: var(--gn2);
+  border-color: #c4d8c4;
+  color: var(--gn);
+}
+.hist-texte {
+  font-size: 13.5px;
+  color: var(--acier);
+}
+.hist-texte--done {
+  color: var(--g1);
+}
+.hist-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--g2);
+}
+.hist-fait {
+  color: var(--gn);
+  font-weight: 600;
+}
+/* Date de réalisation dans « Mes tâches » */
+.task-fait {
+  color: var(--gn);
+  font-weight: 600;
+}

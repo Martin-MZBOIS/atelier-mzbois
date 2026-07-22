@@ -4,6 +4,7 @@ import { useRealtime } from '../../lib/useRealtime'
 import { useSettings } from '../../store/settings'
 import { toast } from '../../store/toasts'
 import { daysSince, taskAge } from '../../lib/dashboard'
+import { formatDate } from '../../lib/format'
 import EmptyState from '../../components/EmptyState'
 import TaskModal from '../TaskModal'
 import TaskEditModal from '../TaskEditModal'
@@ -24,16 +25,21 @@ const MesTaches = forwardRef(function MesTaches({ employeId }, ref) {
   const [editing, setEditing] = useState(null)
 
   const load = useCallback(async () => {
-    let q = supabase
-      .from('taches')
-      .select(
-        'id, texte, done, created_at, source, echeance, assigne_a, ' +
-          'chantier:chantiers!chantier_id(id, num), ' +
-          'employe:employes!assigne_a(id, prenom)'
-      )
-      .order('created_at', { ascending: true })
-    if (employeId) q = q.eq('assigne_a', employeId)
-    const { data } = await q
+    const jointures =
+      'chantier:chantiers!chantier_id(id, num), employe:employes!assigne_a(id, prenom)'
+    const avecDate = `id, texte, done, created_at, termine_le, source, echeance, assigne_a, ${jointures}`
+    const sansDate = `id, texte, done, created_at, source, echeance, assigne_a, ${jointures}`
+
+    const requete = (champs) => {
+      let q = supabase.from('taches').select(champs).order('created_at', { ascending: true })
+      if (employeId) q = q.eq('assigne_a', employeId)
+      return q
+    }
+    // Repli si la colonne termine_le (migration 0028) n'existe pas encore.
+    let { data, error } = await requete(avecDate)
+    if (error && /termine_le/.test(error.message)) {
+      ;({ data } = await requete(sansDate))
+    }
     setTaches(data ?? [])
   }, [employeId])
 
@@ -63,9 +69,21 @@ const MesTaches = forwardRef(function MesTaches({ employeId }, ref) {
   const shown = view === 'done' ? done : pending
 
   async function toggle(t) {
-    const { error } = await supabase.from('taches').update({ done: !t.done }).eq('id', t.id)
+    const done = !t.done
+    // On horodate la réalisation, et on efface la date si la tâche est
+    // rouverte. Repli si la colonne (migration 0028) n'existe pas encore.
+    let { error } = await supabase
+      .from('taches')
+      .update({ done, termine_le: done ? new Date().toISOString() : null })
+      .eq('id', t.id)
+    if (error && /termine_le/.test(error.message)) {
+      ;({ error } = await supabase.from('taches').update({ done }).eq('id', t.id))
+    }
     if (error) toast.error(error.message)
-    else { toast(t.done ? 'Tâche rouverte' : 'Tâche terminée'); load() }
+    else {
+      toast(done ? 'Tâche terminée' : 'Tâche rouverte')
+      load()
+    }
   }
   async function remove(id) {
     const { error } = await supabase.from('taches').delete().eq('id', id)
@@ -126,6 +144,13 @@ const MesTaches = forwardRef(function MesTaches({ employeId }, ref) {
                   {t.source === 'reunion' && <span className="task-tag">📋 Réunion de chantiers</span>}
                   {t.employe && <span className="task-assignee">👤 {t.employe.prenom}</span>}
                   {!t.done && d > 0 && <span className={'task-age task-age--' + age}>{d}j</span>}
+                  {t.done && (
+                    <span className="task-fait">
+                      {t.termine_le
+                        ? 'Terminée le ' + formatDate(t.termine_le)
+                        : 'Terminée (date inconnue)'}
+                    </span>
+                  )}
                 </div>
               </div>
               <button className="task-del" onClick={() => remove(t.id)}>✕</button>

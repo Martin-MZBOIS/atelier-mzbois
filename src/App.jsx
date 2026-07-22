@@ -20,6 +20,7 @@ const HistoriqueTab = lazy(() => import('./pages/HistoriqueTab'))
 const AchatsGlobal = lazy(() => import('./pages/AchatsGlobal'))
 const CoursesGlobal = lazy(() => import('./pages/CoursesGlobal'))
 const PlanningGlobal = lazy(() => import('./pages/PlanningGlobal'))
+const TachesHistorique = lazy(() => import('./pages/TachesHistorique'))
 const Contacts = lazy(() => import('./pages/Contacts'))
 const Bibliotheque = lazy(() => import('./pages/Bibliotheque'))
 const Copil = lazy(() => import('./pages/Copil'))
@@ -54,6 +55,7 @@ function App() {
           </Route>
           <Route path="/achats" element={<AchatsGlobal />} />
           <Route path="/planning" element={<PlanningGlobal />} />
+          <Route path="/taches" element={<TachesHistorique />} />
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/bibliotheque" element={<Bibliotheque />} />
           <Route path="/copil" element={<Copil />} />
