@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import EmptyState from '../components/EmptyState'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
 import { formatDate } from '../lib/format'
@@ -453,7 +454,7 @@ function SignalerSection({ user }) {
         </h3>
         <div className="help-bloc-body">
           {items.length === 0 ? (
-            <div className="empty">Aucun signalement.</div>
+            <EmptyState ico="🐛" titre="Aucun signalement" aide="Signalez un dysfonctionnement pour qu’il soit traité." />
           ) : (
             items.map((s) => {
               const st = SIGNAL_STATUT[s.statut] ?? SIGNAL_STATUT.en_attente
@@ -582,7 +583,7 @@ function NouveautesSection({ user }) {
         <h3 className="help-bloc-title">Nouveautés</h3>
         <div className="help-bloc-body">
           {error && <div className="alert">{error}</div>}
-          {!error && visibles.length === 0 && <div className="empty">Aucune nouveauté.</div>}
+          {!error && visibles.length === 0 && <EmptyState ico="✨" titre="Aucune nouveauté" aide="Les évolutions de l’application seront annoncées ici." />}
           {visibles.map((n) => (
             <div key={n.id} className="nouveaute">
               <div className="nouveaute-head">

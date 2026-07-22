@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import EmptyState from '../components/EmptyState'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
@@ -78,7 +79,7 @@ export default function DashboardIdees() {
             : error}
         </div>
       ) : sujets.length === 0 ? (
-        <div className="empty">Aucune idée soumise pour l’instant.</div>
+        <EmptyState ico="💡" titre="Aucune idée pour l’instant" aide="Toute suggestion d’amélioration est la bienvenue." />
       ) : (
         sujets.map((s) => {
           const st = SUJET_STATUT[s.statut] ?? SUJET_STATUT.boite

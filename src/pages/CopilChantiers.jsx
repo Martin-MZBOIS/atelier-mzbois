@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatDate } from '../lib/format'
@@ -97,7 +99,7 @@ export default function CopilChantiers() {
         </div>
       </div>
 
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelList rows={5} />}
       {error && (
         <div className="alert">
           <strong>Erreur :</strong> {error}
@@ -184,7 +186,7 @@ export default function CopilChantiers() {
         })}
 
       {!loading && !error && rows.length === 0 && (
-        <div className="empty">Aucun chantier.</div>
+        <EmptyState ico="🏗" titre="Aucun chantier" aide="La vue consolidée se remplira dès qu’un chantier sera ouvert." />
       )}
 
       {!loading && !error && (

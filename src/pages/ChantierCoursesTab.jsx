@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
@@ -118,14 +120,14 @@ export default function ChantierCoursesTab() {
         </button>
       </div>
 
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelList rows={4} />}
       {error && (
         <div className="alert">
           <strong>Erreur :</strong> {error}
         </div>
       )}
       {!loading && !error && courses.length === 0 && (
-        <div className="empty">Aucune course pour ce chantier</div>
+        <EmptyState ico="🚚" titre="Aucune course" aide="Planifiez une livraison ou une ramasse pour ce chantier." />
       )}
 
       <div className="course-list">

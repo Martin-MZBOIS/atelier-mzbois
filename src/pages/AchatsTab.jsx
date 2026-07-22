@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
@@ -119,14 +121,14 @@ export default function AchatsTab() {
         </button>
       </div>
 
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelList rows={5} />}
       {error && (
         <div className="alert">
           <strong>Erreur :</strong> {error}
         </div>
       )}
       {!loading && !error && achats.length === 0 && (
-        <div className="empty">Aucun achat</div>
+        <EmptyState ico="📦" titre="Aucun achat" aide="Les achats saisis ici alimentent le suivi budgétaire du chantier." />
       )}
 
       {groups.map(({ typ, items }) => {

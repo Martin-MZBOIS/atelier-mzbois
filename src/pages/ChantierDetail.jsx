@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { SkelList } from '../components/Skeleton'
 import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
@@ -67,7 +68,7 @@ export default function ChantierDetail() {
         ← Chantiers
       </button>
 
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelList rows={3} />}
       {error && (
         <div className="alert">
           <strong>Erreur :</strong> {error}

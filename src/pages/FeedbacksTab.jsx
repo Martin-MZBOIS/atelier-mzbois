@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatDateTime } from '../lib/format'
@@ -108,14 +110,14 @@ export default function FeedbacksTab() {
         </button>
       </div>
 
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelList rows={4} />}
       {error && (
         <div className="alert">
           <strong>Erreur :</strong> {error}
         </div>
       )}
       {!loading && !error && feedbacks.length === 0 && (
-        <div className="empty">Aucun feedback</div>
+        <EmptyState ico="🔧" titre="Aucun feedback" aide="L’atelier peut remonter ici ce qui a posé problème en production." />
       )}
 
       {feedbacks.map((fb) => {

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import { supabase } from '../lib/supabase'
 import { TYP_ACHAT, resolve } from '../lib/statuts'
 
@@ -51,9 +53,9 @@ export default function ModelsModal({ onApply, onClose }) {
         />
 
         {loading ? (
-          <p className="muted">Chargement…</p>
+          <SkelList rows={4} />
         ) : filtered.length === 0 ? (
-          <div className="empty">Aucun modèle</div>
+          <EmptyState ico="📐" titre="Aucun modèle" aide="Créez des modèles dans la bibliothèque pour les réutiliser ici." />
         ) : (
           filtered.map((m) => (
             <div

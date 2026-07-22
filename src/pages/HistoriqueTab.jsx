@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatDateTime } from '../lib/format'
@@ -37,7 +39,7 @@ export default function HistoriqueTab() {
         <span className="card-title">🗂 Historique des modifications</span>
       </div>
 
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelList rows={5} />}
       {error && (
         <div className="alert">
           <strong>Erreur :</strong> {error}
@@ -49,7 +51,7 @@ export default function HistoriqueTab() {
         </div>
       )}
       {!loading && !error && rows.length === 0 && (
-        <div className="empty">Aucune modification enregistrée.</div>
+        <EmptyState ico="🕒" titre="Aucune modification enregistrée" aide="Les changements de statut et de dates s’inscriront ici." />
       )}
 
       {rows.length > 0 && (

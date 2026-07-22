@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import SelectSearch from '../components/SelectSearch'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -128,7 +130,7 @@ export default function FilTab() {
 
   return (
     <div className="fil">
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelList rows={4} />}
       {error && (
         <div className="alert">
           <strong>Erreur :</strong> {error}
@@ -143,7 +145,7 @@ export default function FilTab() {
       )}
 
       {!loading && !error && roots.length === 0 && (
-        <div className="empty">Aucun message</div>
+        <EmptyState ico="💬" titre="Aucun message" aide="Lancez la discussion : le fil garde la trace des échanges du chantier." />
       )}
 
       <div className="fil-list">

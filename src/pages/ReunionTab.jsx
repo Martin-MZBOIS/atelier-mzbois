@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatDate } from '../lib/format'
@@ -81,14 +83,14 @@ export default function ReunionTab() {
         </button>
       </div>
 
-      {loading && <p className="muted">Chargement…</p>}
+      {loading && <SkelList rows={4} />}
       {error && (
         <div className="alert">
           <strong>Erreur :</strong> {error}
         </div>
       )}
       {!loading && !error && reunions.length === 0 && (
-        <div className="empty">Aucun compte-rendu</div>
+        <EmptyState ico="📝" titre="Aucun compte-rendu" aide="Les comptes-rendus de réunion de chantier s’ajouteront ici." />
       )}
 
       {reunions.map((r) => {

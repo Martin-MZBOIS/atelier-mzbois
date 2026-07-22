@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import EmptyState from '../components/EmptyState'
+import { SkelList } from '../components/Skeleton'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store'
 import { formatDate } from '../lib/format'
@@ -91,7 +93,7 @@ export default function CopilMeeting({ type, freqLabel, nextDate, canSubmit, odj
     await load()
   }
 
-  if (loading) return <p className="muted">Chargement…</p>
+  if (loading) return <SkelList rows={5} />
   if (error)
     return (
       <div className="alert">
@@ -138,7 +140,7 @@ export default function CopilMeeting({ type, freqLabel, nextDate, canSubmit, odj
           )}
         </div>
         {sujets.length === 0 ? (
-          <div className="empty">Aucun sujet soumis.</div>
+          <EmptyState ico="💬" titre="Aucun sujet soumis" aide="Proposez un sujet pour qu’il rejoigne l’ordre du jour." />
         ) : (
           sujets.map((s) => {
             const st = SUJET_STATUT[s.statut] ?? SUJET_STATUT.boite
@@ -187,7 +189,7 @@ export default function CopilMeeting({ type, freqLabel, nextDate, canSubmit, odj
               </button>
             </div>
           ) : (
-            <div className="empty">Ordre du jour pas encore publié.</div>
+            <EmptyState ico="📋" titre="Ordre du jour pas encore publié" aide="Il apparaîtra ici une fois la trame validée." />
           )
         ) : (
           <>
@@ -246,7 +248,7 @@ export default function CopilMeeting({ type, freqLabel, nextDate, canSubmit, odj
           <span className="card-title">📚 Historique des réunions</span>
         </div>
         {faites.length === 0 ? (
-          <div className="empty">Aucune réunion passée.</div>
+          <EmptyState ico="🗓" titre="Aucune réunion passée" aide="Les comptes-rendus s’archivent ici après chaque COPIL." />
         ) : (
           faites.map((r) => (
             <div key={r.id} className="reunion">

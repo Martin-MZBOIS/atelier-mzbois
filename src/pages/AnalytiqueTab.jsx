@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { SkelList } from '../components/Skeleton'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSettings } from '../store/settings'
@@ -112,7 +113,7 @@ export default function AnalytiqueTab() {
     }
   }
 
-  if (loading) return <div className="card"><p className="muted">Chargement…</p></div>
+  if (loading) return <div className="card"><SkelList rows={4} /></div>
   if (error)
     return (
       <div className="card">
