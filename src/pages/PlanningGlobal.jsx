@@ -48,10 +48,16 @@ export default function PlanningGlobal() {
 
   const loadAffectations = useCallback(async () => {
     const full = 'id, chantier_id, phase, sal_id, date_debut, date_fin, commentaire, heure_debut, heure_fin'
+    const avecOuvrage = full + ', ouvrage_id, ouvrage:ouvrages!ouvrage_id(nom)'
     const core = 'id, chantier_id, phase, sal_id, date_debut, date_fin, commentaire'
-    let { data, error: dbError } = await supabase.from('plan_affectations').select(full)
+    const charger = (champs) => supabase.from('plan_affectations').select(champs)
+    // Replis : ouvrage (0033) → horaires (0011) → cœur.
+    let { data, error: dbError } = await charger(avecOuvrage)
+    if (dbError && /ouvrage/i.test(dbError.message)) {
+      ;({ data, error: dbError } = await charger(full))
+    }
     if (dbError && /heure_/.test(dbError.message)) {
-      ;({ data, error: dbError } = await supabase.from('plan_affectations').select(core))
+      ;({ data, error: dbError } = await charger(core))
     }
     if (dbError) setError(dbError.message)
     else setAffectations(data ?? [])
@@ -380,6 +386,8 @@ export default function PlanningGlobal() {
                     const ch = chantiers.find((c) => c.id === aff.chantier_id)
                     const col = PHASE_COLOR[aff.phase] ?? COULEUR_DEFAUT
                     const phase = aff.phase ? resolve(PHASE_PLANNING, aff.phase).label : ''
+                    // On montre l'ouvrage quand il est précisé, sinon le métier.
+                    const sousTitre = aff.ouvrage?.nom || phase
                     return (
                       <div
                         className="plan-hblock"
@@ -390,11 +398,11 @@ export default function PlanningGlobal() {
                           e.preventDefault()
                           setMenu({ aff, x: e.clientX, y: e.clientY })
                         }}
-                        title={`${ch?.num ?? '?'}${ch?.client ? ' · ' + ch.client : ''}${phase ? ' · ' + phase : ''}\nCliquer pour modifier · clic droit pour supprimer`}
+                        title={`${ch?.num ?? '?'}${ch?.client ? ' · ' + ch.client : ''}${aff.ouvrage?.nom ? ' · ' + aff.ouvrage.nom : ''}${phase ? ' · ' + phase : ''}\nCliquer pour modifier · clic droit pour supprimer`}
                         style={{ background: col + '22', borderLeft: `3px solid ${col}` }}
                       >
                         <span className="plan-hblock-num">{ch?.num ?? '?'}</span>
-                        {phase && <span className="plan-hblock-k">{phase}</span>}
+                        {sousTitre && <span className="plan-hblock-k">{sousTitre}</span>}
                         {peutJournee && (
                           <button
                             className="plan-hblock-day"

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
@@ -36,10 +36,12 @@ export default function PlanAffectationModal({
     sal_id: affectation?.sal_id ?? salarie?.id ?? '',
     date_debut: affectation?.date_debut ?? initialDate ?? '',
     date_fin: affectation?.date_fin ?? initialDate ?? '',
+    ouvrage_id: affectation?.ouvrage_id ?? '',
     commentaire: affectation?.commentaire ?? '',
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [ouvrages, setOuvrages] = useState([])
   // Créneau demi-journée, déduit des horaires enregistrés (journee | matin | apres).
   const [creneau, setCreneau] = useState(
     affectation
@@ -58,6 +60,29 @@ export default function PlanAffectationModal({
 
   function set(key, value) {
     setForm((f) => ({ ...f, [key]: value }))
+  }
+
+  // Ouvrages du chantier choisi — pour préciser sur quoi porte l'affectation.
+  useEffect(() => {
+    let actif = true
+    if (!form.chantier_id) {
+      setOuvrages([])
+      return
+    }
+    supabase
+      .from('ouvrages')
+      .select('id, nom')
+      .eq('chantier_id', form.chantier_id)
+      .order('nom')
+      .then(({ data }) => actif && setOuvrages(data ?? []))
+    return () => {
+      actif = false
+    }
+  }, [form.chantier_id])
+
+  // Changer de chantier : l'ouvrage retenu n'a plus de sens.
+  function setChantier(id) {
+    setForm((f) => ({ ...f, chantier_id: id, ouvrage_id: '' }))
   }
 
   const chById = Object.fromEntries(chantiers.map((c) => [c.id, c]))
@@ -83,13 +108,18 @@ export default function PlanAffectationModal({
     // Le créneau se traduit en horaires (prévu). Journée = pas d'horaire.
     const h = heuresDe(creneau, form.date_debut)
     const withHours = { ...base, heure_debut: h.debut, heure_fin: h.fin }
+    // Ouvrage (migration 0033) : ajouté au-dessus, retiré au repli si absent.
+    const complet = { ...withHours, ouvrage_id: form.ouvrage_id || null }
 
     async function run(payload) {
       if (isEdit) return supabase.from('plan_affectations').update(payload).eq('id', affectation.id)
       return supabase.from('plan_affectations').insert(payload)
     }
-    // Tente avec les horaires ; repli sans si les colonnes n'existent pas (migration 0011).
-    let { error: dbError } = await run(withHours)
+    // Replis successifs si ouvrage_id (0033) puis heure_ (0011) n'existent pas.
+    let { error: dbError } = await run(complet)
+    if (dbError && /ouvrage_id/.test(dbError.message)) {
+      ;({ error: dbError } = await run(withHours))
+    }
     if (dbError && /heure_/.test(dbError.message)) {
       ;({ error: dbError } = await run(base))
     }
@@ -123,7 +153,7 @@ export default function PlanAffectationModal({
               <span className="chip-select">
                 {selectedCh ? `${selectedCh.num} · ${selectedCh.nom}` : '—'}
                 {!chantierFixed && (
-                  <button type="button" className="chip-x" onClick={() => set('chantier_id', '')}>
+                  <button type="button" className="chip-x" onClick={() => setChantier('')}>
                     ×
                   </button>
                 )}
@@ -133,13 +163,31 @@ export default function PlanAffectationModal({
             <Autocomplete
               items={chantiers}
               value={null}
-              onSelect={(c) => c && set('chantier_id', c.id)}
+              onSelect={(c) => c && setChantier(c.id)}
               getLabel={(c) => `${c.num} · ${c.nom ?? ''}`.trim()}
               getKey={(c) => c.id}
               placeholder="🔍 Rechercher un chantier (n° ou mot)…"
             />
           )}
         </div>
+
+        {form.chantier_id && (
+          <div className="fl">
+            <label>Ouvrage</label>
+            <SelectSearch
+              value={form.ouvrage_id}
+              onChange={(v) => set('ouvrage_id', v)}
+              allowEmpty
+              emptyLabel="— Tout le chantier —"
+              options={ouvrages.map((o) => ({ value: o.id, label: o.nom }))}
+            />
+            {ouvrages.length === 0 && (
+              <div className="param-hint" style={{ marginTop: 5 }}>
+                Ce chantier n’a pas encore d’ouvrage.
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="fl">
           <label>Phase</label>
