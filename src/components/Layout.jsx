@@ -31,6 +31,7 @@ const CHAPTERS = [
       { to: '/planning', id: 'planning', label: 'Planning', icon: 'calendar' },
       { to: '/dashboard#taches', id: 'dashboard', label: 'Tâches', icon: 'checklist' },
       { to: '/taches', id: 'dashboard', label: 'Historique tâches', icon: 'clipboard' },
+      { to: '/feedbacks', id: 'feedbacks', label: 'Feedbacks', icon: 'wrench' },
     ],
   },
   {

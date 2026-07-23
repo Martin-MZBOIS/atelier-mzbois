@@ -23,6 +23,12 @@ const PATHS = {
       <path d="M3 4h2l2 11h10l2-8H6.5" />
     </>
   ),
+  // Clé plate — feedbacks remontés de l'atelier.
+  wrench: (
+    <>
+      <path d="M15.5 3.5a5 5 0 0 0-6.2 6.2L3.6 15.4a2 2 0 0 0 2.8 2.8l5.7-5.7a5 5 0 0 0 6.2-6.2l-2.8 2.8-2.6-.7-.7-2.6z" />
+    </>
+  ),
   truck: (
     <>
       <path d="M3 6h11v9H3z" />
