@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { useAuthStore } from '../store'
 import { useMonEmploye } from '../lib/useMonEmploye'
-import { daysSince, daysUntil, daysUntilAnniv, isoDay } from '../lib/dashboard'
+import { daysUntil, daysUntilAnniv, isoDay } from '../lib/dashboard'
 
 // Cloche de notifications (sidebar).
 //
@@ -74,21 +74,10 @@ export default function NotificationBell() {
           })
       }
 
-      const fb = await supabase
-        .from('feedbacks')
-        .select('id, description, date, chantier:chantiers!chantier_id(id, num)')
-        .neq('statut', 'resolu')
-      if (!fb.error) {
-        const vieux = (fb.data ?? []).filter((f) => daysSince(f.date) > 7)
-        if (vieux.length)
-          next.push({
-            key: 'feedbacks', icon: '🔧', label: 'Feedbacks non traités (> 7 jours)',
-            items: vieux.map((f) => ({
-              id: f.id, text: f.description, sub: f.chantier?.num,
-              path: f.chantier?.id ? `/chantiers/${f.chantier.id}/feedbacks` : '/dashboard',
-            })),
-          })
-      }
+      // Pas d'alerte sur les feedbacks : ils ont leur poste de triage dédié
+      // (page Feedbacks, chapitre Organisation), où ils sont assignés à
+      // quelqu'un. Les remonter aussi dans la cloche ferait un rappel de plus
+      // pour un travail qui a déjà son propriétaire.
 
       // Anniversaires : personnel 7 jours avant, entreprise le jour J.
       let emp = await supabase.from('employes').select('id, prenom, date_naissance, date_entree')
@@ -173,7 +162,6 @@ export default function NotificationBell() {
   // Temps réel sur les sources les plus mouvantes.
   useRealtime('taches', load, { enabled: !isDir })
   useRealtime('signalements', load, { enabled: isDir })
-  useRealtime('feedbacks', load, { enabled: isDir })
   useRealtime('copil_sujets', load, { enabled: isDir })
 
   useEffect(() => {
