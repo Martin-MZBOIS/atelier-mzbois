@@ -618,6 +618,17 @@ export default function PlanningGlobal() {
 
       {menu && (
         <div className="ctx-menu" style={{ top: menu.y, left: menu.x }}>
+          {(menu.aff?.heure_debut || menu.aff?.heure_fin) && (
+            <button
+              className="ctx-menu-item"
+              onClick={() => {
+                setMenu(null)
+                etendreJournee(menu.aff)
+              }}
+            >
+              ⤢ Étendre à la journée
+            </button>
+          )}
           {menu.salId && (
             <button
               className="ctx-menu-item"

@@ -2784,11 +2784,11 @@ textarea.ni:focus {
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 46px;
+  min-height: 60px;
 }
 .plan-half {
   flex: 1 1 50%;
-  min-height: 23px;
+  min-height: 30px;
   display: flex;
   padding: 2px;
 }
@@ -2834,7 +2834,9 @@ textarea.ni:focus {
   text-overflow: ellipsis;
 }
 .plan-hblock { position: relative; }
-/* Poignées d'extension, révélées au survol du bloc. */
+/* Poignées d'extension, révélées au survol du bloc. Séparées : le bouton
+   « journée » en bas à gauche, la poignée d'étirement multi-jours sur le bord
+   droit — elles ne se chevauchent plus. */
 .plan-hblock-day,
 .plan-hblock-resize {
   position: absolute;
@@ -2843,16 +2845,17 @@ textarea.ni:focus {
   color: #fff;
   background: var(--nav-on-bg);
   cursor: pointer;
-  z-index: 2;
 }
 .plan-hblock-day {
-  right: 3px;
-  bottom: 1px;
-  width: 15px;
-  height: 13px;
-  padding: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  z-index: 4;
+  min-width: 22px;
+  height: 12px;
+  padding: 0 4px;
   border: none;
-  border-radius: 2px;
+  border-radius: 3px 3px 0 0;
   font-size: 10px;
   line-height: 1;
 }
@@ -2860,7 +2863,8 @@ textarea.ni:focus {
   right: 0;
   top: 0;
   bottom: 0;
-  width: 11px;
+  width: 12px;
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2872,7 +2876,7 @@ textarea.ni:focus {
 .plan-hblock:hover .plan-hblock-resize,
 .plan-hblock-day:focus-visible,
 .plan-hblock-resize:focus-visible {
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 /* Sélecteur de créneau (Journée / Matin / Après-midi) dans la fenêtre. */
