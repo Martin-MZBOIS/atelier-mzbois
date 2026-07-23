@@ -197,7 +197,10 @@ export default function PlanningGlobal() {
       const [, em, ch] = await Promise.all([
         loadAffectations(),
         supabase.from('employes').select('id, prenom, nom, role, couleur').order('nom'),
-        supabase.from('chantiers').select('id, num, nom, client').order('num'),
+        supabase
+          .from('chantiers')
+          .select('id, num, nom, client, heures_vendues, heures_realisees')
+          .order('num'),
       ])
       if (!active) return
       setEmployes(em.data ?? [])
@@ -220,6 +223,30 @@ export default function PlanningGlobal() {
     chantiers.forEach((c, i) => (m[c.id] = CHANTIER_COLORS[i % CHANTIER_COLORS.length]))
     return m
   }, [chantiers])
+
+  // Charge d'équipe (v1 globale). Capacité des deux familles de production —
+  // fabrication (menuisiers) et étude (BE + programmeur) —, base horaire
+  // entreprise. Demande = heures restant à produire sur les chantiers
+  // (vendues − réalisées) ; un total, non ventilé par famille (l'affinage
+  // viendra avec des heures par ouvrage).
+  const charge = useMemo(() => {
+    const HS = 39 // heures/semaine par personne (lun-jeu 8h30 + ven 5h)
+    const nbFab = employes.filter((e) => e.role === 'Menuisier').length
+    const nbEtude = employes.filter((e) => e.role === 'BE' || e.role === 'Prog').length
+    const capFab = nbFab * HS
+    const capEtude = nbEtude * HS
+    const capTotale = capFab + capEtude
+    let aProduire = 0
+    const depassements = []
+    for (const c of chantiers) {
+      const reste = (Number(c.heures_vendues) || 0) - (Number(c.heures_realisees) || 0)
+      if (reste > 0) aProduire += reste
+      else if (reste < 0) depassements.push({ num: c.num, ecart: Math.round(reste) })
+    }
+    const reserveSem = capTotale ? aProduire / capTotale : 0
+    const pct = capTotale ? Math.round((aProduire / capTotale) * 100) : 0
+    return { nbFab, nbEtude, capFab, capEtude, capTotale, aProduire, depassements, reserveSem, pct }
+  }, [employes, chantiers])
 
   function changePeriodMode(mode) {
     setPeriodMode(mode)
@@ -339,6 +366,53 @@ export default function PlanningGlobal() {
       <div className="page-head">
         <h2>Planning</h2>
       </div>
+
+      {charge.capTotale > 0 && (
+        <div className="charge-bar">
+          <div className="charge-main">
+            <div className="charge-fig">
+              <span className="charge-val">{charge.aProduire} h</span>
+              <span className="charge-lbl">à produire</span>
+            </div>
+            <div className="charge-track" title={`${charge.pct}% de la capacité hebdo`}>
+              <span
+                className={
+                  'charge-fill' +
+                  (charge.pct >= 100 ? ' charge-fill--crit' : charge.pct >= 80 ? ' charge-fill--warn' : '')
+                }
+                style={{ width: Math.min(100, charge.pct) + '%' }}
+              />
+            </div>
+            <div className="charge-fig">
+              <span className="charge-val">
+                {charge.reserveSem.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} sem.
+              </span>
+              <span className="charge-lbl">de réserve</span>
+            </div>
+          </div>
+
+          <div className="charge-pools">
+            <span className="charge-pool">
+              <i style={{ background: PHASE_COLOR.fabrication }} />
+              Fabrication · <strong>{charge.capFab} h</strong>/sem ({charge.nbFab} menuisiers)
+            </span>
+            <span className="charge-pool">
+              <i style={{ background: PHASE_COLOR.etude }} />
+              Étude · <strong>{charge.capEtude} h</strong>/sem ({charge.nbEtude} BE/prog)
+            </span>
+            {charge.depassements.length > 0 && (
+              <span className="charge-warn">
+                ⚠ {charge.depassements.map((d) => `${d.num} (${d.ecart} h)`).join(' · ')} en dépassement
+              </span>
+            )}
+          </div>
+
+          <div className="charge-note">
+            Capacité sur base 39 h/sem, hors absences · demande = heures vendues −
+            réalisées, non ventilée par famille (v1).
+          </div>
+        </div>
+      )}
 
       <nav className="subtabs">
         <button
