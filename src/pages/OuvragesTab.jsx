@@ -8,6 +8,7 @@ import { useRealtime } from '../lib/useRealtime'
 import { useAuthStore } from '../store'
 import { toast } from '../store/toasts'
 import { formatDate, initialesClient, numeroSemaine } from '../lib/format'
+import { logModif } from '../lib/historique'
 import {
   STATUT_OUVRAGE,
   STATUT_OUVRAGE_ORDER,
@@ -208,6 +209,19 @@ export default function OuvragesTab() {
       toast.error('Statut non enregistré : ' + dbError.message)
     } else {
       toast('Statut mis à jour — ' + resolve(STATUT_OUVRAGE, newStatut).label)
+      // Journalisé pour alimenter le fil d'actualité : un changement d'état est
+      // ce que personne ne vient vous dire, et c'est ce qui commande la suite.
+      // Le nom de l'ouvrage est porté par `champ` (un chantier en a plusieurs),
+      // et on stocke les libellés lisibles plutôt que les slugs.
+      const o = previous.find((x) => x.id === ouvrageId)
+      await logModif({
+        table: 'ouvrages',
+        champ: `statut · ${o?.nom ?? ''}`,
+        ancienne: o?.statut ? resolve(STATUT_OUVRAGE, o.statut).label : null,
+        nouvelle: resolve(STATUT_OUVRAGE, newStatut).label,
+        chantierId: chantier.id,
+        user,
+      })
     }
   }
 
