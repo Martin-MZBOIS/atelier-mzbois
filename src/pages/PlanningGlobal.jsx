@@ -236,7 +236,9 @@ export default function PlanningGlobal() {
           if (dj >= aff.date_debut && dj <= aff.date_fin) span++
           else break
         }
-        cells.push({ type: 'aff', aff, span, key: aff.id })
+        // `startIso` = premier jour visible du bloc : sert de date par défaut
+        // quand on ajoute un autre chantier sur ce même jour.
+        cells.push({ type: 'aff', aff, span, key: aff.id, startIso: iso })
         di += span
       } else {
         cells.push({ type: 'empty', key: 'e' + di, day: days[di] })
@@ -402,6 +404,17 @@ export default function PlanningGlobal() {
                         const phase = aff.phase ? resolve(PHASE_PLANNING, aff.phase).label : ''
                         return (
                           <td key={cell.key} colSpan={span} className={cellCls} title={aff.commentaire ?? ''}>
+                            <button
+                              className="plan-add-more"
+                              title="Ajouter un chantier ce jour-là"
+                              aria-label="Ajouter un chantier ce jour-là"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setNewAff({ salId: emp.id, date: cell.startIso })
+                              }}
+                            >
+                              +
+                            </button>
                             <div
                               className={'plan-block plan-block--draggable' + (dense ? ' plan-block--dense' : '')}
                               draggable
@@ -409,7 +422,7 @@ export default function PlanningGlobal() {
                               onClick={() => setEditAff(aff)}
                               onContextMenu={(e) => {
                                 e.preventDefault()
-                                setMenu({ aff, x: e.clientX, y: e.clientY })
+                                setMenu({ aff, x: e.clientX, y: e.clientY, salId: emp.id, date: cell.startIso })
                               }}
                               title="Cliquer pour modifier · clic droit pour supprimer"
                               style={{
@@ -564,6 +577,17 @@ export default function PlanningGlobal() {
 
       {menu && (
         <div className="ctx-menu" style={{ top: menu.y, left: menu.x }}>
+          {menu.salId && (
+            <button
+              className="ctx-menu-item"
+              onClick={() => {
+                setMenu(null)
+                setNewAff({ salId: menu.salId, date: menu.date })
+              }}
+            >
+              ➕ Ajouter un chantier ce jour-là
+            </button>
+          )}
           <button className="ctx-menu-item" onClick={() => deleteAff(menu.aff)}>
             🗑 Supprimer l’affectation
           </button>
