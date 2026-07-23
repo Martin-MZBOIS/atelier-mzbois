@@ -102,6 +102,16 @@ export default function PlanningGlobal() {
     })
   }
 
+  // Étend un demi-bloc à la journée entière (vide les horaires).
+  async function etendreJournee(aff) {
+    const { error: dbError } = await supabase
+      .from('plan_affectations')
+      .update({ heure_debut: null, heure_fin: null })
+      .eq('id', aff.id)
+    if (dbError) setError(dbError.message)
+    await loadAffectations()
+  }
+
   // Redimensionnement d'un bloc (glisser le bord droit) — étend la date de fin.
   function onResizeStart(e, aff) {
     e.preventDefault()
@@ -364,7 +374,9 @@ export default function PlanningGlobal() {
                   )
 
                   // Un demi-bloc chantier (matin, après-midi ou journée entière).
-                  const bloc = (aff) => {
+                  // `peutJournee` : l'autre moitié du jour est libre → on peut
+                  // étendre à la journée entière d'un clic.
+                  const bloc = (aff, peutJournee = false) => {
                     const ch = chantiers.find((c) => c.id === aff.chantier_id)
                     const col = PHASE_COLOR[aff.phase] ?? COULEUR_DEFAUT
                     const phase = aff.phase ? resolve(PHASE_PLANNING, aff.phase).label : ''
@@ -383,6 +395,29 @@ export default function PlanningGlobal() {
                       >
                         <span className="plan-hblock-num">{ch?.num ?? '?'}</span>
                         {phase && <span className="plan-hblock-k">{phase}</span>}
+                        {peutJournee && (
+                          <button
+                            className="plan-hblock-day"
+                            title="Étendre à la journée entière"
+                            aria-label="Étendre à la journée entière"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              etendreJournee(aff)
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                          >
+                            ▾
+                          </button>
+                        )}
+                        <span
+                          className="plan-hblock-resize"
+                          title="Étirer sur plusieurs jours"
+                          onMouseDown={(e) => onResizeStart(e, aff)}
+                          onClick={(e) => e.stopPropagation()}
+                          onDragStart={(e) => e.stopPropagation()}
+                        >
+                          ⟩
+                        </span>
                       </div>
                     )
                   }
@@ -432,12 +467,12 @@ export default function PlanningGlobal() {
                               ) : (
                                 <>
                                   {am ? (
-                                    <div className="plan-half">{bloc(am)}</div>
+                                    <div className="plan-half">{bloc(am, !pm)}</div>
                                   ) : (
                                     vide(iso, 'matin')
                                   )}
                                   {pm ? (
-                                    <div className="plan-half">{bloc(pm)}</div>
+                                    <div className="plan-half">{bloc(pm, !am)}</div>
                                   ) : (
                                     vide(iso, 'apres')
                                   )}

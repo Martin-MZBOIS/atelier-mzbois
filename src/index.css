@@ -2833,6 +2833,47 @@ textarea.ni:focus {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.plan-hblock { position: relative; }
+/* Poignées d'extension, révélées au survol du bloc. */
+.plan-hblock-day,
+.plan-hblock-resize {
+  position: absolute;
+  opacity: 0;
+  transition: opacity var(--tr);
+  color: #fff;
+  background: var(--nav-on-bg);
+  cursor: pointer;
+  z-index: 2;
+}
+.plan-hblock-day {
+  right: 3px;
+  bottom: 1px;
+  width: 15px;
+  height: 13px;
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+  font-size: 10px;
+  line-height: 1;
+}
+.plan-hblock-resize {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  cursor: col-resize;
+  border-radius: 0 2px 2px 0;
+}
+.plan-hblock:hover .plan-hblock-day,
+.plan-hblock:hover .plan-hblock-resize,
+.plan-hblock-day:focus-visible,
+.plan-hblock-resize:focus-visible {
+  opacity: 0.9;
+}
 
 /* Sélecteur de créneau (Journée / Matin / Après-midi) dans la fenêtre. */
 .creneau-seg {
