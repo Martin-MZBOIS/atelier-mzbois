@@ -108,11 +108,13 @@ export default function PlanningGlobal() {
     })
   }
 
-  // Étend un demi-bloc à la journée entière (vide les horaires).
-  async function etendreJournee(aff) {
+  // Change le créneau d'une affectation (journée / matin / après-midi).
+  // Journée = pas d'horaire ; matin/après = plage horaire correspondante.
+  async function changerCreneau(aff, creneau) {
+    const h = heuresDe(creneau, aff.date_debut)
     const { error: dbError } = await supabase
       .from('plan_affectations')
-      .update({ heure_debut: null, heure_fin: null })
+      .update({ heure_debut: h.debut, heure_fin: h.fin })
       .eq('id', aff.id)
     if (dbError) setError(dbError.message)
     await loadAffectations()
@@ -381,8 +383,9 @@ export default function PlanningGlobal() {
 
                   // Un demi-bloc chantier (matin, après-midi ou journée entière).
                   // `peutJournee` : l'autre moitié du jour est libre → on peut
-                  // étendre à la journée entière d'un clic.
-                  const bloc = (aff, peutJournee = false) => {
+                  // étendre à la journée d'un clic. `estJournee` : bloc pleine
+                  // journée → on peut le réduire au matin.
+                  const bloc = (aff, { peutJournee = false, estJournee = false } = {}) => {
                     const ch = chantiers.find((c) => c.id === aff.chantier_id)
                     const col = PHASE_COLOR[aff.phase] ?? COULEUR_DEFAUT
                     const phase = aff.phase ? resolve(PHASE_PLANNING, aff.phase).label : ''
@@ -410,11 +413,25 @@ export default function PlanningGlobal() {
                             aria-label="Étendre à la journée entière"
                             onClick={(e) => {
                               e.stopPropagation()
-                              etendreJournee(aff)
+                              changerCreneau(aff, 'journee')
                             }}
                             onMouseDown={(e) => e.stopPropagation()}
                           >
                             ▾
+                          </button>
+                        )}
+                        {estJournee && (
+                          <button
+                            className="plan-hblock-day plan-hblock-day--up"
+                            title="Réduire au matin"
+                            aria-label="Réduire au matin"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              changerCreneau(aff, 'matin')
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                          >
+                            ▴
                           </button>
                         )}
                         <span
@@ -471,16 +488,16 @@ export default function PlanningGlobal() {
                           <td key={iso} className={cls}>
                             <div className="plan-hd">
                               {journee ? (
-                                <div className="plan-full">{bloc(am)}</div>
+                                <div className="plan-full">{bloc(am, { estJournee: true })}</div>
                               ) : (
                                 <>
                                   {am ? (
-                                    <div className="plan-half">{bloc(am, !pm)}</div>
+                                    <div className="plan-half">{bloc(am, { peutJournee: !pm })}</div>
                                   ) : (
                                     vide(iso, 'matin')
                                   )}
                                   {pm ? (
-                                    <div className="plan-half">{bloc(pm, !am)}</div>
+                                    <div className="plan-half">{bloc(pm, { peutJournee: !am })}</div>
                                   ) : (
                                     vide(iso, 'apres')
                                   )}
@@ -618,17 +635,37 @@ export default function PlanningGlobal() {
 
       {menu && (
         <div className="ctx-menu" style={{ top: menu.y, left: menu.x }}>
-          {(menu.aff?.heure_debut || menu.aff?.heure_fin) && (
-            <button
-              className="ctx-menu-item"
-              onClick={() => {
-                setMenu(null)
-                etendreJournee(menu.aff)
-              }}
-            >
-              ⤢ Étendre à la journée
-            </button>
-          )}
+          {(() => {
+            // Options de créneau selon l'état courant : étendre à la journée
+            // depuis une demi-journée, ou réduire depuis une journée entière.
+            const cr = creneauDe(menu.aff?.heure_debut, menu.aff?.heure_fin)
+            const item = (label, creneau) => (
+              <button
+                key={creneau}
+                className="ctx-menu-item"
+                onClick={() => {
+                  setMenu(null)
+                  changerCreneau(menu.aff, creneau)
+                }}
+              >
+                {label}
+              </button>
+            )
+            if (cr === 'journee')
+              return [
+                item('◐ Réduire au matin', 'matin'),
+                item('◑ Réduire à l’après-midi', 'apres'),
+              ]
+            if (cr === 'matin')
+              return [
+                item('⤢ Étendre à la journée', 'journee'),
+                item('◑ Basculer en après-midi', 'apres'),
+              ]
+            return [
+              item('⤢ Étendre à la journée', 'journee'),
+              item('◐ Basculer en matin', 'matin'),
+            ]
+          })()}
           {menu.salId && (
             <button
               className="ctx-menu-item"
