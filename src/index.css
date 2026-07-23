@@ -3152,6 +3152,25 @@ textarea.ni:focus {
 .plan-table--month .plan-cell {
   padding: 2px;
 }
+/* Vue compacte (3 semaines / mois) : bloc réduit à son code, poignées
+   masquées — c'est une vue de lecture ; on édite en zoom semaine. */
+.plan-table--month .plan-hd {
+  min-height: 40px;
+}
+.plan-table--month .plan-half {
+  min-height: 18px;
+}
+.plan-table--month .plan-hblock {
+  padding: 1px 3px;
+}
+.plan-table--month .plan-hblock-num {
+  font-size: 10px;
+}
+.plan-table--month .plan-hblock-k,
+.plan-table--month .plan-hblock-day,
+.plan-table--month .plan-hblock-resize {
+  display: none;
+}
 
 /* Menu contextuel (clic droit sur un bloc planning) */
 .ctx-menu {

@@ -257,14 +257,16 @@ export default function PlanningGlobal() {
     setSearch('')
   }
 
-  // Jours affichés selon le mode.
+  // Jours affichés selon le mode. Semaine = 7 j, 3 semaines = 21 j (on glisse
+  // par semaine avec préc./suiv.), Mois = le mois entier.
   const days = useMemo(() => {
     const today = new Date()
-    if (periodMode === 'sem') {
+    if (periodMode === 'sem' || periodMode === '3sem') {
+      const nb = periodMode === '3sem' ? 21 : 7
       const monday = new Date(today)
       monday.setDate(today.getDate() - ((today.getDay() + 6) % 7) + periodOffset * 7)
       monday.setHours(0, 0, 0, 0)
-      return Array.from({ length: 7 }, (_, i) => {
+      return Array.from({ length: nb }, (_, i) => {
         const d = new Date(monday)
         d.setDate(monday.getDate() + i)
         return d
@@ -277,12 +279,13 @@ export default function PlanningGlobal() {
   }, [periodMode, periodOffset])
 
   const periodLabel =
-    periodMode === 'sem'
-      ? `${ddmm(days[0])} – ${ddmm(days[days.length - 1])}`
-      : days[0].toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+    periodMode === 'mois'
+      ? days[0].toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+      : `${ddmm(days[0])} – ${ddmm(days[days.length - 1])}`
 
   const todayIso = isoDay(new Date())
-  const isMonth = periodMode === 'mois'
+  // Vue compacte (colonnes étroites) dès qu'on dépasse la semaine.
+  const isMonth = periodMode === 'mois' || periodMode === '3sem'
 
   const filteredEmployes = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -438,7 +441,8 @@ export default function PlanningGlobal() {
         <span className="cal-period" style={{ textTransform: 'capitalize' }}>{periodLabel}</span>
         <button className="btn bg bsm" onClick={() => setPeriodOffset((w) => w + 1)}>Suiv. →</button>
         <div className="view-toggle" style={{ marginLeft: 6 }}>
-          <button className={'vt' + (periodMode === 'sem' ? ' vt--on' : '')} onClick={() => changePeriodMode('sem')}>Semaine</button>
+          <button className={'vt' + (periodMode === 'sem' ? ' vt--on' : '')} onClick={() => changePeriodMode('sem')}>1 semaine</button>
+          <button className={'vt' + (periodMode === '3sem' ? ' vt--on' : '')} onClick={() => changePeriodMode('3sem')}>3 semaines</button>
           <button className={'vt' + (periodMode === 'mois' ? ' vt--on' : '')} onClick={() => changePeriodMode('mois')}>Mois</button>
         </div>
       </div>
