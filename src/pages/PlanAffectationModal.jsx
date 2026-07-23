@@ -3,17 +3,16 @@ import SelectSearch from '../components/SelectSearch'
 import { raccourcisModal } from '../lib/clavier'
 import { supabase } from '../lib/supabase'
 import { PHASE_PLANNING } from '../lib/statuts'
+import {
+  CRENEAUX,
+  CRENEAU_ORDER,
+  apresMidiPossible,
+  creneauDe,
+  heuresDe,
+} from '../lib/creneaux'
 import Autocomplete from '../components/Autocomplete'
 
 const PHASE_ORDER = ['etude', 'fabrication', 'pose']
-
-// Horaires entreprise par défaut selon le jour.
-// Lun-Jeu : 07:00 → 16:30 (pause 12:30-13:30). Vendredi : 07:00 → 12:00.
-function defaultHours(dateStr) {
-  const d = dateStr ? new Date(dateStr + 'T00:00:00') : null
-  const isFriday = d && d.getDay() === 5
-  return { debut: '07:00', fin: isFriday ? '12:00' : '16:30' }
-}
 
 // Création d'une affectation de planning.
 // - salarie fourni  => salarié fixe (vue Salariés), on choisit chantier + phase.
@@ -26,6 +25,7 @@ export default function PlanAffectationModal({
   prefill,
   affectation,
   initialDate,
+  initialCreneau,
   onClose,
   onSaved,
 }) {
@@ -40,20 +40,17 @@ export default function PlanAffectationModal({
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [touteLaJournee, setTouteLaJournee] = useState(!(affectation?.heure_debut || affectation?.heure_fin))
-  const [heures, setHeures] = useState({
-    debut: affectation?.heure_debut?.slice(0, 5) ?? '07:00',
-    fin: affectation?.heure_fin?.slice(0, 5) ?? '16:30',
-  })
+  // Créneau demi-journée, déduit des horaires enregistrés (journee | matin | apres).
+  const [creneau, setCreneau] = useState(
+    affectation
+      ? creneauDe(affectation.heure_debut, affectation.heure_fin)
+      : initialCreneau ?? 'journee'
+  )
 
-  function toggleJournee(checked) {
-    setTouteLaJournee(checked)
-    if (!checked) setHeures(defaultHours(form.date_debut))
-  }
-  // Met à jour la date de début et resynchronise les horaires du jour si besoin.
   function setDateDebut(value) {
     set('date_debut', value)
-    if (!touteLaJournee) setHeures(defaultHours(value))
+    // L'après-midi n'existe pas le vendredi : on retombe sur la journée.
+    if (creneau === 'apres' && !apresMidiPossible(value)) setCreneau('journee')
   }
 
   const chantierFixed = Boolean(prefill?.chantier_id)
@@ -83,11 +80,9 @@ export default function PlanAffectationModal({
       date_fin: form.date_fin,
       commentaire: form.commentaire.trim() || null,
     }
-    const withHours = {
-      ...base,
-      heure_debut: touteLaJournee ? null : heures.debut || null,
-      heure_fin: touteLaJournee ? null : heures.fin || null,
-    }
+    // Le créneau se traduit en horaires (prévu). Journée = pas d'horaire.
+    const h = heuresDe(creneau, form.date_debut)
+    const withHours = { ...base, heure_debut: h.debut, heure_fin: h.fin }
 
     async function run(payload) {
       if (isEdit) return supabase.from('plan_affectations').update(payload).eq('id', affectation.id)
@@ -187,34 +182,26 @@ export default function PlanAffectationModal({
           </div>
         </div>
 
-        <label className="checkbox-label" style={{ marginBottom: touteLaJournee ? 10 : 6 }}>
-          <input
-            type="checkbox"
-            checked={touteLaJournee}
-            onChange={(e) => toggleJournee(e.target.checked)}
-          />
-          Toute la journée
-        </label>
-        {!touteLaJournee && (
-          <div className="fg">
-            <div className="fl">
-              <label>Heure début</label>
-              <input
-                type="time"
-                value={heures.debut}
-                onChange={(e) => setHeures((h) => ({ ...h, debut: e.target.value }))}
-              />
-            </div>
-            <div className="fl">
-              <label>Heure fin</label>
-              <input
-                type="time"
-                value={heures.fin}
-                onChange={(e) => setHeures((h) => ({ ...h, fin: e.target.value }))}
-              />
-            </div>
+        <div className="fl">
+          <label>Créneau</label>
+          <div className="creneau-seg" role="group" aria-label="Créneau">
+            {CRENEAU_ORDER.map((c) => {
+              const indispo = c === 'apres' && !apresMidiPossible(form.date_debut)
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  className={'creneau-opt' + (creneau === c ? ' creneau-opt--on' : '')}
+                  disabled={indispo}
+                  title={indispo ? 'Pas d’après-midi le vendredi' : undefined}
+                  onClick={() => setCreneau(c)}
+                >
+                  {CRENEAUX[c].label}
+                </button>
+              )
+            })}
           </div>
-        )}
+        </div>
 
         <div className="fl">
           <label>Commentaire</label>

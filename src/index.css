@@ -2668,7 +2668,13 @@ textarea.ni:focus {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
   margin-bottom: 12px;
+}
+.plan-legend-hint {
+  font-size: 11px;
+  color: var(--g2);
+  font-weight: 400;
 }
 .plan-legend-item {
   display: flex;
@@ -2770,6 +2776,95 @@ textarea.ni:focus {
 }
 /* Ajout d'un chantier sur un jour déjà occupé (vue Salariés). Discret, révélé
    au survol de la cellule, calé à gauche de la poignée de redimensionnement. */
+/* ---- Planning : cellule demi-journée (vue Salariés) ---- */
+.plan-cell--hd {
+  padding: 0;
+}
+.plan-hd {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 46px;
+}
+.plan-half {
+  flex: 1 1 50%;
+  min-height: 23px;
+  display: flex;
+  padding: 2px;
+}
+.plan-half + .plan-half {
+  border-top: 0.5px dashed var(--g4);
+}
+.plan-half--empty {
+  cursor: pointer;
+}
+.plan-half--empty:hover {
+  background: var(--g6);
+}
+.plan-full {
+  flex: 1;
+  display: flex;
+  padding: 2px;
+}
+.plan-hblock {
+  width: 100%;
+  border-radius: 2px;
+  padding: 2px 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  line-height: 1.2;
+  cursor: pointer;
+  overflow: hidden;
+}
+.plan-hblock-num {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--acier);
+}
+.plan-hblock-k {
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--g2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sélecteur de créneau (Journée / Matin / Après-midi) dans la fenêtre. */
+.creneau-seg {
+  display: inline-flex;
+  border: 0.5px solid var(--g3);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.creneau-opt {
+  appearance: none;
+  border: none;
+  border-left: 0.5px solid var(--g3);
+  background: var(--w);
+  color: var(--g1);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 16px;
+  cursor: pointer;
+}
+.creneau-opt:first-child {
+  border-left: none;
+}
+.creneau-opt--on {
+  background: var(--nav-on-bg);
+  color: #fff;
+}
+.creneau-opt:disabled {
+  color: var(--g4);
+  cursor: not-allowed;
+}
+
 .plan-add-more {
   position: absolute;
   top: 2px;
