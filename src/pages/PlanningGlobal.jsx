@@ -45,6 +45,7 @@ export default function PlanningGlobal() {
   const [newAff, setNewAff] = useState(null)
   const [editAff, setEditAff] = useState(null) // affectation en cours d'édition
   const [menu, setMenu] = useState(null) // menu contextuel { aff, x, y }
+  const [sel, setSel] = useState(null) // cliquer-glisser : { salId, aIso, bIso }
 
   const loadAffectations = useCallback(async () => {
     const full = 'id, chantier_id, phase, sal_id, date_debut, date_fin, commentaire, heure_debut, heure_fin'
@@ -107,6 +108,34 @@ export default function PlanningGlobal() {
       return moitie === 'matin' ? couvreMatin(cr) : couvreApres(cr)
     })
   }
+
+  // Sélection par cliquer-glisser sur des jours vides d'un salarié : on retient
+  // le salarié + la plage survolée, et on ouvre l'affectation au relâchement.
+  function selStart(salId, iso) {
+    setSel({ salId, aIso: iso, bIso: iso })
+  }
+  function selOver(salId, iso) {
+    setSel((s) => (s && s.salId === salId ? { ...s, bIso: iso } : s))
+  }
+  function dansSel(salId, iso) {
+    if (!sel || sel.salId !== salId) return false
+    const lo = sel.aIso <= sel.bIso ? sel.aIso : sel.bIso
+    const hi = sel.aIso <= sel.bIso ? sel.bIso : sel.aIso
+    return iso >= lo && iso <= hi
+  }
+  useEffect(() => {
+    if (!sel) return
+    function onUp() {
+      const s = sel
+      setSel(null)
+      const lo = s.aIso <= s.bIso ? s.aIso : s.bIso
+      const hi = s.aIso <= s.bIso ? s.bIso : s.aIso
+      // Par défaut la journée entière ; la plage glissée fixe début → fin.
+      setNewAff({ salId: s.salId, date: lo, dateFin: hi, creneau: 'journee' })
+    }
+    document.addEventListener('mouseup', onUp)
+    return () => document.removeEventListener('mouseup', onUp)
+  }, [sel])
 
   // Change le créneau d'une affectation (journée / matin / après-midi).
   // Journée = pas d'horaire ; matin/après = plage horaire correspondante.
@@ -447,7 +476,8 @@ export default function PlanningGlobal() {
                     )
                   }
 
-                  // Une moitié vide : cliquer pour affecter ce créneau, ou y déposer un bloc.
+                  // Moitié libre d'une journée déjà entamée : ajout d'un demi-créneau
+                  // (le cas optionnel, quand l'autre moitié est occupée).
                   const vide = (iso, moitie) => (
                     <div
                       className="plan-half plan-half--empty"
@@ -455,6 +485,25 @@ export default function PlanningGlobal() {
                       onClick={() => setNewAff({ salId: emp.id, date: iso, creneau: moitie })}
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={() => onDropCell(emp, iso, moitie)}
+                    />
+                  )
+
+                  // Journée entière vide : cible par défaut. Cliquer = 1 jour,
+                  // glisser sur plusieurs jours = affectation directe sur la plage.
+                  const videJournee = (iso) => (
+                    <div
+                      className={
+                        'plan-full plan-half--empty' +
+                        (dansSel(emp.id, iso) ? ' plan-cell--sel' : '')
+                      }
+                      title="Affecter la journée · glisser pour plusieurs jours"
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        selStart(emp.id, iso)
+                      }}
+                      onMouseEnter={() => selOver(emp.id, iso)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={() => onDropCell(emp, iso, 'journee')}
                     />
                   )
 
@@ -489,7 +538,7 @@ export default function PlanningGlobal() {
                             <div className="plan-hd">
                               {journee ? (
                                 <div className="plan-full">{bloc(am, { estJournee: true })}</div>
-                              ) : (
+                              ) : am || pm ? (
                                 <>
                                   {am ? (
                                     <div className="plan-half">{bloc(am, { peutJournee: !pm })}</div>
@@ -502,6 +551,8 @@ export default function PlanningGlobal() {
                                     vide(iso, 'apres')
                                   )}
                                 </>
+                              ) : (
+                                videJournee(iso)
                               )}
                             </div>
                           </td>
@@ -611,6 +662,7 @@ export default function PlanningGlobal() {
           salarie={newAff.salId ? employes.find((e) => e.id === newAff.salId) : undefined}
           prefill={newAff.chantierId ? { chantier_id: newAff.chantierId, phase: newAff.phase } : undefined}
           initialDate={newAff.date}
+          initialDateFin={newAff.dateFin}
           initialCreneau={newAff.creneau}
           onClose={() => setNewAff(null)}
           onSaved={async () => {

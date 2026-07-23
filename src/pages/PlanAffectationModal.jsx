@@ -25,6 +25,7 @@ export default function PlanAffectationModal({
   prefill,
   affectation,
   initialDate,
+  initialDateFin,
   initialCreneau,
   onClose,
   onSaved,
@@ -35,7 +36,7 @@ export default function PlanAffectationModal({
     phase: affectation?.phase ?? prefill?.phase ?? 'fabrication',
     sal_id: affectation?.sal_id ?? salarie?.id ?? '',
     date_debut: affectation?.date_debut ?? initialDate ?? '',
-    date_fin: affectation?.date_fin ?? initialDate ?? '',
+    date_fin: affectation?.date_fin ?? initialDateFin ?? initialDate ?? '',
     ouvrage_id: affectation?.ouvrage_id ?? '',
     commentaire: affectation?.commentaire ?? '',
   })

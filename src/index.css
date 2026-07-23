@@ -2801,6 +2801,11 @@ textarea.ni:focus {
 .plan-half--empty:hover {
   background: var(--g6);
 }
+/* Cellules survolées pendant un cliquer-glisser de sélection. */
+.plan-cell--sel {
+  background: color-mix(in srgb, var(--nav-on-bg) 16%, var(--w)) !important;
+  box-shadow: inset 0 0 0 1px var(--nav-on-bg);
+}
 .plan-full {
   flex: 1;
   display: flex;
