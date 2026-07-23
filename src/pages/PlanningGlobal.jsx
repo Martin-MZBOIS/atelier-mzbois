@@ -369,6 +369,10 @@ export default function PlanningGlobal() {
 
       {charge.capTotale > 0 && (
         <div className="charge-bar">
+          <div className="charge-head">
+            <span className="charge-title">Charge d’équipe</span>
+            <span className="charge-badge">⚗ En test — chiffres indicatifs</span>
+          </div>
           <div className="charge-main">
             <div className="charge-fig">
               <span className="charge-val">{charge.aProduire} h</span>
